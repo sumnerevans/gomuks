@@ -13,7 +13,7 @@
 //
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
-import { JSX, useRef } from "react"
+import { DragEventHandler, JSX, useRef, useState } from "react"
 import { RoomStateStore } from "@/api/statestore"
 import MessageComposer from "../composer/MessageComposer.tsx"
 import TypingNotifications from "../composer/TypingNotifications.tsx"
@@ -30,19 +30,41 @@ interface RoomViewProps {
 }
 
 const RoomView = ({ room, rightPanelResizeHandle, rightPanel }: RoomViewProps) => {
+	const [isDraggingFile, setIsDraggingFile] = useState(false)
 	const roomContextDataRef = useRef<RoomContextData | undefined>(undefined)
 	if (roomContextDataRef.current === undefined) {
 		roomContextDataRef.current = new RoomContextData(room)
 	}
+	let mediaDrop: JSX.Element | null = null
+	if (isDraggingFile) {
+		mediaDrop = <div className="media-drop">
+			Drop media here
+		</div>
+	}
+
+	const onDragOver: DragEventHandler = e => {
+		e.preventDefault()
+		setIsDraggingFile(true)
+	}
+	const onDrop: DragEventHandler = e => {
+		e.preventDefault()
+		console.log("drop", e)
+		setIsDraggingFile(false)
+	}
 	return <RoomContext value={roomContextDataRef.current}>
-		<div className="room-view">
-			<RoomViewHeader room={room}/>
-			<TimelineView/>
-			<MessageComposer/>
-			<TypingNotifications/>
+		<div className="room-view"
+			onDragOver={onDragOver}
+			onDragLeave={() => setIsDraggingFile(false)}
+			onDrop={onDrop}
+		>
+			<RoomViewHeader room={room} />
+			<TimelineView />
+			<MessageComposer />
+			<TypingNotifications />
+			{mediaDrop}
 		</div>
 		{rightPanelResizeHandle}
-		{rightPanel && <RightPanel {...rightPanel}/>}
+		{rightPanel && <RightPanel {...rightPanel} />}
 	</RoomContext>
 }
 

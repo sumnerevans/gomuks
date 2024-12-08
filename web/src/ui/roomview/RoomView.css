@@ -12,4 +12,11 @@ div.room-view {
 		"typing" auto
 		/ 1fr;
 	contain: strict;
+
+	> div.media-drop {
+		position: fixed;
+		width: 100%;
+		height: 100%;
+		background-color: rgba(0,0,0, 80%);
+	}
 }
