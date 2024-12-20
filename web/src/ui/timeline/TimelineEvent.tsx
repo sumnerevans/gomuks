@@ -27,9 +27,9 @@ import ReadReceipts from "./ReadReceipts.tsx"
 import { ReplyIDBody } from "./ReplyBody.tsx"
 import { ContentErrorBoundary, HiddenEvent, getBodyType, isSmallEvent } from "./content"
 import { EventFullMenu, EventHoverMenu, getModalStyleFromMouse } from "./menu"
-import ErrorIcon from "../../icons/error.svg?react"
-import PendingIcon from "../../icons/pending.svg?react"
-import SentIcon from "../../icons/sent.svg?react"
+import ErrorIcon from "@/icons/error.svg?react"
+import PendingIcon from "@/icons/pending.svg?react"
+import SentIcon from "@/icons/sent.svg?react"
 import "./TimelineEvent.css"
 
 export interface TimelineEventProps {
@@ -199,7 +199,8 @@ const TimelineEvent = ({ evt, prevEvt, disableMenu }: TimelineEventProps) => {
 			</ContentErrorBoundary>
 			{evt.reactions ? <EventReactions reactions={evt.reactions}/> : null}
 		</div>
-		{!evt.event_id.startsWith("~") && <ReadReceipts room={roomCtx.store} eventID={evt.event_id} />}
+		{!evt.event_id.startsWith("~") && roomCtx.store.preferences.display_read_receipts &&
+			<ReadReceipts room={roomCtx.store} eventID={evt.event_id} />}
 		{evt.sender === client.userID && evt.transaction_id ? <EventSendStatus evt={evt}/> : null}
 	</div>
 	return <>
