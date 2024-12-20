@@ -23,6 +23,7 @@ import ClientContext from "../ClientContext.ts"
 import MainScreenContext from "../MainScreenContext.ts"
 import { ModalContext } from "../modal/Modal.tsx"
 import { useRoomContext } from "../roomview/roomcontext.ts"
+import LinkPreviews from "./LinkPreviews.tsx"
 import ReadReceipts from "./ReadReceipts.tsx"
 import { ReplyIDBody } from "./ReplyBody.tsx"
 import { ContentErrorBoundary, HiddenEvent, getBodyType, isSmallEvent } from "./content"
@@ -196,6 +197,7 @@ const TimelineEvent = ({ evt, prevEvt, disableMenu }: TimelineEventProps) => {
 			/> : null}
 			<ContentErrorBoundary>
 				<BodyType room={roomCtx.store} sender={memberEvt} event={evt}/>
+				{!evt.redacted_by ? <LinkPreviews event={evt}/> : null}
 			</ContentErrorBoundary>
 			{evt.reactions ? <EventReactions reactions={evt.reactions}/> : null}
 		</div>
