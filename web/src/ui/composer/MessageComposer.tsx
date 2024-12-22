@@ -24,6 +24,7 @@ import type {
 	MessageEventContent,
 	RelatesTo,
 	RoomID,
+	URLPreview as URLPreviewType,
 } from "@/api/types"
 import { PartialEmoji, emojiToMarkdown } from "@/util/emoji"
 import { isMobileDevice } from "@/util/ismobile.ts"
@@ -36,6 +37,7 @@ import { keyToString } from "../keybindings.ts"
 import { ModalContext } from "../modal"
 import { useRoomContext } from "../roomview/roomcontext.ts"
 import { ReplyBody } from "../timeline/ReplyBody.tsx"
+import URLPreview from "../urlpreview/URLPreview.tsx"
 import type { AutocompleteQuery } from "./Autocompleter.tsx"
 import { ComposerLocation, ComposerLocationValue, ComposerMedia } from "./ComposerMedia.tsx"
 import { charToAutocompleteType, emojiQueryRegex, getAutocompleter } from "./getAutocompleter.ts"
@@ -52,6 +54,7 @@ export interface ComposerState {
 	text: string
 	media: MediaMessageEventContent | null
 	location: ComposerLocationValue | null
+	previews: Record<string, URLPreviewType | "cleared" | null>
 	replyTo: EventID | null
 	silentReply: boolean
 	explicitReplyInThread: boolean
@@ -63,8 +66,9 @@ const MAX_TEXTAREA_ROWS = 10
 const emptyComposer: ComposerState = {
 	text: "",
 	media: null,
-	replyTo: null,
 	location: null,
+	previews: {},
+	replyTo: null,
 	silentReply: false,
 	explicitReplyInThread: false,
 }
@@ -233,6 +237,7 @@ const MessageComposer = () => {
 			text: state.text,
 			relates_to,
 			mentions,
+			url_previews: Object.values(state.previews).filter(p => p !== null && p !== "cleared"),
 		}).catch(err => window.alert("Failed to send message: " + err))
 	}
 	const onComposerCaretChange = (evt: CaretEvent<HTMLTextAreaElement>, newText?: string) => {
@@ -331,6 +336,7 @@ const MessageComposer = () => {
 			roomCtx.setEditing(null)
 		}
 	}
+
 	const onChange = (evt: React.ChangeEvent<HTMLTextAreaElement>) => {
 		setState({ text: evt.target.value })
 		const now = Date.now()
@@ -388,6 +394,40 @@ const MessageComposer = () => {
 		}
 		evt.preventDefault()
 	}
+	const resolvePreviews = useCallback((text: string) => {
+		const encrypt = !!room.meta.current.encryption_event
+		const previews: Record<string, URLPreviewType | "cleared" | null> = {}
+		text.matchAll(/https?:\/\/[^\s/_*]+(?:\/\S*)?/gi).forEach(m => {
+			const url = m[0]
+			if (url.startsWith("https://matrix.to")) return
+
+			if (state.previews[url] === undefined) {
+				previews[url] = null
+				fetch(`_gomuks/url_preview?encrypt=${encrypt}&url=${encodeURIComponent(url)}`, {
+					method: "GET",
+				})
+					.then(async res => {
+						const json = await res.json()
+						if (!res.ok) {
+							throw new Error(json.error)
+						} else {
+							setState(s => ({
+								previews: Object.assign(s.previews, { [url]: json }),
+							}))
+						}
+					})
+					.catch(err => {
+						console.error("Error fetchnig preview for URL", url, err)
+						setState(s => ({
+							previews: Object.assign(s.previews, { [url]: "cleared" }),
+						}))
+					})
+			} else {
+				previews[url] = state.previews[url]
+			}
+		})
+		setState({ previews })
+	}, [room.meta, state.previews])
 	// To ensure the cursor jumps to the end, do this in an effect rather than as the initial value of useState
 	// To try to avoid the input bar flashing, use useLayoutEffect instead of useEffect
 	useLayoutEffect(() => {
@@ -437,6 +477,14 @@ const MessageComposer = () => {
 			draftStore.set(room.roomID, state)
 		}
 	}, [roomCtx, room, state, editing])
+	useEffect(() => {
+		if (!room.preferences.send_bundled_url_previews) {
+			setState({ previews: {}})
+			return
+		}
+		const timeout = setTimeout(() => resolvePreviews(state.text), 500)
+		return () => clearTimeout(timeout)
+	}, [room.preferences, state.text, resolvePreviews])
 	const clearMedia = useCallback(() => setState({ media: null, location: null }), [])
 	const onChangeLocation = useCallback((location: ComposerLocationValue) => setState({ location }), [])
 	const closeReply = useCallback((evt: React.MouseEvent) => {
@@ -594,6 +642,16 @@ const MessageComposer = () => {
 				room={room} client={client}
 				location={state.location} onChange={onChangeLocation} clearLocation={clearMedia}
 			/>}
+			{Object.keys(state.previews).length ? <div className="url-previews">
+				{Object.entries(state.previews).map(([url, preview]) => {
+					if (preview === "cleared") return null
+					return <URLPreview key={url} url={url} preview={preview}
+						clearPreview={() => setState(s => ({
+							previews: Object.assign(s.previews, { [url]: "cleared" }),
+						}))}
+					/>
+				})}
+			</div> : null}
 			<div className="input-area">
 				{!inlineButtons && <button className="show-more" onClick={openButtonsModal}><MoreIcon/></button>}
 				<textarea
