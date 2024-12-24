@@ -26,7 +26,7 @@ import { useRoomContext } from "../roomview/roomcontext.ts"
 import URLPreview from "../urlpreview/URLPreview.tsx"
 import ReadReceipts from "./ReadReceipts.tsx"
 import { ReplyIDBody } from "./ReplyBody.tsx"
-import { ContentErrorBoundary, HiddenEvent, getBodyType, isSmallEvent } from "./content"
+import { ContentErrorBoundary, HiddenEvent, getBodyType, getRenderSender, isSmallEvent } from "./content"
 import { EventFullMenu, EventHoverMenu, getModalStyleFromMouse } from "./menu"
 import ErrorIcon from "@/icons/error.svg?react"
 import PendingIcon from "@/icons/pending.svg?react"
@@ -118,7 +118,7 @@ const TimelineEvent = ({ evt, prevEvt, disableMenu, smallReplies }: TimelineEven
 		})
 	}
 	const memberEvt = useRoomMember(client, roomCtx.store, evt.sender)
-	const memberEvtContent = memberEvt?.content as MemberEventContent | undefined
+	let memberEvtContent = memberEvt?.content as MemberEventContent | undefined
 	const BodyType = getBodyType(evt)
 	const eventTS = new Date(evt.timestamp)
 	const editEventTS = evt.last_edit ? new Date(evt.last_edit.timestamp) : null
@@ -169,6 +169,16 @@ const TimelineEvent = ({ evt, prevEvt, disableMenu, smallReplies }: TimelineEven
 			replyInMessage = replyElem
 		}
 	}
+	const renderSender = getRenderSender(evt)
+	const prevRenderSender = getRenderSender(prevEvt)
+	if (renderSender) {
+		memberEvtContent = {
+			membership: "join",
+			displayname: renderSender.displayname,
+			avatar_url: renderSender.avatar_url,
+		}
+	}
+
 	let smallAvatar = false
 	let renderAvatar = true
 	let eventTimeOnly = false
@@ -182,6 +192,9 @@ const TimelineEvent = ({ evt, prevEvt, disableMenu, smallReplies }: TimelineEven
 		&& dateSeparator === null
 		&& !replyAboveMessage
 		&& !isSmallEvent(getBodyType(prevEvt))
+		&& prevRenderSender?.id === renderSender?.id
+		&& prevRenderSender?.displayname === renderSender?.displayname
+		&& prevRenderSender?.avatar_url === renderSender?.avatar_url
 	) {
 		wrapperClassNames.push("same-sender")
 		eventTimeOnly = true
