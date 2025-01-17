@@ -400,7 +400,7 @@ const MessageComposer = () => {
 	) => {
 		const encrypt = !!room.meta.current.encryption_event
 		const previews: Record<string, URLPreviewType | "cleared" | "loading"> = {}
-		let changed = false
+		let changed = urls.length !== Object.keys(existingPreviews).length
 		urls.forEach(url => {
 			if (url.startsWith("https://matrix.to")) {
 				return
@@ -498,7 +498,8 @@ const MessageComposer = () => {
 			setState({ previews: {}})
 			return
 		}
-		if (urls.length) {
+		const currentUrls = Object.keys(state.previews)
+		if (currentUrls.length !== urls.length || !currentUrls.every((p, i) => urls[i] == p)) {
 			setLoadingPreviews(true)
 			const timeout = setTimeout(() => resolvePreviews(urls, state.previews), 500)
 			return () => {
