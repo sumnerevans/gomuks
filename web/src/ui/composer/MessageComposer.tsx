@@ -501,7 +501,10 @@ const MessageComposer = () => {
 		if (urls.length) {
 			setLoadingPreviews(true)
 			const timeout = setTimeout(() => resolvePreviews(urls, state.previews), 500)
-			return () => clearTimeout(timeout)
+			return () => {
+				setLoadingPreviews(false)
+				clearTimeout(timeout)
+			}
 		}
 	}, [room.preferences, state.text, state.previews, resolvePreviews])
 	const clearMedia = useCallback(() => setState({ media: null, location: null }), [])
