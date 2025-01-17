@@ -134,6 +134,10 @@ func (h *HiClient) requestQueuedSession(ctx context.Context, req *database.Sessi
 	log := zerolog.Ctx(ctx)
 	if !req.BackupChecked {
 		sess, err := h.fetchFromKeyBackup(ctx, req.RoomID, req.SessionID)
+		if sess.InternalGoolm.FirstKnownIndex() != sess.InternalLibolm.FirstKnownIndex() {
+			panic("got different indices")
+		}
+
 		if err != nil {
 			log.Err(err).
 				Stringer("session_id", req.SessionID).
@@ -145,7 +149,7 @@ func (h *HiClient) requestQueuedSession(ctx context.Context, req *database.Sessi
 			if err != nil {
 				log.Err(err).Stringer("session_id", req.SessionID).Msg("Failed to update session request after trying to check backup")
 			}
-		} else if sess == nil || sess.Internal.FirstKnownIndex() > req.MinIndex {
+		} else if sess == nil || sess.InternalGoolm.FirstKnownIndex() > req.MinIndex {
 			req.BackupChecked = true
 			err = h.DB.SessionRequest.Put(ctx, req)
 			if err != nil {
@@ -154,7 +158,7 @@ func (h *HiClient) requestQueuedSession(ctx context.Context, req *database.Sessi
 		} else {
 			log.Debug().Stringer("session_id", req.SessionID).
 				Msg("Found session with sufficiently low first known index, removing from queue")
-			err = h.DB.SessionRequest.Remove(ctx, req.SessionID, sess.Internal.FirstKnownIndex())
+			err = h.DB.SessionRequest.Remove(ctx, req.SessionID, sess.InternalGoolm.FirstKnownIndex())
 			if err != nil {
 				log.Err(err).Stringer("session_id", req.SessionID).Msg("Failed to remove session from request queue")
 			}

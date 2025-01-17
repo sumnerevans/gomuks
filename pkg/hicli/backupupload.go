@@ -7,12 +7,14 @@
 package hicli
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
 	"slices"
 
 	"github.com/rs/zerolog"
+	"go.mau.fi/util/exerrors"
 	"maunium.net/go/mautrix"
 	"maunium.net/go/mautrix/crypto"
 	"maunium.net/go/mautrix/crypto/backup"
@@ -69,9 +71,18 @@ func (c *HiClient) uploadKeyBackupBatch(ctx context.Context, version id.KeyBacku
 	}
 
 	for _, session := range sessions {
-		sessionKey, err := session.Internal.Export(session.Internal.FirstKnownIndex())
+		if session.InternalGoolm.FirstKnownIndex() != session.InternalLibolm.FirstKnownIndex() {
+			panic("got different indices")
+		}
+		if session.InternalGoolm.IsVerified() != session.InternalLibolm.IsVerified() {
+			panic("got different verified")
+		}
+		sessionKey, err := session.InternalLibolm.Export(session.InternalGoolm.FirstKnownIndex())
 		if err != nil {
 			return fmt.Errorf("failed to export session data: %w", err)
+		}
+		if !bytes.Equal(sessionKey, exerrors.Must(session.InternalGoolm.Export(session.InternalGoolm.FirstKnownIndex()))) {
+			panic("got different session key export")
 		}
 
 		sessionData, err := backup.EncryptSessionData(megolmBackupKey, &backup.MegolmSessionData{
@@ -101,9 +112,9 @@ func (c *HiClient) uploadKeyBackupBatch(ctx context.Context, version id.KeyBacku
 		}
 
 		roomData.Sessions[session.ID()] = mautrix.ReqKeyBackupData{
-			FirstMessageIndex: int(session.Internal.FirstKnownIndex()),
+			FirstMessageIndex: int(session.InternalLibolm.FirstKnownIndex()),
 			ForwardedCount:    len(session.ForwardingChains),
-			IsVerified:        session.Internal.IsVerified(),
+			IsVerified:        session.InternalLibolm.IsVerified(),
 			SessionData:       jsonSessionData,
 		}
 	}

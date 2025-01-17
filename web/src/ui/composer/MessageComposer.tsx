@@ -386,9 +386,8 @@ const MessageComposer = () => {
 			input.selectionStart !== input.selectionEnd
 			&& (text.startsWith("http://") || text.startsWith("https://") || text.startsWith("matrix:"))
 		) {
-			document.execCommand("insertText", false, `[${
-				escapeMarkdown(state.text.slice(input.selectionStart, input.selectionEnd))
-			}](${escapeMarkdown(text)})`)
+			document.execCommand("insertText", false, `[${escapeMarkdown(state.text.slice(input.selectionStart, input.selectionEnd))
+				}](${escapeMarkdown(text)})`)
 		} else {
 			return
 		}
@@ -490,12 +489,12 @@ const MessageComposer = () => {
 	}, [roomCtx, room, state, editing])
 	useEffect(() => {
 		if (!room.preferences.send_bundled_url_previews) {
-			setState({ previews: {}})
+			setState({ previews: {} })
 			return
 		}
 		const urls = state.text.matchAll(/\bhttps?:\/\/[^\s/_*]+(?:\/\S*)?\b/gi).map(m => m[0]).toArray()
 		if (!urls.length && Object.keys(state.previews).length > 0) {
-			setState({ previews: {}})
+			setState({ previews: {} })
 			return
 		}
 		const currentUrls = Object.keys(state.previews)
@@ -592,31 +591,31 @@ const MessageComposer = () => {
 			setState({ location: { lat: 0, long: 0, prec: 1 }, media: null })
 		}
 		return <>
-			<button onClick={openEmojiPicker} title="Add emoji"><EmojiIcon/>{includeText && "Emoji"}</button>
+			<button onClick={openEmojiPicker} title="Add emoji"><EmojiIcon />{includeText && "Emoji"}</button>
 			<button
 				onClick={openStickerPicker}
 				disabled={!!stickerDisabledTitle}
 				title={stickerDisabledTitle ?? "Add sticker attachment"}
 			>
-				<StickerIcon/>{includeText && "Sticker"}
+				<StickerIcon />{includeText && "Sticker"}
 			</button>
 			<button
 				onClick={openGIFPicker}
 				disabled={!!mediaDisabledTitle}
 				title={mediaDisabledTitle ?? "Add gif attachment"}
 			>
-				<GIFIcon/>{includeText && "GIF"}
+				<GIFIcon />{includeText && "GIF"}
 			</button>
 			<button
 				onClick={openLocationPicker}
 				disabled={!!locationDisabledTitle}
 				title={locationDisabledTitle ?? "Add location"}
-			><LocationIcon/>{includeText && "Location"}</button>
+			><LocationIcon />{includeText && "Location"}</button>
 			<button
 				onClick={() => fileInput.current!.click()}
 				disabled={!!mediaDisabledTitle}
 				title={mediaDisabledTitle ?? "Add file attachment"}
-			><AttachIcon/>{includeText && "File"}</button>
+			><AttachIcon />{includeText && "File"}</button>
 		</>
 	}
 	const openButtonsModal = () => {
@@ -659,8 +658,8 @@ const MessageComposer = () => {
 				isThread={false}
 				onClose={stopEditing}
 			/>}
-			{loadingMedia && <div className="composer-media"><ScaleLoader color="var(--primary-color)"/></div>}
-			{state.media && <ComposerMedia content={state.media} clearMedia={!disableClearMedia && clearMedia}/>}
+			{loadingMedia && <div className="composer-media"><ScaleLoader color="var(--primary-color)" /></div>}
+			{state.media && <ComposerMedia content={state.media} clearMedia={!disableClearMedia && clearMedia} />}
 			{state.location && <ComposerLocation
 				room={room} client={client}
 				location={state.location} onChange={onChangeLocation} clearLocation={clearMedia}
@@ -677,7 +676,7 @@ const MessageComposer = () => {
 				)}
 			</div> : null}
 			<div className="input-area">
-				{!inlineButtons && <button className="show-more" onClick={openButtonsModal}><MoreIcon/></button>}
+				{!inlineButtons && <button className="show-more" onClick={openButtonsModal}><MoreIcon /></button>}
 				<textarea
 					autoFocus={!isMobileDevice}
 					ref={textInput}
@@ -696,7 +695,7 @@ const MessageComposer = () => {
 					onClick={onClickSend}
 					disabled={!canSend || loadingMedia || loadingPreviews}
 					title="Send message"
-				><SendIcon/></button>}
+				><SendIcon /></button>}
 				<input
 					ref={fileInput}
 					onChange={evt => doUploadFile(evt.target.files?.[0])}
