@@ -498,7 +498,9 @@ const MessageComposer = () => {
 			setState({ previews: {}})
 			return
 		}
-		setLoadingPreviews(true)
+		if (urls.length) {
+			setLoadingPreviews(true)
+		}
 		const timeout = setTimeout(() => resolvePreviews(urls, state.previews), 500)
 		return () => clearTimeout(timeout)
 	}, [room.preferences, state.text, state.previews, resolvePreviews])
