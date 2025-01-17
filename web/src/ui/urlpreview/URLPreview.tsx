@@ -24,10 +24,10 @@ import "./URLPreview.css"
 
 const URLPreview = ({ url, preview, clearPreview }: {
 	url: string,
-	preview: URLPreviewType | null,
+	preview: URLPreviewType | "loading",
 	clearPreview?: () => void,
 }) => {
-	if (!preview) {
+	if (preview === "loading") {
 		return <div key={url} className="url-preview loading" title={`Loading preview for ${url}`}>
 			<ScaleLoader color="var(--primary-color)"/>
 		</div>

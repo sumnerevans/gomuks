@@ -54,7 +54,7 @@ export interface ComposerState {
 	text: string
 	media: MediaMessageEventContent | null
 	location: ComposerLocationValue | null
-	previews: Record<string, URLPreviewType | "cleared" | null>
+	previews: Record<string, URLPreviewType | "cleared" | "loading">
 	replyTo: EventID | null
 	silentReply: boolean
 	explicitReplyInThread: boolean
@@ -238,7 +238,7 @@ const MessageComposer = () => {
 			text: state.text,
 			relates_to,
 			mentions,
-			url_previews: Object.values(state.previews).filter(p => p !== null && p !== "cleared"),
+			url_previews: Object.values(state.previews).filter(p => p !== "loading" && p !== "cleared"),
 		}).catch(err => window.alert("Failed to send message: " + err))
 	}
 	const onComposerCaretChange = (evt: CaretEvent<HTMLTextAreaElement>, newText?: string) => {
@@ -396,10 +396,10 @@ const MessageComposer = () => {
 	}
 	const resolvePreviews = useCallback((
 		urls: string[],
-		existingPreviews: Record<string, URLPreviewType | "cleared" | null>,
+		existingPreviews: Record<string, URLPreviewType | "cleared" | "loading">,
 	) => {
 		const encrypt = !!room.meta.current.encryption_event
-		const previews: Record<string, URLPreviewType | "cleared" | null> = {}
+		const previews: Record<string, URLPreviewType | "cleared" | "loading"> = {}
 		let changed = false
 		urls.forEach(url => {
 			if (url.startsWith("https://matrix.to")) {
@@ -408,7 +408,7 @@ const MessageComposer = () => {
 
 			if (existingPreviews[url] === undefined) {
 				changed = true
-				previews[url] = null
+				previews[url] = "loading"
 				fetch(`_gomuks/url_preview?encrypt=${encrypt}&url=${encodeURIComponent(url)}`, {
 					method: "GET",
 				})
