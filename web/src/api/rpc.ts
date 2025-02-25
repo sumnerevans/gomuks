@@ -34,7 +34,9 @@ import type {
 	ReceiptType,
 	RelatesTo,
 	RelationType,
+	ReqCreateRoom,
 	ResolveAliasResponse,
+	RespCreateRoom,
 	RespOpenIDToken,
 	RespRoomJoin,
 	RoomAlias,
@@ -246,6 +248,14 @@ export default abstract class RPCClient {
 
 	leaveRoom(room_id: RoomID, reason?: string): Promise<Record<string, never>> {
 		return this.request("leave_room", { room_id, reason })
+	}
+
+	createRoom(request: ReqCreateRoom): Promise<RespCreateRoom> {
+		return this.request("create_room", request)
+	}
+
+	muteRoom(room_id: RoomID, muted: boolean): Promise<boolean> {
+		return this.request("mute_room", { room_id, muted })
 	}
 
 	resolveAlias(alias: RoomAlias): Promise<ResolveAliasResponse> {

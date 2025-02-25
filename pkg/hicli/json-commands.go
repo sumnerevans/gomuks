@@ -17,6 +17,7 @@ import (
 	"maunium.net/go/mautrix"
 	"maunium.net/go/mautrix/event"
 	"maunium.net/go/mautrix/id"
+	"maunium.net/go/mautrix/pushrules"
 
 	"go.mau.fi/gomuks/pkg/hicli/database"
 )
@@ -166,6 +167,20 @@ func (h *HiClient) handleJSONCommand(ctx context.Context, req *JSONCommand) (any
 	case "leave_room":
 		return unmarshalAndCall(req.Data, func(params *leaveRoomParams) (*mautrix.RespLeaveRoom, error) {
 			return h.Client.LeaveRoom(ctx, params.RoomID, &mautrix.ReqLeave{Reason: params.Reason})
+		})
+	case "create_room":
+		return unmarshalAndCall(req.Data, func(params *mautrix.ReqCreateRoom) (*mautrix.RespCreateRoom, error) {
+			return h.Client.CreateRoom(ctx, params)
+		})
+	case "mute_room":
+		return unmarshalAndCall(req.Data, func(params *muteRoomParams) (bool, error) {
+			if params.Muted {
+				return true, h.Client.PutPushRule(ctx, "global", pushrules.RoomRule, string(params.RoomID), &mautrix.ReqPutPushRule{
+					Actions: []pushrules.PushActionType{},
+				})
+			} else {
+				return false, h.Client.DeletePushRule(ctx, "global", pushrules.RoomRule, string(params.RoomID))
+			}
 		})
 	case "ensure_group_session_shared":
 		return unmarshalAndCall(req.Data, func(params *ensureGroupSessionSharedParams) (bool, error) {
@@ -389,4 +404,9 @@ type leaveRoomParams struct {
 type getReceiptsParams struct {
 	RoomID   id.RoomID    `json:"room_id"`
 	EventIDs []id.EventID `json:"event_ids"`
+}
+
+type muteRoomParams struct {
+	RoomID id.RoomID `json:"room_id"`
+	Muted  bool      `json:"muted"`
 }
