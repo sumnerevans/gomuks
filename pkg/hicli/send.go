@@ -165,11 +165,17 @@ func (h *HiClient) SendMessage(
 				Body:       "",
 				MsgType:    contentCopy.MsgType,
 				URL:        contentCopy.URL,
+				GeoURI:     contentCopy.GeoURI,
 				NewContent: &contentCopy,
 				RelatesTo:  relatesTo,
 			}
 			if contentCopy.File != nil {
 				content.URL = contentCopy.File.URL
+			}
+			if extra != nil {
+				extra = map[string]any{
+					"m.new_content": extra,
+				}
 			}
 		} else {
 			content.RelatesTo = relatesTo
