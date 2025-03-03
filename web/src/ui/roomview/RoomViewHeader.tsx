@@ -18,10 +18,11 @@ import { getRoomAvatarThumbnailURL, getRoomAvatarURL } from "@/api/media.ts"
 import { RoomStateStore } from "@/api/statestore"
 import { useEventAsState } from "@/util/eventdispatcher.ts"
 import MainScreenContext from "../MainScreenContext.ts"
-import { LightboxContext } from "../modal"
-import { ModalContext } from "../modal"
+import { LightboxContext, NestableModalContext } from "../modal"
+import RoomStateExplorer from "../settings/RoomStateExplorer.tsx"
 import SettingsView from "../settings/SettingsView.tsx"
 import BackIcon from "@/icons/back.svg?react"
+import CodeIcon from "@/icons/code.svg?react"
 import PeopleIcon from "@/icons/group.svg?react"
 import PinIcon from "@/icons/pin.svg?react"
 import SettingsIcon from "@/icons/settings.svg?react"
@@ -34,13 +35,21 @@ interface RoomViewHeaderProps {
 const RoomViewHeader = ({ room }: RoomViewHeaderProps) => {
 	const roomMeta = useEventAsState(room.meta)
 	const mainScreen = use(MainScreenContext)
-	const openModal = use(ModalContext)
+	const openModal = use(NestableModalContext)
 	const openSettings = () => {
 		openModal({
 			dimmed: true,
 			boxed: true,
 			innerBoxClass: "settings-view",
 			content: <SettingsView room={room} />,
+		})
+	}
+	const openRoomStateExplorer = () => {
+		openModal({
+			dimmed: true,
+			boxed: true,
+			innerBoxClass: "room-state-explorer-box",
+			content: <RoomStateExplorer room={room} />,
 		})
 	}
 	return <div className="room-header">
@@ -72,6 +81,7 @@ const RoomViewHeader = ({ room }: RoomViewHeaderProps) => {
 				onClick={mainScreen.clickRightPanelOpener}
 				title="Room Members"
 			><PeopleIcon/></button>
+			<button title="Explore room state" onClick={openRoomStateExplorer}><CodeIcon/></button>
 			<button title="Room Settings" onClick={openSettings}><SettingsIcon/></button>
 		</div>
 	</div>
