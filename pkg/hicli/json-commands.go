@@ -47,7 +47,7 @@ func (h *HiClient) handleJSONCommand(ctx context.Context, req *JSONCommand) (any
 		})
 	case "send_event":
 		return unmarshalAndCall(req.Data, func(params *sendEventParams) (*database.Event, error) {
-			return h.Send(ctx, params.RoomID, params.EventType, params.Content, params.DisableEncryption)
+			return h.Send(ctx, params.RoomID, params.EventType, params.Content, params.DisableEncryption, params.Synchronous)
 		})
 	case "resend_event":
 		return unmarshalAndCall(req.Data, func(params *resendEventParams) (*database.Event, error) {
@@ -65,7 +65,16 @@ func (h *HiClient) handleJSONCommand(ctx context.Context, req *JSONCommand) (any
 		})
 	case "set_state":
 		return unmarshalAndCall(req.Data, func(params *sendStateEventParams) (id.EventID, error) {
-			return h.SetState(ctx, params.RoomID, params.EventType, params.StateKey, params.Content)
+			return h.SetState(ctx, params.RoomID, params.EventType, params.StateKey, params.Content, mautrix.ReqSendEvent{
+				UnstableDelay: time.Duration(params.DelayMS) * time.Millisecond,
+			})
+		})
+	case "update_delayed_event":
+		return unmarshalAndCall(req.Data, func(params *updateDelayedEventParams) (*mautrix.RespUpdateDelayedEvent, error) {
+			return h.Client.UpdateDelayedEvent(ctx, &mautrix.ReqUpdateDelayedEvent{
+				DelayID: params.DelayID,
+				Action:  params.Action,
+			})
 		})
 	case "set_membership":
 		return unmarshalAndCall(req.Data, func(params *setMembershipParams) (any, error) {
@@ -186,6 +195,11 @@ func (h *HiClient) handleJSONCommand(ctx context.Context, req *JSONCommand) (any
 		return unmarshalAndCall(req.Data, func(params *ensureGroupSessionSharedParams) (bool, error) {
 			return true, h.EnsureGroupSessionShared(ctx, params.RoomID)
 		})
+	case "send_to_device":
+		return unmarshalAndCall(req.Data, func(params *sendToDeviceParams) (*mautrix.RespSendToDevice, error) {
+			params.EventType.Class = event.ToDeviceEventType
+			return h.SendToDevice(ctx, params.EventType, params.ReqSendToDevice, params.Encrypted)
+		})
 	case "resolve_alias":
 		return unmarshalAndCall(req.Data, func(params *resolveAliasParams) (*mautrix.RespAliasResolve, error) {
 			return h.Client.ResolveAlias(ctx, params.Alias)
@@ -238,6 +252,14 @@ func (h *HiClient) handleJSONCommand(ctx context.Context, req *JSONCommand) (any
 		return unmarshalAndCall(req.Data, func(params *database.PushRegistration) (bool, error) {
 			return true, h.DB.PushRegistration.Put(ctx, params)
 		})
+	case "listen_to_device":
+		return unmarshalAndCall(req.Data, func(listen *bool) (bool, error) {
+			return h.ToDeviceInSync.Swap(*listen), nil
+		})
+	case "get_turn_servers":
+		return h.Client.TurnServer(ctx)
+	case "get_media_config":
+		return h.Client.GetMediaConfig(ctx)
 	default:
 		return nil, fmt.Errorf("unknown command %q", req.Command)
 	}
@@ -272,6 +294,7 @@ type sendEventParams struct {
 	EventType         event.Type      `json:"type"`
 	Content           json.RawMessage `json:"content"`
 	DisableEncryption bool            `json:"disable_encryption"`
+	Synchronous       bool            `json:"synchronous"`
 }
 
 type resendEventParams struct {
@@ -295,6 +318,12 @@ type sendStateEventParams struct {
 	EventType event.Type      `json:"type"`
 	StateKey  string          `json:"state_key"`
 	Content   json.RawMessage `json:"content"`
+	DelayMS   int             `json:"delay_ms"`
+}
+
+type updateDelayedEventParams struct {
+	DelayID string `json:"delay_id"`
+	Action  string `json:"action"`
 }
 
 type setMembershipParams struct {
@@ -356,6 +385,12 @@ type getSpecificRoomStateParams struct {
 
 type ensureGroupSessionSharedParams struct {
 	RoomID id.RoomID `json:"room_id"`
+}
+
+type sendToDeviceParams struct {
+	*mautrix.ReqSendToDevice
+	EventType event.Type `json:"event_type"`
+	Encrypted bool       `json:"encrypted"`
 }
 
 type resolveAliasParams struct {

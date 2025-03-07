@@ -37,8 +37,10 @@ import type {
 	ReqCreateRoom,
 	ResolveAliasResponse,
 	RespCreateRoom,
+	RespMediaConfig,
 	RespOpenIDToken,
 	RespRoomJoin,
+	RespTurnServer,
 	RoomAlias,
 	RoomID,
 	RoomStateGUID,
@@ -151,9 +153,13 @@ export default abstract class RPCClient {
 	}
 
 	sendEvent(
-		room_id: RoomID, type: EventType, content: unknown, disable_encryption: boolean = false,
+		room_id: RoomID,
+		type: EventType,
+		content: unknown,
+		disable_encryption: boolean = false,
+		synchronous: boolean = false,
 	): Promise<RawDBEvent> {
-		return this.request("send_event", { room_id, type, content, disable_encryption })
+		return this.request("send_event", { room_id, type, content, disable_encryption, synchronous })
 	}
 
 	resendEvent(transaction_id: string): Promise<RawDBEvent> {
@@ -170,8 +176,13 @@ export default abstract class RPCClient {
 
 	setState(
 		room_id: RoomID, type: EventType, state_key: string, content: Record<string, unknown>,
+		extra: { delay_ms?: number } = {},
 	): Promise<EventID> {
-		return this.request("set_state", { room_id, type, state_key, content })
+		return this.request("set_state", { room_id, type, state_key, content, ...extra })
+	}
+
+	updateDelayedEvent(delay_id: string, action: string): Promise<void> {
+		return this.request("update_delayed_event", { delay_id, action })
 	}
 
 	setMembership(room_id: RoomID, user_id: UserID, action: MembershipAction, reason?: string): Promise<void> {
@@ -212,6 +223,14 @@ export default abstract class RPCClient {
 
 	ensureGroupSessionShared(room_id: RoomID): Promise<boolean> {
 		return this.request("ensure_group_session_shared", { room_id })
+	}
+
+	sendToDevice(
+		event_type: EventType,
+		messages: { [userId: string]: { [deviceId: string]: object } },
+		encrypted: boolean = false,
+	): Promise<void> {
+		return this.request("send_to_device", { event_type, messages, encrypted })
 	}
 
 	getSpecificRoomState(keys: RoomStateGUID[]): Promise<RawDBEvent[]> {
@@ -290,5 +309,17 @@ export default abstract class RPCClient {
 
 	registerPush(reg: DBPushRegistration): Promise<boolean> {
 		return this.request("register_push", reg)
+	}
+
+	getTurnServers(): Promise<RespTurnServer> {
+		return this.request("get_turn_servers", {})
+	}
+
+	getMediaConfig(): Promise<RespMediaConfig> {
+		return this.request("get_media_config", {})
+	}
+
+	setListenToDevice(listen: boolean): Promise<void> {
+		return this.request("listen_to_device", listen)
 	}
 }
