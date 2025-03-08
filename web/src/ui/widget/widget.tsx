@@ -19,6 +19,7 @@ import type Client from "@/api/client"
 import type { RoomStateStore, WidgetListener } from "@/api/statestore"
 import type { MemDBEvent, RoomID, SyncToDevice } from "@/api/types"
 import { getDisplayname } from "@/util/validation"
+import PermissionPrompt from "./PermissionPrompt"
 import { memDBEventToIRoomEvent } from "./util"
 import GomuksWidgetDriver from "./widgetDriver"
 import "./Widget.css"
@@ -27,6 +28,7 @@ export interface WidgetProps {
 	info: IWidget
 	room: RoomStateStore
 	client: Client
+	onClose?: () => void
 }
 
 // TODO remove this after widgets start using a parameter for it
@@ -68,9 +70,24 @@ class WidgetListenerImpl implements WidgetListener {
 	}
 }
 
-const ReactWidget = ({ room, info, client }: WidgetProps) => {
+const openPermissionPrompt = (requested: Set<string>): Promise<Set<string>> => {
+	return new Promise(resolve => {
+		window.openModal({
+			content: <PermissionPrompt
+				capabilities={requested}
+				onConfirm={resolve}
+			/>,
+			dimmed: true,
+			boxed: true,
+			noDismiss: true,
+			innerBoxClass: "permission-prompt",
+		})
+	})
+}
+
+const ReactWidget = ({ room, info, client, onClose }: WidgetProps) => {
 	const wrappedWidget = new WrappedWidget(info)
-	const driver = new GomuksWidgetDriver(client, room)
+	const driver = new GomuksWidgetDriver(client, room, openPermissionPrompt)
 	const widgetURL = addLegacyParams(wrappedWidget.getCompleteUrl({
 		widgetRoomId: room.roomID,
 		currentUserId: client.userID,
@@ -92,13 +109,16 @@ const ReactWidget = ({ room, info, client }: WidgetProps) => {
 			evt.preventDefault()
 			clientAPI.transport.reply(evt.detail, {})
 		}
+		const closeWidget = (evt: CustomEvent) => {
+			noopReply(evt)
+			onClose?.()
+		}
 		clientAPI.on("action:io.element.join", noopReply)
 		clientAPI.on("action:im.vector.hangup", noopReply)
 		clientAPI.on("action:io.element.device_mute", noopReply)
 		clientAPI.on("action:io.element.tile_layout", noopReply)
 		clientAPI.on("action:io.element.spotlight_layout", noopReply)
-		// TODO handle this one?
-		clientAPI.on("action:io.element.close", noopReply)
+		clientAPI.on("action:io.element.close", closeWidget)
 		clientAPI.on("action:set_always_on_screen", noopReply)
 		const removeListener = client.addWidgetListener(new WidgetListenerImpl(clientAPI))
 
