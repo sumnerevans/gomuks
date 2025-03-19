@@ -11,8 +11,11 @@ This branch contains gomuks web. For legacy gomuks terminal, see the
 version will get a terminal frontend in the future. See also:
 <https://github.com/tulir/gomuks/issues/476>.
 
-## Docs
+## Sponsors
+* [conduwuit](https://github.com/girlbossceo/conduwuit)
+
+## Documentation
 For installation and usage instructions, see [docs.mau.fi](https://docs.mau.fi/gomuks/).
 
 ## Discussion
-Matrix room: [#gomuks:maunium.net](https://matrix.to/#/#gomuks:maunium.net)
+Matrix room: [#gomuks:gomuks.app](https://matrix.to/#/#gomuks:gomuks.app)

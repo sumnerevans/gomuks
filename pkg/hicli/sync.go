@@ -137,7 +137,7 @@ func (h *HiClient) maybeDiscardOutboundSession(ctx context.Context, newMembershi
 		prevMembership = event.Membership(gjson.GetBytes(cs.Content, "membership").Str)
 	}
 	if prevMembership == newMembership ||
-		(prevMembership == event.MembershipInvite && newMembership == event.MembershipJoin) ||
+		(prevMembership == event.MembershipInvite && newMembership == event.MembershipJoin && h.shouldShareKeysToInvitedUsers(ctx, evt.RoomID)) ||
 		(prevMembership == event.MembershipJoin && newMembership == event.MembershipInvite) ||
 		(prevMembership == event.MembershipBan && newMembership == event.MembershipLeave) ||
 		(prevMembership == event.MembershipLeave && newMembership == event.MembershipBan) {
@@ -598,7 +598,7 @@ func (h *HiClient) calculateLocalContent(ctx context.Context, dbEvt *database.Ev
 	return nil, nil
 }
 
-const CurrentHTMLSanitizerVersion = 8
+const CurrentHTMLSanitizerVersion = 10
 
 func (h *HiClient) ReprocessExistingEvent(ctx context.Context, evt *database.Event) {
 	if (evt.Type != event.EventMessage.Type && evt.DecryptedType != event.EventMessage.Type) ||
@@ -785,7 +785,7 @@ func (h *HiClient) processStateAndTimeline(
 				return fmt.Errorf("failed to get relation target of redaction target: %w", err)
 			}
 		}
-		if updatedRoom.PreviewEventRowID == dbEvt.RowID {
+		if updatedRoom.PreviewEventRowID == dbEvt.RowID || (updatedRoom.PreviewEventRowID == 0 && room.PreviewEventRowID == dbEvt.RowID) {
 			updatedRoom.PreviewEventRowID = 0
 			recalculatePreviewEvent = true
 		}
@@ -969,10 +969,11 @@ func (h *HiClient) processStateAndTimeline(
 		updatedRoom.PreviewEventRowID, err = h.DB.Room.RecalculatePreview(ctx, room.ID)
 		if err != nil {
 			return fmt.Errorf("failed to recalculate preview event: %w", err)
-		}
-		_, err = addOldEvent(updatedRoom.PreviewEventRowID, "")
-		if err != nil {
-			return fmt.Errorf("failed to get preview event: %w", err)
+		} else if updatedRoom.PreviewEventRowID != 0 {
+			_, err = addOldEvent(updatedRoom.PreviewEventRowID, "")
+			if err != nil {
+				return fmt.Errorf("failed to get preview event: %w", err)
+			}
 		}
 	}
 	// Calculate name from participants if participants changed and current name was generated from participants, or if the room name was unset

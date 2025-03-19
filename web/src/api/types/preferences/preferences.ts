@@ -61,8 +61,20 @@ export const preferences = {
 	}),
 	show_media_previews: new Preference<boolean>({
 		displayName: "Show image and video previews",
-		description: "If disabled, images and videos will only be visible after clicking and will not be downloaded automatically.",
+		description: "If disabled, images and videos will only be visible after clicking and will not be downloaded automatically. This will also disable images in URL previews.",
 		allowedContexts: anyContext,
+		defaultValue: true,
+	}),
+	show_inline_images: new Preference<boolean>({
+		displayName: "Show inline images",
+		description: "If disabled, custom emojis and other inline images will not be rendered and the alt attribute will be shown instead.",
+		allowedContexts: anyContext,
+		defaultValue: true,
+	}),
+	show_invite_avatars: new Preference<boolean>({
+		displayName: "Show avatars in invites",
+		description: "If disabled, the avatar of the room or inviter will not be shown in the invite view.",
+		allowedContexts: anyGlobalContext,
 		defaultValue: true,
 	}),
 	code_block_line_wrap: new Preference<boolean>({

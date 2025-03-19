@@ -253,10 +253,15 @@ div.event-content > div.event-reactions {
 	}
 }
 
+blockquote.reply-body.small > div.reply-sender > span.event-sender {
+	max-width: 10rem;
+}
+
 div.small-event > div.sender-avatar, blockquote.reply-body > div.reply-sender > div.sender-avatar {
 	margin-top: 0;
 	display: flex;
 	align-items: center;
+	flex-shrink: 0;
 }
 
 div.date-separator {
