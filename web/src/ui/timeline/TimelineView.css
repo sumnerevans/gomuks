@@ -50,4 +50,8 @@ div.event-context-modal {
 	div.timeline-edge {
 		height: 3.5rem;
 	}
+
+	div.timeline-list {
+		padding-bottom: 0;
+	}
 }
