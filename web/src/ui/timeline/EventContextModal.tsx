@@ -20,7 +20,7 @@ import { EventID, MemDBEvent } from "@/api/types"
 import ClientContext from "../ClientContext.ts"
 import { RoomContext, RoomContextData } from "../roomview/roomcontext.ts"
 import { jumpToVisibleEvent } from "../util/jumpToEvent.tsx"
-import TimelineEvent from "./TimelineEvent.tsx"
+import { renderTimelineList } from "./timelineutil.tsx"
 
 export interface EventContextModalProps {
 	roomCtx: RoomContextData
@@ -112,7 +112,6 @@ const EventContextModal = ({ roomCtx, eventID }: EventContextModalProps) => {
 			Failed to load event context: {error}
 		</div>
 	}
-	let prevEvt: MemDBEvent | null = null
 	const content = <div className="timeline-view" ref={viewRef}>
 		<div className="timeline-edge">
 			{start ? <button onClick={loadStart} disabled={startLoading}>
@@ -122,19 +121,7 @@ const EventContextModal = ({ roomCtx, eventID }: EventContextModalProps) => {
 			</button> : "No older messages available in this room"}
 		</div>
 		<div className="timeline-list">
-			{timeline.map(entry => {
-				if (!entry) {
-					return null
-				}
-				const thisEvt = <TimelineEvent
-					key={entry.rowid}
-					evt={entry}
-					prevEvt={prevEvt}
-					smallReplies={smallReplies}
-				/>
-				prevEvt = entry
-				return thisEvt
-			})}
+			{renderTimelineList(timeline, { smallReplies })}
 		</div>
 		<div className="timeline-edge">
 			{end ? <button onClick={loadEnd} disabled={endLoading}>
