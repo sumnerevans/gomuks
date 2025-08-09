@@ -76,13 +76,6 @@ const ThreadView = ({ threadRoot }: ThreadViewProps) => {
 			})
 			.finally(() => setLoading(false))
 	}
-	useEffect(() => {
-		if (!prevBatch && rootEvent && timeline[0]?.event_id !== rootEvent.event_id) {
-			// If we paginated through the thread and the root event is not at the top,
-			// add it to the top of the timeline.
-			setTimeline(currentTimeline => [rootEvent, ...currentTimeline])
-		}
-	}, [timeline, rootEvent, prevBatch])
 	useLayoutEffect(() => {
 		if (bottomRef.current && scrolledToBottom.current) {
 			bottomRef.current.scrollIntoView()
@@ -104,13 +97,11 @@ const ThreadView = ({ threadRoot }: ThreadViewProps) => {
 
 	const prependRoot = rootEvent && !prevBatch
 	const timelineDiv = <div className="timeline-view" ref={viewRef} onScroll={handleScroll}>
-		<div className="timeline-edge">
-			{(prevBatch || loading) ? <button onClick={loadHistory} disabled={loading}>
-				{loading
-					? <><ScaleLoader color="var(--primary-color)"/> Loading history...</>
-					: "Load more history"}
-			</button> : null}
-		</div>
+		{(prevBatch || loading) ? <div className="timeline-edge"><button onClick={loadHistory} disabled={loading}>
+			{loading
+				? <><ScaleLoader color="var(--primary-color)"/> Loading history...</>
+				: "Load more history"}
+		</button></div> : null}
 		<div className="timeline-list">
 			{prependRoot ? <TimelineEvent
 				prevEvt={null}
