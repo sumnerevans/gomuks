@@ -219,7 +219,7 @@ const TimelineEvent = ({
 	let replyInMessage: JSX.Element | null = null
 	if (isEventID(replyTo) && BodyType !== HiddenEvent && !isRedacted && !editHistoryView) {
 		const replyElem = <ReplyIDBody
-			room={roomCtx.store}
+			roomCtx={roomCtx}
 			eventID={replyTo}
 			isThread={relatesTo?.rel_type === "m.thread"}
 			small={!!smallReplies}

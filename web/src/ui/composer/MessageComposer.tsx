@@ -717,7 +717,9 @@ const MessageComposer = () => {
 			const handleNavigate = (e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
 				e.preventDefault()
 				mainScreen.setActiveRoom(content.replacement_room, {
-					via: [via],
+					previewMeta: {
+						via: [via],
+					},
 				})
 			}
 			const url = `matrix:roomid/${content.replacement_room.slice(1)}?via=${via}`
@@ -760,7 +762,7 @@ const MessageComposer = () => {
 		/></div>}
 		<div className="message-composer" ref={composerRef}>
 			{replyToEvt && <ReplyBody
-				room={room}
+				roomCtx={roomCtx}
 				event={replyToEvt}
 				onClose={closeReply}
 				isThread={replyToEvt.content?.["m.relates_to"]?.rel_type === "m.thread"}
@@ -772,7 +774,7 @@ const MessageComposer = () => {
 				onSetStartNewThread={setStartNewThread}
 			/>}
 			{editing && <ReplyBody
-				room={room}
+				roomCtx={roomCtx}
 				event={editing}
 				isEditing={true}
 				isThread={false}

@@ -116,7 +116,7 @@ const TimelineView = () => {
 
 	let prevEvt: MemDBEvent | null = null
 	return <div className="timeline-view" onScroll={handleScroll} ref={timelineViewRef}>
-		<div className="timeline-beginning">
+		<div className="timeline-edge beginning">
 			{room.hasMoreHistory ? <button onClick={loadHistory} disabled={isLoadingHistory}>
 				{isLoadingHistory
 					? <><ScaleLoader color="var(--primary-color)"/> Loading history...</>

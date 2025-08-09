@@ -130,6 +130,8 @@ export class RoomStateStore {
 	hasMoreHistory = true
 	hidden = false
 
+	hackyPendingJumpToEventID: EventID | null = null
+
 	constructor(meta: DBRoom, private parent: StateStore) {
 		this.roomID = meta.room_id
 		this.meta = new NonNullCachedEventDispatcher(meta)

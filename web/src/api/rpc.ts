@@ -254,7 +254,7 @@ export default abstract class RPCClient {
 		return this.request("get_related_events", { room_id, event_id, relation_type })
 	}
 
-	getEventContext(room_id: RoomID, event_id: EventID, limit: number = 50): Promise<EventContextResponse> {
+	getEventContext(room_id: RoomID, event_id: EventID, limit: number = 20): Promise<EventContextResponse> {
 		return this.request("get_event_context", { room_id, event_id, limit })
 	}
 
