@@ -129,6 +129,7 @@ export class RoomStateStore {
 	readUpToRow = -1
 	hasMoreHistory = true
 	hidden = false
+	groupSessionAutoShared = false
 
 	hackyPendingJumpToEventID: EventID | null = null
 

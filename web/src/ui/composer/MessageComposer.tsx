@@ -389,6 +389,12 @@ const MessageComposer = () => {
 		const now = Date.now()
 		if (evt.target.value !== "" && typingSentAt.current + 5_000 < now) {
 			typingSentAt.current = now
+			if (!room.groupSessionAutoShared && isEncrypted) {
+				client.rpc.ensureGroupSessionShared(room.roomID).then(
+					() => room.groupSessionAutoShared = true,
+					err => console.error("Failed to share group session:", err),
+				)
+			}
 			if (room.preferences.send_typing_notifications) {
 				client.rpc.setTyping(room.roomID, 10_000)
 					.catch(err => console.error("Failed to send typing notification:", err))
