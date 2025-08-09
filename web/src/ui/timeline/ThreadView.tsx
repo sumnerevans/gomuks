@@ -95,7 +95,7 @@ const ThreadView = ({ threadRoot }: ThreadViewProps) => {
 		scrolledToBottom.current = timelineView.scrollTop + timelineView.clientHeight + 1 >= timelineView.scrollHeight
 	}
 
-	const prependRoot = rootEvent && !prevBatch
+	const prependRoot = rootEvent && !prevBatch && !loading
 	const timelineDiv = <div className="timeline-view" ref={viewRef} onScroll={handleScroll}>
 		{(prevBatch || loading) ? <div className="timeline-edge"><button onClick={loadHistory} disabled={loading}>
 			{loading
