@@ -21,7 +21,7 @@ package gomuks
 import (
 	"runtime"
 
-	"github.com/jdeng/goheif"
+	"go.mau.fi/goheif"
 	"golang.org/x/sys/cpu"
 )
 

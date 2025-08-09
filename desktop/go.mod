@@ -8,7 +8,7 @@ require github.com/wailsapp/wails/v3 v3.0.0-alpha.21
 
 require (
 	go.mau.fi/gomuks v0.4.0
-	go.mau.fi/util v0.8.8
+	go.mau.fi/util v0.8.9-0.20250808135321-09699c48d2fa
 )
 
 require (
@@ -39,7 +39,6 @@ require (
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/jbenet/go-context v0.0.0-20150711004518-d14ea06fba99 // indirect
 	github.com/jchv/go-winloader v0.0.0-20210711035445-715c2860da7e // indirect
-	github.com/jdeng/goheif v0.0.0-20250603221700-0b111b5c3adb // indirect
 	github.com/kevinburke/ssh_config v1.2.0 // indirect
 	github.com/leaanthony/go-ansi-parser v1.6.1 // indirect
 	github.com/leaanthony/u v1.1.1 // indirect
@@ -48,7 +47,7 @@ require (
 	github.com/mattn/go-colorable v0.1.14 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/mattn/go-sqlite3 v1.14.28 // indirect
-	github.com/petermattis/goid v0.0.0-20250508124226-395b08cebbdb // indirect
+	github.com/petermattis/goid v0.0.0-20250721140440-ea1c0173183e // indirect
 	github.com/pjbgf/sha1cd v0.3.2 // indirect
 	github.com/pkg/browser v0.0.0-20240102092130-5ac0b6a4141c // indirect
 	github.com/pkg/errors v0.9.1 // indirect
@@ -66,10 +65,11 @@ require (
 	github.com/wailsapp/mimetype v1.4.1 // indirect
 	github.com/xanzy/ssh-agent v0.3.3 // indirect
 	github.com/yuin/goldmark v1.7.12 // indirect
+	go.mau.fi/goheif v0.0.0-20250809103256-ca48e8691d2f // indirect
 	go.mau.fi/webp v0.2.0 // indirect
 	go.mau.fi/zeroconfig v0.1.3 // indirect
 	golang.org/x/crypto v0.40.0 // indirect
-	golang.org/x/exp v0.0.0-20250711185948-6ae5c78190dc // indirect
+	golang.org/x/exp v0.0.0-20250718183923-645b1fa84792 // indirect
 	golang.org/x/image v0.28.0 // indirect
 	golang.org/x/net v0.42.0 // indirect
 	golang.org/x/sys v0.34.0 // indirect
@@ -78,10 +78,8 @@ require (
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1 // indirect
 	gopkg.in/warnings.v0 v0.1.2 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
-	maunium.net/go/mautrix v0.24.3-0.20250722141947-3fe5a7badc23 // indirect
+	maunium.net/go/mautrix v0.24.3-0.20250809101031-135cffc7c1b9 // indirect
 	mvdan.cc/xurls/v2 v2.6.0 // indirect
 )
 
 replace go.mau.fi/gomuks => ../
-
-replace github.com/jdeng/goheif => github.com/tulir/goheif v0.0.0-20250501140641-64420fbcc40f
