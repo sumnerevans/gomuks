@@ -130,6 +130,8 @@ export class RoomStateStore {
 	hasMoreHistory = true
 	hidden = false
 	groupSessionAutoShared = false
+	#threadListenerRoot: EventID | null = null
+	#threadListener: ((evts: MemDBEvent[]) => void) | null = null
 
 	hackyPendingJumpToEventID: EventID | null = null
 
@@ -509,12 +511,32 @@ export class RoomStateStore {
 		for (const [evtID, receipts] of Object.entries(sync.receipts ?? {})) {
 			this.applyReceipts(receipts, evtID, false)
 		}
-		if (hasWidgets && ((sync.timeline && sync.timeline.length > 0) || newState.length > 0)) {
+		if (
+			(hasWidgets || this.#threadListener)
+			&& ((sync.timeline && sync.timeline.length > 0) || newState.length > 0)
+		) {
 			const evts = sync.timeline?.map(evt => this.eventsByRowID.get(evt.event_rowid)).filter(evt => !!evt)
+			if (this.#threadListener && evts) {
+				this.#threadListener(evts.filter(evt => {
+					const rel = evt.content["m.relates_to"]
+					return rel?.rel_type === "m.thread" && rel?.event_id === this.#threadListenerRoot
+				}))
+			}
 			this.parent.widgetListeners.forEach(listener => {
 				evts?.forEach(listener.onTimelineEvent)
 				newState.forEach(listener.onStateEvent)
 			})
+		}
+	}
+
+	subscribeThread(threadRoot: EventID, listener: (evts: MemDBEvent[]) => void) {
+		this.#threadListenerRoot = threadRoot
+		this.#threadListener = listener
+		return () => {
+			if (this.#threadListenerRoot === threadRoot) {
+				this.#threadListener = null
+				this.#threadListenerRoot = null
+			}
 		}
 	}
 

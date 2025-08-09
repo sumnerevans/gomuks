@@ -20,13 +20,16 @@ import TimelineEvent from "./TimelineEvent.tsx"
 interface renderTimelineListParams {
 	smallReplies?: boolean
 	focusedEventRowID?: number | null
+	threadView?: boolean
+	eventContextView?: boolean
+	prevEventOverride?: MemDBEvent
 }
 
 export function renderTimelineList(
 	timeline: (MemDBEvent | null)[],
-	{ smallReplies, focusedEventRowID }: renderTimelineListParams,
+	{ smallReplies, focusedEventRowID, threadView, eventContextView, prevEventOverride }: renderTimelineListParams,
 ): (JSX.Element | null)[] {
-	let prevEvt: MemDBEvent | null = null
+	let prevEvt: MemDBEvent | null = prevEventOverride ?? null
 	return timeline.map(entry => {
 		if (!entry) {
 			return null
@@ -37,6 +40,8 @@ export function renderTimelineList(
 			prevEvt={prevEvt}
 			smallReplies={smallReplies}
 			isFocused={focusedEventRowID === entry.rowid}
+			threadView={threadView}
+			eventContextView={eventContextView}
 		/>
 		prevEvt = entry
 		return thisEvt

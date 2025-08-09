@@ -22,7 +22,7 @@ import {
 	maybeRedactMemberEvent,
 	useRoomMember,
 } from "@/api/statestore"
-import { MemDBEvent, URLPreview as URLPreviewType, UnreadType } from "@/api/types"
+import { MemDBEvent, RelatesTo, URLPreview as URLPreviewType, UnreadType } from "@/api/types"
 import { displayAsRedacted } from "@/util/displayAsRedacted.ts"
 import { isMobileDevice } from "@/util/ismobile.ts"
 import { getDisplayname, isEventID } from "@/util/validation.ts"
@@ -48,6 +48,8 @@ export interface TimelineEventProps {
 	smallReplies?: boolean
 	isFocused?: boolean
 	editHistoryView?: boolean
+	threadView?: boolean
+	eventContextView?: boolean
 }
 
 const fullTimeFormatter = new Intl.DateTimeFormat("en-GB", { dateStyle: "full", timeStyle: "medium" })
@@ -102,7 +104,7 @@ const EventURLPreviews = ({ event, room }: {
 }
 
 const TimelineEvent = ({
-	evt, prevEvt, disableMenu, smallReplies, isFocused, editHistoryView,
+	evt, prevEvt, disableMenu, smallReplies, isFocused, editHistoryView, threadView, eventContextView,
 }: TimelineEventProps) => {
 	const roomCtx = useRoomContext()
 	const client = use(ClientContext)!
@@ -154,7 +156,7 @@ const TimelineEvent = ({
 		}
 		mouseEvt.preventDefault()
 		mouseEvt.stopPropagation()
-		roomCtx.setFocusedEventRowID(roomCtx.focusedEventRowID === evt.rowid ? null : evt.rowid)
+		roomCtx.setFocusedEventRowID(roomCtx.focusedEventRowID === evt.rowid ? null : evt.rowid, threadView)
 	}
 	const openEditHistory = () => {
 		openNestableModal({
@@ -213,15 +215,25 @@ const TimelineEvent = ({
 		</div>
 	}
 	const isSmallBodyType = isSmallEvent(BodyType)
-	const relatesTo = (evt.orig_content ?? evt.content)?.["m.relates_to"]
+	const relatesTo = (evt.orig_content ?? evt.content)?.["m.relates_to"] as RelatesTo | undefined
 	const replyTo = relatesTo?.["m.in_reply_to"]?.event_id
+	const threadRoot = relatesTo?.rel_type === "m.thread" && isEventID(relatesTo.event_id)
+		? relatesTo.event_id : undefined
+	const isFallbackReply = relatesTo?.is_falling_back
 	let replyAboveMessage: JSX.Element | null = null
 	let replyInMessage: JSX.Element | null = null
-	if (isEventID(replyTo) && BodyType !== HiddenEvent && !isRedacted && !editHistoryView) {
+	if (
+		isEventID(replyTo)
+		&& BodyType !== HiddenEvent
+		&& !isRedacted
+		&& !editHistoryView
+		&& (!isFallbackReply || !threadView)
+	) {
 		const replyElem = <ReplyIDBody
 			roomCtx={roomCtx}
 			eventID={replyTo}
-			isThread={relatesTo?.rel_type === "m.thread"}
+			isThread={!threadView && relatesTo?.rel_type === "m.thread"}
+			threadRoot={threadRoot}
 			small={!!smallReplies}
 		/>
 		if (smallReplies && !isSmallBodyType) {
@@ -269,7 +281,7 @@ const TimelineEvent = ({
 		</div>}
 		{isMobileDevice && isFocused && createPortal(
 			<EventFixedMenu evt={evt} roomCtx={roomCtx} />,
-			document.getElementById("mobile-event-menu-container")!,
+			document.getElementById(threadView ? "mobile-thread-event-menu-container" : "mobile-event-menu-container")!,
 		)}
 		{replyAboveMessage}
 		{renderAvatar && <div
@@ -325,8 +337,12 @@ const TimelineEvent = ({
 			</div> : null}
 			{evt.reactions ? <EventReactions reactions={evt.reactions} onRereact={onRereact} /> : null}
 		</div>
-		{!evt.event_id.startsWith("~") && roomCtx.store.preferences.display_read_receipts && !editHistoryView &&
-			<ReadReceipts room={roomCtx.store} eventID={evt.event_id} />}
+		{!evt.event_id.startsWith("~")
+			&& roomCtx.store.preferences.display_read_receipts
+			&& !editHistoryView
+			&& !threadView
+			&& !eventContextView
+			? <ReadReceipts room={roomCtx.store} eventID={evt.event_id} /> : null}
 		{evt.sender === client.userID && evt.transaction_id && !editHistoryView ? <EventSendStatus evt={evt}/> : null}
 	</div>
 	return <>

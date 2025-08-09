@@ -77,14 +77,12 @@ const EventContextModal = ({ roomCtx, eventID }: EventContextModalProps) => {
 		setStartLoading(true)
 		client.rpc.paginateManual(room.roomID, start, "b").then(
 			res => {
+				scrollFixRef.current = viewRef.current?.parentElement?.scrollHeight ?? null
 				setStart(res.next_batch)
 				setTimeline([
 					...res.events.reverse().map(evt => room.applyEvent(evt)),
 					...timeline,
 				])
-				if (viewRef.current) {
-					scrollFixRef.current = viewRef.current.scrollHeight
-				}
 			},
 			err => window.alert(`Failed to load older messages: ${err}`),
 		).finally(() => setStartLoading(false))
@@ -121,7 +119,7 @@ const EventContextModal = ({ roomCtx, eventID }: EventContextModalProps) => {
 			</button> : "No older messages available in this room"}
 		</div>
 		<div className="timeline-list">
-			{renderTimelineList(timeline, { smallReplies })}
+			{renderTimelineList(timeline, { smallReplies, eventContextView: true })}
 		</div>
 		<div className="timeline-edge">
 			{end ? <button onClick={loadEnd} disabled={endLoading}>

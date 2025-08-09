@@ -262,9 +262,9 @@ export default abstract class RPCClient {
 		room_id: RoomID,
 		since: string,
 		direction: Direction,
-		limit: number = 50,
+		{ limit = 50, threadRoot }: { limit?: number, threadRoot?: EventID } = {},
 	): Promise<ManualPaginationResponse> {
-		return this.request("paginate_manual", { room_id, since, direction, limit })
+		return this.request("paginate_manual", { room_id, since, direction, limit, thread_root: threadRoot })
 	}
 
 	paginate(

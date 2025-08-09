@@ -35,6 +35,22 @@ div.event-context-loading {
 	width: 100%;
 }
 
+div.thread-view {
+	--timeline-horizontal-padding: .5rem;
+	--timeline-status-size: 2rem;
+	overflow: hidden;
+
+	/* TODO these are only here to make the timeline-view inside scrollable - maybe replace with a grid? */
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+
+	div.timeline-edge {
+		height: 3.5rem;
+		flex-shrink: 0;
+	}
+}
+
 div.event-context-modal {
 	--timeline-horizontal-padding: 0;
 	--timeline-status-size: 2rem;
@@ -49,6 +65,7 @@ div.event-context-modal {
 
 	div.timeline-edge {
 		height: 3.5rem;
+		flex-shrink: 0;
 	}
 
 	div.timeline-list {
