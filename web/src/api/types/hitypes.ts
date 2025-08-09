@@ -194,6 +194,19 @@ export interface PaginationResponse {
 	has_more: boolean
 }
 
+export interface EventContextResponse {
+	end: string
+	start: string
+	before: RawDBEvent[]
+	after: RawDBEvent[]
+	event: RawDBEvent
+}
+
+export interface ManualPaginationResponse {
+	events: RawDBEvent[]
+	next_batch: string
+}
+
 export interface ResolveAliasResponse {
 	room_id: RoomID
 	servers: string[]

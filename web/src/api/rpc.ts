@@ -18,11 +18,14 @@ import { CancellablePromise } from "../util/promise.ts"
 import type {
 	ClientWellKnown,
 	DBPushRegistration,
+	Direction,
+	EventContextResponse,
 	EventID,
 	EventType,
 	JSONValue,
 	LoginFlowsResponse,
 	LoginRequest,
+	ManualPaginationResponse,
 	MembershipAction,
 	Mentions,
 	MessageEventContent,
@@ -251,10 +254,23 @@ export default abstract class RPCClient {
 		return this.request("get_related_events", { room_id, event_id, relation_type })
 	}
 
+	getEventContext(room_id: RoomID, event_id: EventID, limit: number = 50): Promise<EventContextResponse> {
+		return this.request("get_event_context", { room_id, event_id, limit })
+	}
+
+	paginateManual(
+		room_id: RoomID,
+		since: string,
+		direction: Direction,
+		limit: number = 50,
+	): Promise<ManualPaginationResponse> {
+		return this.request("paginate_manual", { room_id, since, direction, limit })
+	}
+
 	paginate(
 		room_id: RoomID,
 		max_timeline_id: TimelineRowID,
-		limit: number,
+		limit: number = 50,
 		reset: boolean = false,
 	): Promise<PaginationResponse> {
 		return this.request("paginate", { room_id, max_timeline_id, limit, reset })
