@@ -32,7 +32,7 @@ const ThreadView = ({ threadRoot }: ThreadViewProps) => {
 	const client = use(ClientContext)!
 	const parentRoomCtx = useRoomContext()
 	const room = parentRoomCtx.store
-	const [threadRoomCtx] = useState(() => new RoomContextData(room, undefined, threadRoot))
+	const [threadRoomCtx] = useState(() => new RoomContextData(room, undefined, threadRoot, parentRoomCtx))
 	const [prevBatch, setPrevBatch] = useState("")
 	const [loading, setLoading] = useState(false)
 	const [timeline, setTimeline] = useState<MemDBEvent[]>([])

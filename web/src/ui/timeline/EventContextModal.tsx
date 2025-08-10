@@ -69,7 +69,7 @@ const EventContextModal = ({ roomCtx, eventID }: EventContextModalProps) => {
 		if (didHighlight.current === eventID) {
 			return
 		}
-		if (jumpToVisibleEvent(eventID, viewRef.current)) {
+		if (viewRef.current && jumpToVisibleEvent(eventID, viewRef.current)) {
 			didHighlight.current = eventID
 		}
 	}, [eventID, timeline])

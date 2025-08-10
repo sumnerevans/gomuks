@@ -39,6 +39,7 @@ export class RoomContextData {
 		public readonly store: RoomStateStore,
 		setForceDefaultTimeline?: (force: boolean) => void,
 		public readonly threadRoot?: EventID,
+		public readonly threadParentRoom?: RoomContextData,
 	) {
 		if (setForceDefaultTimeline) {
 			this.setForceDefaultTimeline = setForceDefaultTimeline

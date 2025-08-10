@@ -31,6 +31,9 @@ export const jumpToEvent = (roomCtx: RoomContextData, evtID: EventID, allowRetry
 }
 
 export const openEventContextModal = (roomCtx: RoomContextData, evtID: EventID) => {
+	if (roomCtx.threadParentRoom) {
+		roomCtx = roomCtx.threadParentRoom
+	}
 	window.openNestableModal({
 		dimmed: true,
 		boxed: true,
@@ -39,7 +42,7 @@ export const openEventContextModal = (roomCtx: RoomContextData, evtID: EventID) 
 	})
 }
 
-export const jumpToVisibleEvent = (evtID: EventID, parent?: HTMLElement | null): boolean => {
+export const jumpToVisibleEvent = (evtID: EventID, parent?: Element | null): boolean => {
 	if (!evtID) {
 		return false
 	}

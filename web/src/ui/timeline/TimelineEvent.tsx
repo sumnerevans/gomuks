@@ -32,6 +32,7 @@ import { EventFixedMenu, EventFullMenu, EventHoverMenu, getModalStyleFromMouse }
 import { ModalContext, NestableModalContext } from "../modal"
 import { useRoomContext } from "../roomview/roomcontext.ts"
 import URLPreview from "../urlpreview/URLPreview.tsx"
+import { jumpToVisibleEvent, openEventContextModal } from "../util/jumpToEvent.tsx"
 import EventEditHistory from "./EventEditHistory.tsx"
 import ReadReceipts from "./ReadReceipts.tsx"
 import { ReplyIDBody } from "./ReplyBody.tsx"
@@ -157,6 +158,13 @@ const TimelineEvent = ({
 		mouseEvt.preventDefault()
 		mouseEvt.stopPropagation()
 		roomCtx.setFocusedEventRowID(roomCtx.focusedEventRowID === evt.rowid ? null : evt.rowid)
+	}
+	const onClickTimestamp = () => {
+		if (viewType === "pinned") {
+			if (!jumpToVisibleEvent(evt.event_id, document.querySelector("div.room-view"))) {
+				openEventContextModal(roomCtx, evt.event_id)
+			}
+		}
 	}
 	const openEditHistory = () => {
 		openNestableModal({
@@ -328,8 +336,8 @@ const TimelineEvent = ({
 					{getDisplayname(evt.sender, memberEvtContent)}
 				</span>
 			</div>}
-			<span className="event-time" title={fullTime}>{shortTime}</span>
-		</div> : <div className="event-time-only">
+			<span className="event-time" title={fullTime} onClick={onClickTimestamp}>{shortTime}</span>
+		</div> : <div className="event-time-only" onClick={onClickTimestamp}>
 			<span className="event-time" title={fullTime}>{shortTime}</span>
 		</div>}
 		<div className="event-content">
