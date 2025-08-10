@@ -202,6 +202,9 @@ const TimelineEvent = ({
 	if (evt.unsigned["io.element.synapse.soft_failed"]) {
 		wrapperClassNames.push("soft-failed")
 	}
+	if (evt.unsigned["io.element.synapse.policy_server_spammy"]) {
+		wrapperClassNames.push("policy-server-spammy")
+	}
 	let dateSeparator = null
 	const prevEvtDate = prevEvt ? new Date(prevEvt.timestamp) : null
 	if (prevEvtDate && (

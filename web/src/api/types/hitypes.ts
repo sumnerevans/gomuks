@@ -223,6 +223,7 @@ export interface EventUnsigned {
 	prev_sender?: UserID
 
 	"io.element.synapse.soft_failed"?: boolean
+	"io.element.synapse.policy_server_spammy"?: boolean
 }
 
 export interface ClientWellKnown {
