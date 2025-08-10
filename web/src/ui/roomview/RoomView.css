@@ -39,7 +39,6 @@ div.room-view {
 div.mobile-event-menu-container {
 	overflow: hidden;
 	border-bottom: 1px solid var(--border-color);
-	padding-top: var(--window-top-margin);
 
 	&:empty {
 		display: none;
@@ -48,6 +47,7 @@ div.mobile-event-menu-container {
 
 div#mobile-event-menu-container {
 	grid-area: header;
+	padding-top: var(--window-top-margin);
 
 	&:not(:empty) + div.room-header {
 		display: none;
