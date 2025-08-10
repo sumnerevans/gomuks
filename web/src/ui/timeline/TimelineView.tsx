@@ -124,7 +124,7 @@ const TimelineView = () => {
 		</div>
 		<div className="timeline-list">
 			<div className="timeline-top-ref" ref={topRef}/>
-			{renderTimelineList(timeline, { smallReplies, focusedEventRowID })}
+			{renderTimelineList("timeline", timeline, { smallReplies, focusedEventRowID })}
 			<div className="timeline-bottom-ref" ref={bottomRef}/>
 		</div>
 	</div>

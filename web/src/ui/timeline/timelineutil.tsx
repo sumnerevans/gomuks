@@ -15,19 +15,18 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 import { JSX } from "react"
 import { MemDBEvent } from "@/api/types"
-import TimelineEvent from "./TimelineEvent.tsx"
+import TimelineEvent, { TimelineEventViewType } from "./TimelineEvent.tsx"
 
 interface renderTimelineListParams {
 	smallReplies?: boolean
 	focusedEventRowID?: number | null
-	threadView?: boolean
-	eventContextView?: boolean
 	prevEventOverride?: MemDBEvent
 }
 
 export function renderTimelineList(
+	viewType: TimelineEventViewType,
 	timeline: (MemDBEvent | null)[],
-	{ smallReplies, focusedEventRowID, threadView, eventContextView, prevEventOverride }: renderTimelineListParams,
+	{ smallReplies, focusedEventRowID, prevEventOverride }: renderTimelineListParams,
 ): (JSX.Element | null)[] {
 	let prevEvt: MemDBEvent | null = prevEventOverride ?? null
 	return timeline.map(entry => {
@@ -40,8 +39,7 @@ export function renderTimelineList(
 			prevEvt={prevEvt}
 			smallReplies={smallReplies}
 			isFocused={focusedEventRowID === entry.rowid}
-			threadView={threadView}
-			eventContextView={eventContextView}
+			viewType={viewType}
 		/>
 		prevEvt = entry
 		return thisEvt

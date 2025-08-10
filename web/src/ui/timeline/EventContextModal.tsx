@@ -120,7 +120,7 @@ const EventContextModal = ({ roomCtx, eventID }: EventContextModalProps) => {
 			</button> : "No older messages available in this room"}
 		</div>
 		<div className="timeline-list">
-			{renderTimelineList(timeline, { smallReplies, eventContextView: true })}
+			{renderTimelineList("context", timeline, { smallReplies })}
 		</div>
 		<div className="timeline-edge">
 			{end ? <button onClick={loadEnd} disabled={endLoading}>

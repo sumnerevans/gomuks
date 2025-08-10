@@ -126,11 +126,10 @@ const ThreadView = ({ threadRoot }: ThreadViewProps) => {
 				evt={rootEvent}
 				smallReplies={smallReplies}
 				isFocused={focusedEventRowID === rootEvent.rowid}
-				threadView={true}
+				viewType="thread"
 			/> : null}
-			{renderTimelineList(timeline, {
+			{renderTimelineList("thread", timeline, {
 				smallReplies,
-				threadView: true,
 				prevEventOverride: prependRoot ? rootEvent : undefined,
 				focusedEventRowID,
 			})}
