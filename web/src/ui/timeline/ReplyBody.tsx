@@ -31,6 +31,7 @@ import TooltipButton from "../util/TooltipButton.tsx"
 import { jumpToEvent } from "../util/jumpToEvent.tsx"
 import { ContentErrorBoundary, getBodyType, getPerMessageProfile } from "./content"
 import CloseIcon from "@/icons/close.svg?react"
+import EditIcon from "@/icons/edit.svg?react"
 import NotificationsOffIcon from "@/icons/notifications-off.svg?react"
 import NotificationsIcon from "@/icons/notifications.svg?react"
 import ReplyIcon from "@/icons/reply.svg?react"
@@ -137,6 +138,12 @@ export const ReplyBody = ({
 			>
 				{getDisplayname(event.sender, renderMemberEvtContent)}
 			</span>
+			{isThread ? <span className="sender-extra thread-logo">
+				(<ThreadIcon width=".75rem" height=".75rem" /> thread)
+			</span> : null}
+			{isEditing ? <span className="sender-extra editing-logo">
+				(<EditIcon width="1rem" height="1rem"/> editing)
+			</span> : null}
 			{perMessageSender && <div className="per-message-event-sender">
 				<span className="via">via</span>
 				<span
