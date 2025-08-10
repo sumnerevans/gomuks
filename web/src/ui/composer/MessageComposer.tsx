@@ -106,8 +106,14 @@ const composerReducer = (
 })
 
 const draftStore = {
-	get: (roomID: RoomID): ComposerState | null => {
-		const data = localStorage.getItem(`draft-${roomID}`)
+	makeDraftKey(roomID: RoomID, threadID?: EventID): string {
+		if (threadID) {
+			return `draft-${roomID}-${threadID}`
+		}
+		return `draft-${roomID}`
+	},
+	get: (roomID: RoomID, threadID?: EventID): ComposerState | null => {
+		const data = localStorage.getItem(draftStore.makeDraftKey(roomID, threadID))
 		if (!data) {
 			return null
 		}
@@ -117,8 +123,10 @@ const draftStore = {
 			return null
 		}
 	},
-	set: (roomID: RoomID, data: ComposerState) => localStorage.setItem(`draft-${roomID}`, JSON.stringify(data)),
-	clear: (roomID: RoomID) => localStorage.removeItem(`draft-${roomID}`),
+	set: (roomID: RoomID, data: ComposerState, threadID?: EventID) =>
+		localStorage.setItem(draftStore.makeDraftKey(roomID, threadID), JSON.stringify(data)),
+	clear: (roomID: RoomID, threadID?: EventID) =>
+		localStorage.removeItem(draftStore.makeDraftKey(roomID, threadID)),
 }
 
 type CaretEvent<T> = React.MouseEvent<T> | React.KeyboardEvent<T> | React.ChangeEvent<T>
@@ -181,7 +189,7 @@ const MessageComposer = () => {
 	roomCtx.setEditing = useCallback((evt: MemDBEvent | null) => {
 		if (evt === null) {
 			rawSetEditing(null)
-			setState(draftStore.get(room.roomID) ?? emptyComposer)
+			setState(draftStore.get(room.roomID, roomCtx.threadRoot) ?? emptyComposer)
 			return
 		}
 		const evtContent = evt.content as MessageEventContent
@@ -210,7 +218,7 @@ const MessageComposer = () => {
 				[],
 		})
 		textInput.current?.focus()
-	}, [room.roomID])
+	}, [room.roomID, roomCtx.threadRoot])
 	const canSend = Boolean(state.text || state.media || state.location)
 	const onClickSend = (evt: React.FormEvent) => {
 		evt.preventDefault()
@@ -221,7 +229,7 @@ const MessageComposer = () => {
 	}
 	const doSendMessage = (state: ComposerState) => {
 		if (editing) {
-			setState(draftStore.get(room.roomID) ?? emptyComposer)
+			setState(draftStore.get(room.roomID, roomCtx.threadRoot) ?? emptyComposer)
 		} else {
 			setState(emptyComposer)
 		}
@@ -542,7 +550,7 @@ const MessageComposer = () => {
 	// To ensure the cursor jumps to the end, do this in an effect rather than as the initial value of useState
 	// To try to avoid the input bar flashing, use useLayoutEffect instead of useEffect
 	useLayoutEffect(() => {
-		const draft = draftStore.get(room.roomID)
+		const draft = draftStore.get(room.roomID, roomCtx.threadRoot)
 		setState(draft ?? emptyComposer)
 		setAutocomplete(null)
 		return () => {
@@ -554,7 +562,7 @@ const MessageComposer = () => {
 				}
 			}
 		}
-	}, [client, room])
+	}, [client, room, roomCtx])
 	useLayoutEffect(() => {
 		if (!textInput.current) {
 			return
@@ -583,9 +591,9 @@ const MessageComposer = () => {
 			return
 		}
 		if (!state.text && !state.media && !state.replyTo && !state.location) {
-			draftStore.clear(room.roomID)
+			draftStore.clear(room.roomID, roomCtx.threadRoot)
 		} else {
-			draftStore.set(room.roomID, state)
+			draftStore.set(room.roomID, state, roomCtx.threadRoot)
 		}
 	}, [roomCtx, room, state, editing])
 	useEffect(() => {
