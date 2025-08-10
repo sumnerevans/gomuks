@@ -90,7 +90,7 @@ function renderRightPanelContent(props: RightPanelProps, mainScreen: MainScreenC
 	case "user":
 		return <UserInfo userID={props.userID} />
 	case "thread":
-		return <ThreadView threadRoot={props.threadRoot} />
+		return <ThreadView key={props.threadRoot} threadRoot={props.threadRoot} />
 	}
 }
 

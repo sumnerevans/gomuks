@@ -18,6 +18,7 @@ import { ScaleLoader } from "react-spinners"
 import { usePreference, useRoomEvent } from "@/api/statestore"
 import { EventID, EventRowID, MemDBEvent } from "@/api/types"
 import ClientContext from "../ClientContext.ts"
+import MessageComposer from "../composer/MessageComposer.tsx"
 import { RoomContext, RoomContextData, useRoomContext } from "../roomview/roomcontext.ts"
 import TimelineEvent from "./TimelineEvent.tsx"
 import { renderTimelineList } from "./timelineutil.tsx"
@@ -31,7 +32,7 @@ const ThreadView = ({ threadRoot }: ThreadViewProps) => {
 	const client = use(ClientContext)!
 	const parentRoomCtx = useRoomContext()
 	const room = parentRoomCtx.store
-	const [threadRoomCtx] = useState(() => new RoomContextData(room))
+	const [threadRoomCtx] = useState(() => new RoomContextData(room, undefined, threadRoot))
 	const [prevBatch, setPrevBatch] = useState("")
 	const [loading, setLoading] = useState(false)
 	const [timeline, setTimeline] = useState<MemDBEvent[]>([])
@@ -96,6 +97,7 @@ const ThreadView = ({ threadRoot }: ThreadViewProps) => {
 	}
 
 	useLayoutEffect(() => {
+		threadRoomCtx.lastThreadEventID = timeline[timeline.length - 1]?.event_id ?? null
 		if (bottomRef.current && threadRoomCtx.scrolledToBottom) {
 			bottomRef.current.scrollIntoView()
 		} else if (scrollFixRef.current && viewRef.current) {
@@ -131,6 +133,8 @@ const ThreadView = ({ threadRoot }: ThreadViewProps) => {
 	return <RoomContext value={threadRoomCtx}>
 		<div className="thread-view" onClick={onClick}>
 			{timelineDiv}
+			<MessageComposer/>
+			<div className="typing-notifications empty" />
 		</div>
 	</RoomContext>
 }

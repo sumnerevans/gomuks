@@ -8,6 +8,7 @@ div.thread-view {
 		"messageview" 1fr
 		"autocomplete" 0
 		"input" auto
+		"typing" auto
 		/ 1fr;
 	height: 100%;
 

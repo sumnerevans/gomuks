@@ -232,23 +232,37 @@ const MessageComposer = () => {
 			room: false,
 		}
 		let relates_to: RelatesTo | undefined = undefined
+		if (roomCtx.threadRoot) {
+			relates_to = {
+				rel_type: "m.thread",
+				event_id: roomCtx.threadRoot,
+				is_falling_back: true,
+				"m.in_reply_to": {
+					event_id: roomCtx.lastThreadEventID ?? roomCtx.threadRoot,
+				},
+			}
+		}
 		if (editing) {
 			relates_to = {
 				rel_type: "m.replace",
 				event_id: editing.event_id,
 			}
 		} else if (replyToEvt) {
-			const isThread = replyToEvt.content?.["m.relates_to"]?.rel_type === "m.thread"
+			const isThread = !roomCtx.threadRoot
+				&& replyToEvt.content?.["m.relates_to"]?.rel_type === "m.thread"
 				&& typeof replyToEvt.content?.["m.relates_to"]?.event_id === "string"
 			if (!state.silentReply && (!isThread || state.explicitReplyInThread)) {
 				mentions.user_ids.push(replyToEvt.sender)
 			}
-			relates_to = {
-				"m.in_reply_to": {
-					event_id: replyToEvt.event_id,
-				},
+			if (!relates_to) {
+				relates_to = {}
 			}
-			if (isThread) {
+			relates_to["m.in_reply_to"] = {
+				event_id: replyToEvt.event_id,
+			}
+			if (roomCtx.threadRoot) {
+				relates_to.is_falling_back = false
+			} else if (isThread) {
 				relates_to.rel_type = "m.thread"
 				relates_to.event_id = replyToEvt.content?.["m.relates_to"].event_id
 				relates_to.is_falling_back = !state.explicitReplyInThread
@@ -771,13 +785,13 @@ const MessageComposer = () => {
 				roomCtx={roomCtx}
 				event={replyToEvt}
 				onClose={closeReply}
-				isThread={replyToEvt.content?.["m.relates_to"]?.rel_type === "m.thread"}
+				isThread={!roomCtx.threadRoot && replyToEvt.content?.["m.relates_to"]?.rel_type === "m.thread"}
 				isSilent={state.silentReply}
 				onSetSilent={setSilentReply}
 				isExplicitInThread={state.explicitReplyInThread}
-				onSetExplicitInThread={setExplicitReplyInThread}
+				onSetExplicitInThread={!roomCtx.threadRoot ? setExplicitReplyInThread : undefined}
 				startNewThread={state.startNewThread}
-				onSetStartNewThread={setStartNewThread}
+				onSetStartNewThread={!roomCtx.threadRoot ? setStartNewThread : undefined}
 			/>}
 			{editing && <ReplyBody
 				roomCtx={roomCtx}
