@@ -62,8 +62,13 @@ const ThreadView = ({ threadRoot }: ThreadViewProps) => {
 				console.error("Failed to load thread history", err)
 			})
 			.finally(() => setLoading(false))
-		return room.subscribeThread(threadRoot, evts => {
-			setTimeline(currentTimeline => [...currentTimeline, ...evts])
+		return room.subscribeThread(threadRoot, (append, overwrite) => {
+			if (append) {
+				setTimeline(currentTimeline => [...currentTimeline, ...append])
+			} else if (overwrite) {
+				setTimeline(currentTimeline =>
+					currentTimeline.map(evt => evt.event_id === overwrite.event_id ? overwrite : evt))
+			}
 		})
 	}, [client, room, threadRoot])
 

@@ -22,10 +22,10 @@ import {
 	maybeRedactMemberEvent,
 	useRoomMember,
 } from "@/api/statestore"
-import { MemDBEvent, RelatesTo, URLPreview as URLPreviewType, UnreadType } from "@/api/types"
+import { MemDBEvent, URLPreview as URLPreviewType, UnreadType } from "@/api/types"
 import { displayAsRedacted } from "@/util/displayAsRedacted.ts"
 import { isMobileDevice } from "@/util/ismobile.ts"
-import { getDisplayname, isEventID } from "@/util/validation.ts"
+import { getDisplayname, getRelatesTo, isEventID } from "@/util/validation.ts"
 import ClientContext from "../ClientContext.ts"
 import MainScreenContext from "../MainScreenContext.ts"
 import { EventFixedMenu, EventFullMenu, EventHoverMenu, getModalStyleFromMouse } from "../menu"
@@ -215,7 +215,7 @@ const TimelineEvent = ({
 		</div>
 	}
 	const isSmallBodyType = isSmallEvent(BodyType)
-	const relatesTo = (evt.orig_content ?? evt.content)?.["m.relates_to"] as RelatesTo | undefined
+	const relatesTo = getRelatesTo(evt)
 	const replyTo = relatesTo?.["m.in_reply_to"]?.event_id
 	const threadRoot = relatesTo?.rel_type === "m.thread" && isEventID(relatesTo.event_id)
 		? relatesTo.event_id : undefined

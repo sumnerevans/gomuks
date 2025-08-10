@@ -42,7 +42,7 @@ import { useEventAsState } from "@/util/eventdispatcher.ts"
 import { isMobileDevice } from "@/util/ismobile.ts"
 import { escapeMarkdown } from "@/util/markdown.ts"
 import { getEventLevel, getUserLevel } from "@/util/powerlevel.ts"
-import { getServerName } from "@/util/validation.ts"
+import { getRelatesTo, getServerName, isEventID } from "@/util/validation.ts"
 import ClientContext from "../ClientContext.ts"
 import MainScreenContext from "../MainScreenContext.ts"
 import EmojiPicker from "../emojipicker/EmojiPicker.tsx"
@@ -248,9 +248,10 @@ const MessageComposer = () => {
 				event_id: editing.event_id,
 			}
 		} else if (replyToEvt) {
+			const replyToEvtRelation = getRelatesTo(replyToEvt)
 			const isThread = !roomCtx.threadRoot
-				&& replyToEvt.content?.["m.relates_to"]?.rel_type === "m.thread"
-				&& typeof replyToEvt.content?.["m.relates_to"]?.event_id === "string"
+				&& replyToEvtRelation?.rel_type === "m.thread"
+				&& isEventID(replyToEvtRelation?.event_id)
 			if (!state.silentReply && (!isThread || state.explicitReplyInThread)) {
 				mentions.user_ids.push(replyToEvt.sender)
 			}
@@ -264,7 +265,7 @@ const MessageComposer = () => {
 				relates_to.is_falling_back = false
 			} else if (isThread) {
 				relates_to.rel_type = "m.thread"
-				relates_to.event_id = replyToEvt.content?.["m.relates_to"].event_id
+				relates_to.event_id = replyToEvtRelation.event_id
 				relates_to.is_falling_back = !state.explicitReplyInThread
 			} else if (state.startNewThread) {
 				relates_to.rel_type = "m.thread"
@@ -785,7 +786,7 @@ const MessageComposer = () => {
 				roomCtx={roomCtx}
 				event={replyToEvt}
 				onClose={closeReply}
-				isThread={!roomCtx.threadRoot && replyToEvt.content?.["m.relates_to"]?.rel_type === "m.thread"}
+				isThread={!roomCtx.threadRoot && getRelatesTo(replyToEvt)?.rel_type === "m.thread"}
 				isSilent={state.silentReply}
 				onSetSilent={setSilentReply}
 				isExplicitInThread={state.explicitReplyInThread}
