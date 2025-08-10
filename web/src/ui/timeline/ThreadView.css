@@ -12,8 +12,7 @@ div.thread-view {
 		/ 1fr;
 	height: 100%;
 
-	div.timeline-edge {
-		height: 3.5rem;
-		flex-shrink: 0;
+	> div.timeline-view {
+		justify-content: unset;
 	}
 }

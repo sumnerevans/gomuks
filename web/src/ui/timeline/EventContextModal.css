@@ -20,11 +20,6 @@ div.event-context-modal {
 		height: 100%;
 	}
 
-	div.timeline-edge {
-		height: 3.5rem;
-		flex-shrink: 0;
-	}
-
 	div.timeline-list {
 		padding-bottom: 0;
 	}

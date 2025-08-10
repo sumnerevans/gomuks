@@ -113,11 +113,13 @@ const ThreadView = ({ threadRoot }: ThreadViewProps) => {
 
 	const prependRoot = rootEvent && !prevBatch && !loading
 	const timelineDiv = <div className="timeline-view" ref={viewRef} onScroll={handleScroll}>
-		{(prevBatch || loading) ? <div className="timeline-edge"><button onClick={loadHistory} disabled={loading}>
-			{loading
-				? <><ScaleLoader color="var(--primary-color)"/> Loading history...</>
-				: "Load more history"}
-		</button></div> : null}
+		<div className="timeline-edge">
+			{(prevBatch || loading) ? <button onClick={loadHistory} disabled={loading}>
+				{loading
+					? <><ScaleLoader color="var(--primary-color)"/> Loading history...</>
+					: "Load more history"}
+			</button> : <button disabled>This is the beginning of the thread.</button>}
+		</div>
 		<div className="timeline-list">
 			{prependRoot ? <TimelineEvent
 				prevEvt={null}

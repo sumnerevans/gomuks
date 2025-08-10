@@ -8,6 +8,8 @@ div.timeline-view {
 	> div.timeline-edge {
 		display: flex;
 		justify-content: space-around;
+		flex-shrink: 0;
+		height: 2.5rem;
 
 		&.beginning {
 			margin-top: 1rem;
@@ -15,7 +17,7 @@ div.timeline-view {
 
 		> button {
 			display: flex;
-			padding: .5rem 1rem;
+			padding: 0 1rem;
 			gap: .5rem;
 		}
 	}
