@@ -156,7 +156,7 @@ const TimelineEvent = ({
 		}
 		mouseEvt.preventDefault()
 		mouseEvt.stopPropagation()
-		roomCtx.setFocusedEventRowID(roomCtx.focusedEventRowID === evt.rowid ? null : evt.rowid, threadView)
+		roomCtx.setFocusedEventRowID(roomCtx.focusedEventRowID === evt.rowid ? null : evt.rowid)
 	}
 	const openEditHistory = () => {
 		openNestableModal({

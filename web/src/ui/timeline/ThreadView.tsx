@@ -13,14 +13,15 @@
 //
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
-import { use, useEffect, useLayoutEffect, useRef, useState } from "react"
+import React, { use, useEffect, useLayoutEffect, useRef, useState } from "react"
 import { ScaleLoader } from "react-spinners"
 import { usePreference, useRoomEvent } from "@/api/statestore"
 import { EventID, EventRowID, MemDBEvent } from "@/api/types"
 import ClientContext from "../ClientContext.ts"
-import { useRoomContext } from "../roomview/roomcontext.ts"
+import { RoomContext, RoomContextData, useRoomContext } from "../roomview/roomcontext.ts"
 import TimelineEvent from "./TimelineEvent.tsx"
 import { renderTimelineList } from "./timelineutil.tsx"
+import "./ThreadView.css"
 
 export interface ThreadViewProps {
 	threadRoot: EventID
@@ -28,23 +29,27 @@ export interface ThreadViewProps {
 
 const ThreadView = ({ threadRoot }: ThreadViewProps) => {
 	const client = use(ClientContext)!
-	const roomCtx = useRoomContext()
-	const room = roomCtx.store
+	const parentRoomCtx = useRoomContext()
+	const room = parentRoomCtx.store
+	const [threadRoomCtx] = useState(() => new RoomContextData(room))
 	const [prevBatch, setPrevBatch] = useState("")
 	const [loading, setLoading] = useState(false)
 	const [timeline, setTimeline] = useState<MemDBEvent[]>([])
 	const [focusedEventRowID, directSetFocusedEventRowID] = useState<EventRowID | null>(null)
 	const scrollFixRef = useRef<number>(null)
 	const bottomRef = useRef<HTMLDivElement>(null)
-	const scrolledToBottom = useRef(true)
 	const viewRef = useRef<HTMLDivElement>(null)
 	const smallReplies = usePreference(client.store, room, "small_replies")
 	const rootEvent = useRoomEvent(room, threadRoot)
 	client.requestEvent(room, threadRoot)
 
 	useEffect(() => {
-		roomCtx.directSetThreadFocusedEventRowID = directSetFocusedEventRowID
-	}, [roomCtx])
+		threadRoomCtx.directSetFocusedEventRowID = directSetFocusedEventRowID
+		window.addEventListener("resize", threadRoomCtx.scrollToBottom)
+		return () => {
+			window.removeEventListener("resize", threadRoomCtx.scrollToBottom)
+		}
+	}, [threadRoomCtx])
 	useEffect(() => {
 		setLoading(true)
 		setTimeline([])
@@ -61,6 +66,12 @@ const ThreadView = ({ threadRoot }: ThreadViewProps) => {
 		})
 	}, [client, room, threadRoot])
 
+	const onClick = (evt: React.MouseEvent<HTMLDivElement>) => {
+		if (threadRoomCtx.focusedEventRowID) {
+			threadRoomCtx.setFocusedEventRowID(null)
+			evt.stopPropagation()
+		}
+	}
 	const loadHistory = () => {
 		setLoading(true)
 		client.rpc.paginateManual(room.roomID, prevBatch, "b", { threadRoot })
@@ -76,24 +87,22 @@ const ThreadView = ({ threadRoot }: ThreadViewProps) => {
 			})
 			.finally(() => setLoading(false))
 	}
-	useLayoutEffect(() => {
-		if (bottomRef.current && scrolledToBottom.current) {
-			bottomRef.current.scrollIntoView()
-		} else if (scrollFixRef.current && viewRef.current) {
-			viewRef.current.scrollTo({
-				top: viewRef.current.scrollTop + (viewRef.current.scrollHeight - scrollFixRef.current),
-				behavior: "instant",
-			})
-		}
-		scrollFixRef.current = null
-	}, [timeline])
 	const handleScroll = () => {
 		if (!viewRef.current) {
 			return
 		}
-		const timelineView = viewRef.current
-		scrolledToBottom.current = timelineView.scrollTop + timelineView.clientHeight + 1 >= timelineView.scrollHeight
+		const tlView = viewRef.current
+		threadRoomCtx.scrolledToBottom = tlView.scrollTop + tlView.clientHeight + 1 >= tlView.scrollHeight
 	}
+
+	useLayoutEffect(() => {
+		if (bottomRef.current && threadRoomCtx.scrolledToBottom) {
+			bottomRef.current.scrollIntoView()
+		} else if (scrollFixRef.current && viewRef.current) {
+			viewRef.current.scrollTop += viewRef.current.scrollHeight - scrollFixRef.current
+		}
+		scrollFixRef.current = null
+	}, [timeline, threadRoomCtx])
 
 	const prependRoot = rootEvent && !prevBatch && !loading
 	const timelineDiv = <div className="timeline-view" ref={viewRef} onScroll={handleScroll}>
@@ -119,9 +128,11 @@ const ThreadView = ({ threadRoot }: ThreadViewProps) => {
 			<div className="timeline-bottom-ref" ref={bottomRef}/>
 		</div>
 	</div>
-	return <div className="thread-view">
-		{timelineDiv}
-	</div>
+	return <RoomContext value={threadRoomCtx}>
+		<div className="thread-view" onClick={onClick}>
+			{timelineDiv}
+		</div>
+	</RoomContext>
 }
 
 export default ThreadView

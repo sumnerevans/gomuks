@@ -21,6 +21,7 @@ import ClientContext from "../ClientContext.ts"
 import { RoomContext, RoomContextData } from "../roomview/roomcontext.ts"
 import { jumpToVisibleEvent } from "../util/jumpToEvent.tsx"
 import { renderTimelineList } from "./timelineutil.tsx"
+import "./EventContextModal.css"
 
 export interface EventContextModalProps {
 	roomCtx: RoomContextData

@@ -29,9 +29,7 @@ export class RoomContextData {
 	public setEditing: (evt: MemDBEvent | null) => void = noop("setEditing")
 	public insertText: (text: string) => void = noop("insertText")
 	public directSetFocusedEventRowID: (eventRowID: EventRowID | null) => void = noop("setFocusedEventRowID")
-	public directSetThreadFocusedEventRowID: ((eventRowID: EventRowID | null) => void) | null = null
 	public focusedEventRowID: EventRowID | null = null
-	public threadFocusedEventRowID: EventRowID | null = null
 	public readonly isEditing = new NonNullCachedEventDispatcher<boolean>(false)
 	public scrolledToBottom = true
 	public setForceDefaultTimeline: (force: boolean) => void = noop("setForceDefaultTimeline")
@@ -51,19 +49,9 @@ export class RoomContextData {
 		}
 	}
 
-	setFocusedEventRowID = (eventRowID: number | null, threadView: boolean = false) => {
-		if (eventRowID === null) {
-			this.directSetThreadFocusedEventRowID?.(null)
-			this.threadFocusedEventRowID = null
-			this.directSetFocusedEventRowID(null)
-			this.focusedEventRowID = null
-		} else if (threadView && this.directSetThreadFocusedEventRowID) {
-			this.directSetThreadFocusedEventRowID(eventRowID)
-			this.threadFocusedEventRowID = eventRowID
-		} else {
-			this.directSetFocusedEventRowID(eventRowID)
-			this.focusedEventRowID = eventRowID
-		}
+	setFocusedEventRowID = (eventRowID: number | null) => {
+		this.directSetFocusedEventRowID(eventRowID)
+		this.focusedEventRowID = eventRowID
 	}
 
 	appendMentionToComposer = (evt: React.MouseEvent<HTMLSpanElement>) => {
