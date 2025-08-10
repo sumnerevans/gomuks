@@ -716,18 +716,20 @@ const MessageComposer = () => {
 			><AttachIcon/>{includeText && "File"}</button>
 		</>
 	}
-	const openButtonsModal = () => {
-		const style: CSSProperties = getEmojiPickerStyle()
-		style.left = style.right
-		delete style.right
+	const openButtonsModal = (evt: React.MouseEvent<HTMLButtonElement>) => {
+		const style: CSSProperties = {
+			bottom: (composerRef.current?.clientHeight ?? 32) + 4 + 24,
+			left: evt.currentTarget.getBoundingClientRect().left - 1,
+		}
 		openModal({
 			content: <div className="context-menu event-context-menu" style={style}>
 				{makeAttachmentButtons(true)}
 			</div>,
 		})
 	}
-	const inlineButtons = state.text === "" || window.innerWidth > 720
-	const showSendButton = canSend || window.innerWidth > 720
+	const collapseButtons = (composerRef.current ? composerRef.current.clientWidth : window.innerWidth - 16) < 600
+	const inlineButtons = state.text === "" || !collapseButtons
+	const showSendButton = canSend || !collapseButtons
 	const disableClearMedia = editing && state.media?.msgtype === "m.sticker"
 	if (tombstoneEvent !== null) {
 		const content = tombstoneEvent.content
