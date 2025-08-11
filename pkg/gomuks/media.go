@@ -357,14 +357,7 @@ func (gmx *Gomuks) DownloadMedia(w http.ResponseWriter, r *http.Request) {
 		_ = os.Remove(tempFile.Name())
 	}()
 
-	resp, err := gmx.Client.Client.Download(mautrix.WithMaxRetries(ctx, 0), mxc)
-	if err != nil {
-		if ctx.Err() != nil {
-			w.WriteHeader(499)
-			return
-		}
-		log.Err(err).Msg("Failed to download media")
-		var httpErr mautrix.HTTPError
+	addErrorToCacheEntry := func(err error) {
 		if cacheEntry == nil {
 			cacheEntry = &database.Media{
 				MXC: mxc,
@@ -379,6 +372,7 @@ func (gmx *Gomuks) DownloadMedia(w http.ResponseWriter, r *http.Request) {
 			cacheEntry.Error.Attempts++
 			cacheEntry.Error.ReceivedAt = jsontime.UnixMilliNow()
 		}
+		var httpErr mautrix.HTTPError
 		if errors.As(err, &httpErr) {
 			if httpErr.WrappedError != nil {
 				cacheEntry.Error.Matrix = ptr.Ptr(ErrBadGateway.WithMessage(httpErr.WrappedError.Error()))
@@ -390,6 +384,14 @@ func (gmx *Gomuks) DownloadMedia(w http.ResponseWriter, r *http.Request) {
 				cacheEntry.Error.Matrix = ptr.Ptr(mautrix.MUnknown.WithMessage("Server returned non-JSON error with status %d", httpErr.Response.StatusCode))
 				cacheEntry.Error.StatusCode = httpErr.Response.StatusCode
 			}
+		} else if errors.Is(err, attachment.HashMismatch) ||
+			errors.Is(err, attachment.UnsupportedVersion) ||
+			errors.Is(err, attachment.UnsupportedAlgorithm) ||
+			errors.Is(err, attachment.InvalidKey) ||
+			errors.Is(err, attachment.InvalidInitVector) ||
+			errors.Is(err, attachment.InvalidHash) {
+			cacheEntry.Error.Matrix = ptr.Ptr(mautrix.MUnknown.WithMessage(err.Error()))
+			cacheEntry.Error.StatusCode = http.StatusInternalServerError
 		} else {
 			cacheEntry.Error.Matrix = ptr.Ptr(ErrBadGateway.WithMessage(err.Error()))
 			cacheEntry.Error.StatusCode = http.StatusBadGateway
@@ -399,6 +401,16 @@ func (gmx *Gomuks) DownloadMedia(w http.ResponseWriter, r *http.Request) {
 			log.Err(err).Msg("Failed to save errored cache entry")
 		}
 		cacheEntry.Error.Write(w)
+	}
+
+	resp, err := gmx.Client.Client.Download(mautrix.WithMaxRetries(ctx, 0), mxc)
+	if err != nil {
+		if ctx.Err() != nil {
+			w.WriteHeader(499)
+			return
+		}
+		log.Err(err).Msg("Failed to download media")
+		addErrorToCacheEntry(err)
 		return
 	}
 	defer func() {
@@ -417,7 +429,7 @@ func (gmx *Gomuks) DownloadMedia(w http.ResponseWriter, r *http.Request) {
 		err = cacheEntry.EncFile.PrepareForDecryption()
 		if err != nil {
 			log.Err(err).Msg("Failed to prepare media for decryption")
-			mautrix.MUnknown.WithMessage(fmt.Sprintf("Failed to prepare media for decryption: %v", err)).Write(w)
+			addErrorToCacheEntry(err)
 			return
 		}
 		reader = cacheEntry.EncFile.DecryptStream(reader)
@@ -441,13 +453,13 @@ func (gmx *Gomuks) DownloadMedia(w http.ResponseWriter, r *http.Request) {
 	cacheEntry.Size, err = io.Copy(tempFile, wrappedReader)
 	if err != nil {
 		log.Err(err).Msg("Failed to copy media to temporary file")
-		mautrix.MUnknown.WithMessage(fmt.Sprintf("Failed to copy media to temp file: %v", err)).Write(w)
+		addErrorToCacheEntry(err)
 		return
 	}
 	err = reader.Close()
 	if err != nil {
 		log.Err(err).Msg("Failed to close media reader")
-		mautrix.MUnknown.WithMessage(fmt.Sprintf("Failed to finish reading media: %v", err)).Write(w)
+		addErrorToCacheEntry(err)
 		return
 	}
 	// This is a hack for Beeper as some buckets (wasabi?) apparently don't respect the content-type header in uploads
