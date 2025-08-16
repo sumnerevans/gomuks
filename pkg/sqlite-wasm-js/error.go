@@ -22,9 +22,9 @@ type Error struct {
 
 func (e *Error) Error() string {
 	if e.Code != e.ExtendedCode && e.ExtendedCode != 0 {
-		return fmt.Sprintf("%s: %d/%d: %s", e.Function, e.Code, e.ExtendedCode, e.Message)
+		return fmt.Sprintf("%s: error %d/%d: %s", e.Function, e.Code, e.ExtendedCode, e.Message)
 	}
-	return fmt.Sprintf("%s: %d: %s", e.Function, e.Code, e.Message)
+	return fmt.Sprintf("%s: error %d: %s", e.Function, e.Code, e.Message)
 }
 
 func (d *Driver) MakeError(c *Conn, funcName string, rc int) error {
