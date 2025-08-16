@@ -26,6 +26,7 @@ import type {
 	LoginFlowsResponse,
 	LoginRequest,
 	ManualPaginationResponse,
+	MediaMessageEventContent,
 	MembershipAction,
 	Mentions,
 	MessageEventContent,
@@ -81,6 +82,7 @@ export interface SendMessageParams {
 export default abstract class RPCClient {
 	public readonly connect: CachedEventDispatcher<ConnectionEvent> = new CachedEventDispatcher()
 	public readonly event: EventDispatcher<RPCEvent> = new EventDispatcher()
+	public readonly rpcMediaUpload: boolean = false
 	protected readonly pendingRequests: Map<number, {
 		resolve: (data: unknown) => void,
 		reject: (err: Error) => void
@@ -88,7 +90,7 @@ export default abstract class RPCClient {
 	#requestIDCounter: number = 1
 
 	protected abstract isConnected: boolean
-	protected abstract send(data: string): void
+	protected abstract send(data: RPCCommand): void
 	public abstract start(): void
 	public abstract stop(): void
 
@@ -125,6 +127,32 @@ export default abstract class RPCClient {
 		return this.#requestIDCounter++
 	}
 
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
+	async uploadMedia(_file: Blob, _filename: string, _encrypt: boolean): Promise<MediaMessageEventContent> {
+		throw new Error("Media upload not supported by this RPC client")
+	}
+
+	async doAuth(signal: AbortSignal): Promise<boolean> {
+		try {
+			const resp = await fetch("_gomuks/auth", {
+				method: "POST",
+				signal,
+			})
+			if (!resp.ok && !signal.aborted) {
+				this.connect.emit({
+					connected: false,
+					reconnecting: false,
+					error: `Authentication failed: ${resp.statusText}`,
+				})
+				return false
+			}
+			return true
+		} catch (err) {
+			this.connect.emit({ connected: false, reconnecting: false, error: `Authentication failed: ${err}` })
+			return false
+		}
+	}
+
 	request<Req, Resp>(command: string, data: Req): CancellablePromise<Resp> {
 		if (!this.isConnected) {
 			return new CancellablePromise((_resolve, reject) => {
@@ -139,11 +167,11 @@ export default abstract class RPCClient {
 				return
 			}
 			this.pendingRequests.set(request_id, { resolve: resolve as ((value: unknown) => void), reject })
-			this.send(JSON.stringify({
+			this.send({
 				command,
 				request_id,
 				data,
-			}))
+			} as RPCCommand)
 		}, this.cancelRequest.bind(this, request_id))
 	}
 
