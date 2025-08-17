@@ -17,7 +17,7 @@ variables:
   GOTOOLCHAIN: local
 
 wasm:
-  image: golang:1.25-alpine3.22
+  image: golang:1.25-alpine
   stage: frontend
   cache:
     paths:
@@ -35,7 +35,7 @@ wasm:
     expire_in: 1 hour
 
 frontend:
-  image: node:22-alpine
+  image: node:24-alpine
   stage: frontend
   cache:
     paths:
@@ -54,7 +54,7 @@ frontend:
   - wasm
 
 deploy wasmuks:
-  image: golang:1.25-alpine3.22
+  image: golang:1.25-alpine
   stage: frontend
   tags:
   - webdeploy
