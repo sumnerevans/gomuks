@@ -63,6 +63,10 @@ func (d *Driver) Open(connectionString string) (conn driver.Conn, retErr error) 
 	readOnly := parseOptionalBool(query.Get("read_only"), false)
 	create := parseOptionalBool(query.Get("create"), true)
 	enableTracing := parseOptionalBool(query.Get("enable_tracing"), false)
+	connectionMode := query.Get("connection_mode")
+	if connectionMode == "" {
+		connectionMode = "opfs-sahpool"
+	}
 	txLock := strings.ToUpper(query.Get("_txlock"))
 	switch txLock {
 	case "", "IMMEDIATE", "DEFERRED", "EXCLUSIVE":
@@ -82,12 +86,26 @@ func (d *Driver) Open(connectionString string) (conn driver.Conn, retErr error) 
 	if enableTracing {
 		constructorFlags += "t"
 	}
-	//fmt.Printf("new OpfsDb(%s, %s)\n", connectionURI.Path, constructorFlags)
-	//db := d.OO1.Get("OpfsDb").New(connectionURI.Path, constructorFlags)
-	//fmt.Printf("new sqlite3.PoolUtil.OpfsSAHPoolDb(%s)\n", connectionURI.Path)
-	db := d.SQLite.Get("PoolUtil").Get("OpfsSAHPoolDb").New(connectionURI.Path)
-	conn, retErr = (&Conn{d: d, ptr: db, cptr: db.Get("pointer"), txlock: txLock}).connectHook(noContextFunc)
-	fmt.Println("Opened SQLite connection")
+	var db js.Value
+	var sahPool bool
+	switch strings.ToLower(connectionMode) {
+	case "memory":
+		db = d.OO1.Get("DB").New(":memory:", constructorFlags)
+	case "opfs":
+		db = d.OO1.Get("OpfsDb").New(connectionURI.Path, constructorFlags)
+	case "opfs-sahpool":
+		db = d.SQLite.Get("PoolUtil").Get("OpfsSAHPoolDb").New(connectionURI.Path)
+		sahPool = true
+	default:
+		return nil, fmt.Errorf("invalid connection mode %q", connectionMode)
+	}
+	conn, retErr = (&Conn{
+		d:       d,
+		ptr:     db,
+		cptr:    db.Get("pointer"),
+		txlock:  txLock,
+		sahpool: sahPool,
+	}).connectHook(noContextFunc)
 	return
 }
 

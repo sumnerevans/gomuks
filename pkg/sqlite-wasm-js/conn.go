@@ -27,7 +27,8 @@ type Conn struct {
 
 	closed atomic.Bool
 
-	txlock string
+	txlock  string
+	sahpool bool
 }
 
 var (
@@ -70,13 +71,16 @@ func (c *Conn) connectHook(ctx context.Context) (dc driver.Conn, err error) {
 	if err != nil {
 		return
 	}
-	_, err = c.ExecContext(ctx, "PRAGMA journal_mode = WAL", nil)
-	if err != nil {
-		return
-	}
-	_, err = c.ExecContext(ctx, "PRAGMA synchronous = NORMAL", nil)
-	if err != nil {
-		return
+	if c.sahpool {
+		// WAL mode is only useful when using the SAH pool, so don't enable it otherwise
+		_, err = c.ExecContext(ctx, "PRAGMA journal_mode = WAL", nil)
+		if err != nil {
+			return
+		}
+		_, err = c.ExecContext(ctx, "PRAGMA synchronous = NORMAL", nil)
+		if err != nil {
+			return
+		}
 	}
 	_, err = c.ExecContext(ctx, "PRAGMA busy_timeout = 10000", nil)
 	if err != nil {
