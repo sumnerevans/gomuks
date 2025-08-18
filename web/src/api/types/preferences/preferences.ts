@@ -224,6 +224,7 @@ export const preferences = {
 		description: "Whether to enable bandwidth saving features. Refresh to apply changes.",
 		allowedContexts: globalDeviceSpecific,
 		defaultValue: false,
+		hidden: window.gomuksDesktop || window.gomuksWebWasm,
 	}),
 	web_push: new Preference<boolean>({
 		displayName: "Web push notifications",
