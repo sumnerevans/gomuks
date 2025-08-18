@@ -28,10 +28,9 @@ import { LightboxWrapper } from "./ui/modal"
 import { useEventAsState } from "./util/eventdispatcher.ts"
 
 function makeRPCClient(): RPCClient {
-	if (window.wails || window._wails || navigator.userAgent.includes("wails.io")) {
+	if (window.gomuksDesktop) {
 		return new WailsClient()
-	}
-	if (import.meta.env.PROD && !document.querySelector("meta[name=gomuks-frontend-etag]")) {
+	} else if (window.gomuksWebWasm) {
 		return new WasmClient()
 	}
 	const lb = getLocalStoragePreferences("global_prefs", () => {}).low_bandwidth

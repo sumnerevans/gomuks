@@ -191,6 +191,7 @@ export default class WSClient extends RPCClient {
 		} else if (parsed.command === "run_id") {
 			console.log("Received run ID", parsed.data)
 			this.#resumeRunID = parsed.data.run_id
+			window.vapidPublicKey = parsed.data.vapid_key
 			checkUpdate(parsed.data.etag)
 		}
 		this.onCommand(parsed)

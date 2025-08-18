@@ -456,6 +456,9 @@ const SettingsView = ({ room }: SettingsViewProps) => {
 			} else {
 				(client.store.localPreferenceCache[key] as PreferenceValueType) = value
 			}
+			if (key === "web_push") {
+				client.registerWebPush()
+			}
 		} else if (context === PreferenceContext.RoomAccount) {
 			client.rpc.setAccountData("fi.mau.gomuks.preferences", {
 				...room.serverPreferenceCache,
@@ -559,7 +562,7 @@ const SettingsView = ({ room }: SettingsViewProps) => {
 			</thead>
 			<tbody>
 				{Object.entries(preferences).map(([key, pref]) =>
-					<PreferenceRow
+					!pref.hidden ? <PreferenceRow
 						key={key}
 						name={key as keyof Preferences}
 						pref={pref}
@@ -568,7 +571,7 @@ const SettingsView = ({ room }: SettingsViewProps) => {
 						globalLocal={globalLocal[key as keyof Preferences]}
 						roomServer={roomServer[key as keyof Preferences]}
 						roomLocal={roomLocal[key as keyof Preferences]}
-					/>)}
+					/> : null)}
 			</tbody>
 		</table>
 		<CustomCSSInput setPref={setPref} room={room} />

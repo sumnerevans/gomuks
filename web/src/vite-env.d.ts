@@ -21,5 +21,8 @@ declare global {
 		openModal: openModal
 		openNestableModal: openModal
 		gomuksAndroid?: true
+		gomuksDesktop?: boolean
+		gomuksWebWasm?: boolean
+		vapidPublicKey?: string
 	}
 }

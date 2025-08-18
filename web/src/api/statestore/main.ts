@@ -323,7 +323,12 @@ export class StateStore {
 				}
 			}
 
-			if (window.Notification?.permission === "granted" && !focused.current && data.notifications) {
+			if (
+				window.Notification?.permission === "granted"
+				&& !focused.current
+				&& data.notifications
+				&& !this.localPreferenceCache.web_push
+			) {
 				for (const notification of data.notifications) {
 					this.showNotification(room, notification.event_rowid, notification.sound)
 				}

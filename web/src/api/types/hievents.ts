@@ -143,6 +143,7 @@ export interface InitCompleteEvent extends BaseRPCCommand<void> {
 export interface RunData {
 	run_id: string
 	etag: string
+	vapid_key: string
 }
 
 export interface RunIDEvent extends BaseRPCCommand<RunData> {

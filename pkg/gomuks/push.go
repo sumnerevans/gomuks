@@ -30,6 +30,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/SherClockHolmes/webpush-go"
 	"github.com/rs/zerolog"
 	"go.mau.fi/util/jsontime"
 	"go.mau.fi/util/ptr"
@@ -187,6 +188,7 @@ func (gmx *Gomuks) SendPushNotification(ctx context.Context, pushRegs []*databas
 			}
 			encrypted = true
 		}
+		var shouldDelete bool
 		switch reg.Type {
 		case database.PushTypeFCM:
 			if !encrypted {
@@ -201,14 +203,22 @@ func (gmx *Gomuks) SendPushNotification(ctx context.Context, pushRegs []*databas
 				log.Err(err).Str("device_id", reg.DeviceID).Msg("Failed to unmarshal FCM token")
 				continue
 			}
-			shouldDelete := gmx.SendFCMPush(ctx, token, devicePayload, notif.HasImportant)
-			if shouldDelete {
-				log.Debug().Str("device_id", reg.DeviceID).Msg("Expiring push registration as gateway returned 404")
-				reg.Expiration = jsontime.UnixNow()
-				err = gmx.Client.DB.PushRegistration.Put(ctx, reg)
-				if err != nil {
-					log.Err(err).Msg("Failed to mark push registration as expired")
-				}
+			shouldDelete = gmx.SendFCMPush(ctx, token, devicePayload, notif.HasImportant)
+		case database.PushTypeWeb:
+			var sub webpush.Subscription
+			err = json.Unmarshal(reg.Data, &sub)
+			if err != nil {
+				log.Err(err).Str("device_id", reg.DeviceID).Msg("Failed to unmarshal web push subscription")
+				continue
+			}
+			shouldDelete = gmx.SendWebPush(ctx, &sub, devicePayload, notif.HasImportant)
+		}
+		if shouldDelete {
+			log.Debug().Str("device_id", reg.DeviceID).Msg("Expiring push registration as gateway returned 404")
+			reg.Expiration = jsontime.UnixNow()
+			err = gmx.Client.DB.PushRegistration.Put(ctx, reg)
+			if err != nil {
+				log.Err(err).Msg("Failed to mark push registration as expired")
 			}
 		}
 	}
@@ -261,11 +271,43 @@ func (gmx *Gomuks) SendFCMPush(ctx context.Context, token string, payload []byte
 			Int("status", resp.StatusCode).
 			Str("push_token", token).
 			Msg("Non-200 status while sending push request")
-		shouldDelete = resp.StatusCode == http.StatusNotFound
+		shouldDelete = resp.StatusCode == http.StatusNotFound || resp.StatusCode == http.StatusGone
 	} else {
 		zerolog.Ctx(ctx).Trace().
 			Int("status", resp.StatusCode).
 			Str("push_token", token).
+			Msg("Sent push request")
+	}
+	if resp != nil {
+		_ = resp.Body.Close()
+	}
+	return
+}
+
+func (gmx *Gomuks) SendWebPush(ctx context.Context, sub *webpush.Subscription, payload []byte, important bool) (shouldDelete bool) {
+	if !important {
+		// Dismissing notifications isn't supported currently
+		return
+	}
+	resp, err := webpush.SendNotificationWithContext(ctx, payload, sub, &webpush.Options{
+		HTTPClient:      pushClient,
+		Subscriber:      "https://gomuks.app",
+		Topic:           "", // TODO use topics for collapsing pending notifications on read receipt?
+		VAPIDPublicKey:  gmx.Config.Push.VAPIDPublicKey,
+		VAPIDPrivateKey: gmx.Config.Push.VAPIDPrivateKey,
+	})
+	if err != nil {
+		zerolog.Ctx(ctx).Err(err).Str("endpoint", sub.Endpoint).Msg("Failed to send push request")
+	} else if resp.StatusCode != http.StatusOK {
+		zerolog.Ctx(ctx).Error().
+			Int("status", resp.StatusCode).
+			Str("endpoint", sub.Endpoint).
+			Msg("Non-200 status while sending push request")
+		shouldDelete = resp.StatusCode == http.StatusNotFound || resp.StatusCode == http.StatusGone
+	} else {
+		zerolog.Ctx(ctx).Trace().
+			Int("status", resp.StatusCode).
+			Str("endpoint", sub.Endpoint).
 			Msg("Sent push request")
 	}
 	if resp != nil {

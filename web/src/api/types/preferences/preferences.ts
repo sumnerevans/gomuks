@@ -225,6 +225,13 @@ export const preferences = {
 		allowedContexts: globalDeviceSpecific,
 		defaultValue: false,
 	}),
+	web_push: new Preference<boolean>({
+		displayName: "Web push notifications",
+		description: "Whether to enable web push for background notifications. Refresh to apply changes.",
+		allowedContexts: globalDeviceSpecific,
+		defaultValue: false,
+		hidden: window.gomuksAndroid || window.gomuksDesktop || window.gomuksWebWasm,
+	}),
 } as const
 
 export const existingPreferenceKeys = new Set(Object.keys(preferences))

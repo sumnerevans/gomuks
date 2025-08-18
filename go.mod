@@ -5,6 +5,7 @@ go 1.24.0
 toolchain go1.25.0
 
 require (
+	github.com/SherClockHolmes/webpush-go v1.4.0
 	github.com/alecthomas/chroma/v2 v2.18.0
 	github.com/buckket/go-blurhash v1.1.0
 	github.com/chzyer/readline v1.5.1
@@ -37,6 +38,7 @@ require (
 	filippo.io/edwards25519 v1.1.0 // indirect
 	github.com/coreos/go-systemd/v22 v22.5.0 // indirect
 	github.com/dlclark/regexp2 v1.11.5 // indirect
+	github.com/golang-jwt/jwt/v5 v5.2.1 // indirect
 	github.com/mattn/go-colorable v0.1.14 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/petermattis/goid v0.0.0-20250813065127-a731cc31b4fe // indirect

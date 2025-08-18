@@ -23,7 +23,9 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/SherClockHolmes/webpush-go"
 	"github.com/rs/zerolog"
+	"go.mau.fi/util/exerrors"
 	"go.mau.fi/util/ptr"
 	"go.mau.fi/util/random"
 	"go.mau.fi/zeroconfig"
@@ -44,7 +46,9 @@ type MatrixConfig struct {
 }
 
 type PushConfig struct {
-	FCMGateway string `yaml:"fcm_gateway"`
+	FCMGateway      string `yaml:"fcm_gateway"`
+	VAPIDPrivateKey string `yaml:"vapid_private_key"`
+	VAPIDPublicKey  string `yaml:"vapid_public_key"`
 }
 
 type MediaConfig struct {
@@ -152,6 +156,10 @@ func (gmx *Gomuks) LoadConfig() error {
 	}
 	if gmx.Config.Push.FCMGateway == "" {
 		gmx.Config.Push.FCMGateway = "https://push.gomuks.app"
+		changed = true
+	}
+	if gmx.Config.Push.VAPIDPrivateKey == "" {
+		gmx.Config.Push.VAPIDPrivateKey, gmx.Config.Push.VAPIDPublicKey = exerrors.Must2(webpush.GenerateVAPIDKeys())
 		changed = true
 	}
 	if gmx.Config.Media.ThumbnailSize == 0 {

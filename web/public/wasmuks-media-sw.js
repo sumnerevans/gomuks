@@ -13,12 +13,8 @@
 //
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
-self.addEventListener("install", () => {
-	self.skipWaiting()
-})
-self.addEventListener("activate", (event) => {
-	event.waitUntil(clients.claim())
-})
+self.addEventListener("install", () => self.skipWaiting())
+self.addEventListener("activate", (event) => event.waitUntil(clients.claim()))
 
 const mediaCache = caches.open("wasmuks-media-v1")
 const bc = new BroadcastChannel("wasmuks-media-download")

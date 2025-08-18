@@ -68,6 +68,11 @@ func (gmx *Gomuks) CreateAPIRouter() http.Handler {
 	)
 }
 
+const metaTagsTemplate = `
+	<meta name="gomuks-frontend-etag" content="%s">
+	<meta name="gomuks-vapid-key" content="%s">
+`
+
 func (gmx *Gomuks) StartServer() {
 	api := gmx.CreateAPIRouter()
 	router := http.NewServeMux()
@@ -93,10 +98,15 @@ func (gmx *Gomuks) StartServer() {
 				data, err := io.ReadAll(indexFile)
 				_ = indexFile.Close()
 				if err == nil {
+					metaTags := fmt.Sprintf(
+						metaTagsTemplate,
+						html.EscapeString(gmx.frontendETag),
+						gmx.Config.Push.VAPIDPublicKey,
+					)
 					gmx.indexWithETag = bytes.Replace(
 						data,
 						[]byte("<!-- etag placeholder -->"),
-						[]byte(fmt.Sprintf(`<meta name="gomuks-frontend-etag" content="%s">`, html.EscapeString(gmx.frontendETag))),
+						[]byte(metaTags),
 						1,
 					)
 				}

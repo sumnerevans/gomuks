@@ -139,6 +139,70 @@ export default class Client {
 		})
 	}
 
+	registerWebPush = (refresh = false) => {
+		if (!this.store.localPreferenceCache.web_push) {
+			navigator.serviceWorker.getRegistration("pushmuks").then(reg => {
+				if (reg?.active?.scriptURL.endsWith("/pushmuks-sw.js")) {
+					console.debug("Unregistering push service worker")
+					reg.pushManager.getSubscription().then(sub => sub?.unsubscribe().then(
+						ok => console.info("Push registration unsubscribed:", ok),
+						err => console.error("Failed to unsubscribe push registration", err),
+					)).finally(() => reg.unregister().then(
+						ok => console.info("Push service worker unregistered:", ok),
+						err => console.error("Failed to unregister push service worker", err),
+					))
+					if (localStorage.push_device_id) {
+						this.rpc.registerPush({
+							type: "web",
+							device_id: localStorage.push_device_id,
+							data: {},
+							expiration: 1,
+						})
+					}
+				}
+			})
+			return
+		}
+		if (!localStorage.push_device_id) {
+			localStorage.push_device_id = crypto.randomUUID()
+		}
+		navigator.serviceWorker.register("/pushmuks-sw.js", { scope: "pushmuks" }).then(async reg => {
+			let sub: PushSubscription | null
+			try {
+				if (refresh) {
+					sub = await reg.pushManager.getSubscription()
+				} else {
+					const applicationServerKey = window.vapidPublicKey || (
+						document.querySelector("meta[name=gomuks-vapid-key]") as HTMLMetaElement
+					)?.content
+					sub = await reg.pushManager.subscribe({
+						userVisibleOnly: true,
+						applicationServerKey,
+					})
+				}
+			} catch (err) {
+				console.error("Failed to subscribe to web push", err)
+				this.store.localPreferenceCache.web_push = false
+				return
+			}
+			if (!sub) {
+				console.warn("No push subscription found, disabling web push")
+				this.store.localPreferenceCache.web_push = false
+				return
+			}
+			await this.rpc.registerPush({
+				type: "web",
+				device_id: localStorage.push_device_id,
+				data: sub.toJSON(),
+				expiration: sub.expirationTime ?? undefined,
+			})
+			console.info("Push service worker registered", reg)
+		}, err => {
+			console.error("Failed to register push service worker", err)
+			this.store.localPreferenceCache.web_push = false
+		})
+	}
+
 	registerURIHandler = () => {
 		navigator.registerProtocolHandler("matrix", "#/uri/%s")
 	}
@@ -184,6 +248,9 @@ export default class Client {
 		if (ev.command === "client_state") {
 			this.state.emit(ev.data)
 			this.store.userID = ev.data.is_logged_in ? ev.data.user_id : ""
+			if (ev.data.is_verified) {
+				this.registerWebPush(true)
+			}
 		} else if (ev.command === "sync_status") {
 			this.syncStatus.emit(ev.data)
 		} else if (ev.command === "init_complete") {

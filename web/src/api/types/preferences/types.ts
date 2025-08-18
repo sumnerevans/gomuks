@@ -76,6 +76,7 @@ interface PreferenceFields<T extends PreferenceValueType = PreferenceValueType> 
 	defaultValue: T
 	description: string
 	allowedValues?: readonly T[]
+	hidden?: boolean
 }
 
 export class Preference<T extends PreferenceValueType = PreferenceValueType> {
@@ -84,6 +85,7 @@ export class Preference<T extends PreferenceValueType = PreferenceValueType> {
 	public readonly defaultValue: T
 	public readonly description?: string
 	public readonly allowedValues?: readonly T[]
+	public readonly hidden: boolean
 
 	constructor(fields: PreferenceFields<T>) {
 		this.displayName = fields.displayName
@@ -91,5 +93,6 @@ export class Preference<T extends PreferenceValueType = PreferenceValueType> {
 		this.defaultValue = fields.defaultValue
 		this.description = fields.description ?? ""
 		this.allowedValues = fields.allowedValues
+		this.hidden = fields.hidden ?? false
 	}
 }

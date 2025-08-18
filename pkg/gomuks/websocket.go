@@ -257,8 +257,9 @@ func (gmx *Gomuks) HandleWebsocket(w http.ResponseWriter, r *http.Request) {
 	initErr := writeCmd(ctx, conn, fp, &jsoncmd.Container[*jsoncmd.RunData]{
 		Command: jsoncmd.EventRunID,
 		Data: &jsoncmd.RunData{
-			RunID: strconv.FormatInt(runID, 10),
-			ETag:  gmx.frontendETag,
+			RunID:    strconv.FormatInt(runID, 10),
+			ETag:     gmx.frontendETag,
+			VAPIDKey: gmx.Config.Push.VAPIDPublicKey,
 		},
 	})
 	if initErr != nil {
