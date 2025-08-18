@@ -14,6 +14,8 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+//go:build !js
+
 package gomuks
 
 import (
@@ -64,6 +66,8 @@ var pushClient = &http.Client{
 	},
 	Timeout: 60 * time.Second,
 }
+
+var DisablePush = false
 
 func (gmx *Gomuks) SendPushNotifications(sync *jsoncmd.SyncComplete) {
 	var ctx context.Context

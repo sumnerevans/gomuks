@@ -116,7 +116,7 @@ func main() {
 	gmx.EventBuffer.Subscribe(0, nil, func(evt *gomuks.BufferedEvent) {
 		postMessage(evt.Command, evt.RequestID, evt.Data)
 	})
-	gmx.DisablePush = true
+	gomuks.DisablePush = true
 	js.Global().Call("addEventListener", "message", js.FuncOf(jsMessageListener))
 	js.Global().Set("meowDownloadMedia", js.FuncOf(jsDownloadCallback))
 	postMessage("wasm-connection", 0, json.RawMessage(`{"connected":true,"reconnecting":false,"error":null}`))
