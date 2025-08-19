@@ -21,17 +21,20 @@ self.addEventListener("push", evt => {
 		return
 	}
 	const data = evt.data.json()
-	evt.waitUntil(Promise.all(data.messages.map(notif => self.registration.showNotification(notif.room_name, {
-		body: notif.text,
-		timestamp: notif.timestamp,
-		silent: !notif.sound,
-		badge: "gomuks.png",
-		icon: notif.sender.avatar ? `${notif.sender.avatar}&image_auth=${data.image_auth}` : undefined,
-		image: notif.image ? `${notif.image}&image_auth=${data.image_auth}` : undefined,
-		data: {
-			url: `#/uri/${encodeURIComponent(`matrix:roomid/${notif.room_id.slice(1)}/e/${notif.event_id.slice(1)}`)}`
+	evt.waitUntil(Promise.all(data.messages.map(notif => self.registration.showNotification(
+		notif.room_name === notif.sender.name ? notif.sender.name : `${notif.sender.name} (${notif.room_name})`,
+		{
+			body: notif.text,
+			timestamp: notif.timestamp,
+			silent: !notif.sound,
+			badge: "gomuks.png",
+			icon: notif.sender.avatar ? `${notif.sender.avatar}&image_auth=${data.image_auth}` : undefined,
+			image: notif.image ? `${notif.image}&image_auth=${data.image_auth}` : undefined,
+			data: {
+				url: `#/uri/${encodeURIComponent(`matrix:roomid/${notif.room_id.slice(1)}/e/${notif.event_id.slice(1)}`)}`
+			},
 		},
-	}))))
+	))))
 })
 
 self.addEventListener("notificationclick", evt => {
