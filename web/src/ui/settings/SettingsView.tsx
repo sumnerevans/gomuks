@@ -112,7 +112,7 @@ const PreferenceRow = ({
 		inheritedVal: PreferenceValueType,
 	) => {
 		if (!pref.allowedContexts.includes(context)) {
-			return null
+			return <div className="empty-cell" />
 		}
 		if (prefType === "boolean") {
 			return <BooleanPreferenceCell
@@ -146,13 +146,13 @@ const PreferenceRow = ({
 		}
 	}
 	let inherit: PreferenceValueType
-	return <tr>
-		<th title={pref.description}>{pref.displayName}</th>
-		<td>{makeContentCell(PreferenceContext.Account, globalServer, inherit = pref.defaultValue)}</td>
-		<td>{makeContentCell(PreferenceContext.Device, globalLocal, inherit = globalServer ?? inherit)}</td>
-		<td>{makeContentCell(PreferenceContext.RoomAccount, roomServer, inherit = globalLocal ?? inherit)}</td>
-		<td>{makeContentCell(PreferenceContext.RoomDevice, roomLocal, inherit = roomServer ?? inherit)}</td>
-	</tr>
+	return <>
+		<div className="name" title={pref.description}>{pref.displayName}</div>
+		{makeContentCell(PreferenceContext.Account, globalServer, inherit = pref.defaultValue)}
+		{makeContentCell(PreferenceContext.Device, globalLocal, inherit = globalServer ?? inherit)}
+		{makeContentCell(PreferenceContext.RoomAccount, roomServer, inherit = globalLocal ?? inherit)}
+		{makeContentCell(PreferenceContext.RoomDevice, roomLocal, inherit = roomServer ?? inherit)}
+	</>
 }
 
 interface SettingsViewProps {
@@ -550,30 +550,24 @@ const SettingsView = ({ room }: SettingsViewProps) => {
 				</div>
 			</div>
 		</div>
-		<table>
-			<thead>
-				<tr>
-					<th>Name</th>
-					<th>Account</th>
-					<th>Device</th>
-					<th>Room (account)</th>
-					<th>Room (device)</th>
-				</tr>
-			</thead>
-			<tbody>
-				{Object.entries(preferences).map(([key, pref]) =>
-					!pref.hidden ? <PreferenceRow
-						key={key}
-						name={key as keyof Preferences}
-						pref={pref}
-						setPref={setPref}
-						globalServer={globalServer[key as keyof Preferences]}
-						globalLocal={globalLocal[key as keyof Preferences]}
-						roomServer={roomServer[key as keyof Preferences]}
-						roomLocal={roomLocal[key as keyof Preferences]}
-					/> : null)}
-			</tbody>
-		</table>
+		<div className="preference-table">
+			<div className="name">Name</div>
+			<div className="name">Account</div>
+			<div className="name">Device</div>
+			<div className="name">Room (account)</div>
+			<div className="name">Room (device)</div>
+			{Object.entries(preferences).map(([key, pref]) =>
+				!pref.hidden ? <PreferenceRow
+					key={key}
+					name={key as keyof Preferences}
+					pref={pref}
+					setPref={setPref}
+					globalServer={globalServer[key as keyof Preferences]}
+					globalLocal={globalLocal[key as keyof Preferences]}
+					roomServer={roomServer[key as keyof Preferences]}
+					roomLocal={roomLocal[key as keyof Preferences]}
+				/> : null)}
+		</div>
 		<CustomCSSInput setPref={setPref} room={room} />
 		<AppliedSettingsView room={room} />
 		<hr/>
