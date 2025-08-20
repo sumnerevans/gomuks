@@ -97,6 +97,7 @@ div.settings-view {
 		> div.vscode-wrapper {
 			position: fixed;
 			inset: 0;
+			top: var(--window-top-margin);
 			z-index: 10;
 			background-color: var(--background-color);
 
