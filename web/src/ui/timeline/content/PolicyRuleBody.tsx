@@ -24,6 +24,12 @@ const PolicyRuleBody = ({ event, sender }: EventContentProps) => {
 	const prevContent = event.unsigned.prev_content as PolicyRuleContent | undefined
 	const mainScreen = use(MainScreenContext)
 
+	const oldPolicyIsValid = Boolean(
+		(prevContent?.entity || prevContent?.["org.matrix.msc4205.hashes"]?.sha256) && prevContent?.recommendation,
+	)
+	const newPolicyIsValid = Boolean(
+		(content.entity || content["org.matrix.msc4205.hashes"]?.sha256) && content.recommendation,
+	)
 	const entity = ensureString(content.entity ?? prevContent?.entity)
 	const hashedEntity = ensureString(content["org.matrix.msc4205.hashes"]?.sha256
 		?? prevContent?.["org.matrix.msc4205.hashes"]?.sha256)
@@ -59,7 +65,7 @@ const PolicyRuleBody = ({ event, sender }: EventContentProps) => {
 	} else if (recommendation === "org.matrix.msc4204.takedown") {
 		recommendationElement = "takedown"
 	}
-	const action = prevContent ? ((content.entity && content.recommendation) ? "updated" : "removed") : "added"
+	const action = oldPolicyIsValid ? (newPolicyIsValid ? "updated" : "removed") : "added"
 	return <div className="policy-body">
 		{getDisplayname(event.sender, sender?.content)} {action} a {recommendationElement} rule
 		for {matchingWord} <code>{entityElement}</code>
