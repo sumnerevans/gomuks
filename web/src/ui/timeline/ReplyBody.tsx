@@ -13,7 +13,7 @@
 //
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
-import { use } from "react"
+import { MouseEvent, use } from "react"
 import { getAvatarThumbnailURL, getUserColorIndex } from "@/api/media.ts"
 import {
 	applyPerMessageSender,
@@ -28,7 +28,7 @@ import ClientContext from "../ClientContext.ts"
 import MainScreenContext from "../MainScreenContext.ts"
 import { RoomContextData } from "../roomview/roomcontext.ts"
 import TooltipButton from "../util/TooltipButton.tsx"
-import { jumpToEvent } from "../util/jumpToEvent.tsx"
+import { jumpToEvent, jumpToVisibleEvent } from "../util/jumpToEvent.tsx"
 import { ContentErrorBoundary, getBodyType, getPerMessageProfile } from "./content"
 import CloseIcon from "@/icons/close.svg?react"
 import EditIcon from "@/icons/edit.svg?react"
@@ -113,13 +113,13 @@ export const ReplyBody = ({
 		userColorIndex = getUserColorIndex(threadRoot)
 	}
 	classNames.push(`sender-color-${userColorIndex}`)
-	const onClick = () => {
+	const onClick = (evt: MouseEvent<HTMLQuoteElement>) => {
 		if (isThread && threadRoot) {
 			mainScreen.setRightPanel({
 				type: "thread",
 				threadRoot,
 			})
-		} else {
+		} else if (!jumpToVisibleEvent(event.event_id, evt.currentTarget.closest(".timeline-list"))) {
 			jumpToEvent(roomCtx, event.event_id)
 		}
 	}
