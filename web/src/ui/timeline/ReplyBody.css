@@ -41,6 +41,12 @@ blockquote.reply-body {
 		}
 	}
 
+	&.timeline-thread-msg {
+		grid-area: content;
+		border-left-width: 4px;
+		margin: 0;
+	}
+
 	pre {
 		display: inline;
 

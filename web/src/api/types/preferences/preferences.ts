@@ -132,6 +132,12 @@ export const preferences = {
 		allowedContexts: anyContext,
 		defaultValue: false,
 	}),
+	small_threads: new Preference<boolean>({
+		displayName: "Compact thread messages",
+		description: "Whether thread messages should only be shown as a single line in the main timeline.",
+		allowedContexts: anyContext,
+		defaultValue: false,
+	}),
 	show_date_separators: new Preference<boolean>({
 		displayName: "Show date separators",
 		description: "Whether messages in different days should have a date separator between them in the room timeline.",

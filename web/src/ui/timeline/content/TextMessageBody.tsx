@@ -84,6 +84,23 @@ function importMath() {
 	)
 }
 
+function fallbackBodyForMedia(msgtype: string): string {
+	switch (msgtype) {
+	case "m.image":
+		return "Sent an image"
+	case "m.audio":
+		return "Sent an audio file"
+	case "m.video":
+		return "Sent a video"
+	case "m.file":
+		return "Sent a file"
+	case "m.location":
+		return "Sent a location"
+	default:
+		return ""
+	}
+}
+
 const TextMessageBody = ({ event, sender }: EventContentProps) => {
 	const content = event.content as MessageEventContent
 	const classNames = ["message-text"]
@@ -114,7 +131,7 @@ const TextMessageBody = ({ event, sender }: EventContentProps) => {
 		/>
 	}
 	return <div className={classNames.join(" ")} data-event-sender={eventSenderName}>
-		{ensureString(content.body)}
+		{ensureString(content.body) || fallbackBodyForMedia(content.msgtype)}
 	</div>
 }
 

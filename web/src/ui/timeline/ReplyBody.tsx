@@ -44,6 +44,7 @@ interface ReplyBodyProps {
 	isThread: boolean
 	threadRoot?: EventID
 	small?: boolean
+	timelineThreadMsg?: boolean
 	isEditing?: boolean
 	onClose?: (evt: React.MouseEvent) => void
 	isSilent?: boolean
@@ -78,7 +79,7 @@ export const ReplyIDBody = ({ roomCtx, eventID, isThread, threadRoot, small }: R
 }
 
 export const ReplyBody = ({
-	roomCtx, event, onClose, isThread, threadRoot, isEditing, small,
+	roomCtx, event, onClose, isThread, threadRoot, isEditing, small, timelineThreadMsg,
 	isSilent, onSetSilent,
 	isExplicitInThread, onSetExplicitInThread,
 	startNewThread, onSetStartNewThread,
@@ -106,7 +107,11 @@ export const ReplyBody = ({
 	}
 	const perMessageSender = getPerMessageProfile(event)
 	const renderMemberEvtContent = applyPerMessageSender(memberEvtContent, perMessageSender)
-	const userColorIndex = getUserColorIndex(perMessageSender?.id ?? event.sender)
+	let userColorIndex = getUserColorIndex(perMessageSender?.id ?? event.sender)
+	if (timelineThreadMsg && threadRoot) {
+		classNames.push("timeline-thread-msg")
+		userColorIndex = getUserColorIndex(threadRoot)
+	}
 	classNames.push(`sender-color-${userColorIndex}`)
 	const onClick = () => {
 		if (isThread && threadRoot) {
@@ -121,7 +126,7 @@ export const ReplyBody = ({
 	return <blockquote className={classNames.join(" ")} onClick={onClick}>
 		{small && <div className="reply-spine"/>}
 		<div className="reply-sender">
-			<div
+			{!timelineThreadMsg && <div
 				className="sender-avatar"
 				title={perMessageSender ? `${perMessageSender.id} via ${event.sender}` : event.sender}
 			>
@@ -131,7 +136,7 @@ export const ReplyBody = ({
 					src={getAvatarThumbnailURL(perMessageSender?.id ?? event.sender, renderMemberEvtContent)}
 					alt=""
 				/>
-			</div>
+			</div>}
 			<span
 				className={`event-sender sender-color-${userColorIndex}`}
 				title={perMessageSender ? perMessageSender.id : event.sender}
