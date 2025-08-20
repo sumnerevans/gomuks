@@ -38,7 +38,7 @@ div.overlay {
 div.lightbox {
 	> div.controls {
 		position: fixed;
-		top: .5rem;
+		top: calc(.5rem + var(--window-top-margin));
 		right: .5rem;
 		display: flex;
 		z-index: 1;
