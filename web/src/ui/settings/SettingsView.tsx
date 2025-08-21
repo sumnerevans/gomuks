@@ -551,7 +551,7 @@ const SettingsView = ({ room }: SettingsViewProps) => {
 			</div>
 		</div>
 		<div className="preference-table">
-			<div className="name">Name</div>
+			<div className="name" style={{ height: "2.5rem" }}>Name</div>
 			<div className="name">Account</div>
 			<div className="name">Device</div>
 			<div className="name">Room (account)</div>
