@@ -143,4 +143,8 @@ blockquote.reply-body {
 			}
 		}
 	}
+
+	> div.event-reactions {
+		margin-bottom: 0;
+	}
 }

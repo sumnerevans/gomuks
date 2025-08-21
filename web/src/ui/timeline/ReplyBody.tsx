@@ -13,7 +13,7 @@
 //
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
-import { MouseEvent, use } from "react"
+import React, { JSX, MouseEvent, use } from "react"
 import { getAvatarThumbnailURL, getUserColorIndex } from "@/api/media.ts"
 import {
 	applyPerMessageSender,
@@ -45,6 +45,7 @@ interface ReplyBodyProps {
 	threadRoot?: EventID
 	small?: boolean
 	timelineThreadMsg?: boolean
+	reactions?: JSX.Element | null
 	isEditing?: boolean
 	onClose?: (evt: React.MouseEvent) => void
 	isSilent?: boolean
@@ -79,7 +80,8 @@ export const ReplyIDBody = ({ roomCtx, eventID, isThread, threadRoot, small }: R
 }
 
 export const ReplyBody = ({
-	roomCtx, event, onClose, isThread, threadRoot, isEditing, small, timelineThreadMsg,
+	roomCtx, event, onClose, isThread, threadRoot, isEditing, small,
+	timelineThreadMsg, reactions,
 	isSilent, onSetSilent,
 	isExplicitInThread, onSetExplicitInThread,
 	startNewThread, onSetStartNewThread,
@@ -195,5 +197,6 @@ export const ReplyBody = ({
 		<ContentErrorBoundary>
 			<BodyType room={room} event={event} sender={memberEvt}/>
 		</ContentErrorBoundary>
+		{reactions}
 	</blockquote>
 }

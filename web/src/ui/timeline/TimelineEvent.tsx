@@ -361,6 +361,7 @@ const TimelineEvent = ({
 			isThread={true}
 			threadRoot={threadRoot}
 			timelineThreadMsg={true}
+			reactions={evt.reactions ? <EventReactions reactions={evt.reactions} onRereact={onRereact} /> : null}
 		/> : <div className="event-content">
 			{replyInMessage}
 			<ContentErrorBoundary>

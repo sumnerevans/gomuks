@@ -246,7 +246,7 @@ span.event-sender {
 	&.sender-color-9 { color: var(--sender-color-9); }
 }
 
-div.event-content > div.event-reactions {
+div.event-reactions {
 	display: flex;
 	flex-wrap: wrap;
 	gap: .25rem;
