@@ -62,6 +62,10 @@ const RoomView = ({ room, rightPanelResizeHandle, rightPanel }: RoomViewProps) =
 			}
 		}
 	}, [room, roomContextData])
+	const hasRightPanel = !!rightPanel
+	useEffect(() => {
+		roomContextData.scrollToBottom()
+	}, [roomContextData, hasRightPanel])
 	const onClick = (evt: React.MouseEvent<HTMLDivElement>) => {
 		if (roomContextData.focusedEventRowID) {
 			roomContextData.setFocusedEventRowID(null)
@@ -87,7 +91,7 @@ const RoomView = ({ room, rightPanelResizeHandle, rightPanel }: RoomViewProps) =
 			</ErrorBoundary>
 		</div>
 		{rightPanelResizeHandle}
-		{rightPanel && <RightPanel {...rightPanel}/>}
+		{hasRightPanel ? <RightPanel {...rightPanel}/> : null}
 	</RoomContext>
 }
 
