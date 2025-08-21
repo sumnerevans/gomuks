@@ -299,7 +299,8 @@ const TimelineEvent = ({
 		data-event-id={evt.event_id}
 		className={wrapperClassNames.join(" ")}
 		onContextMenu={onContextMenu}
-		onClick={!disableMenu && viewType !== "edit-history" && isMobileDevice ? onClick : undefined}
+		onClick={!disableMenu && viewType !== "edit-history" && isMobileDevice && !isSmallThreadMessage
+			? onClick : undefined}
 	>
 		{!disableMenu && (!isMobileDevice || forceContextMenuOnMobile) && <div
 			className={`context-menu-container ${forceContextMenuOpen ? "force-open" : ""}`}
