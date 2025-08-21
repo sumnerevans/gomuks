@@ -136,7 +136,7 @@ export const preferences = {
 		displayName: "Compact thread messages",
 		description: "Whether thread messages should only be shown as a single line in the main timeline.",
 		allowedContexts: anyContext,
-		defaultValue: false,
+		defaultValue: true,
 	}),
 	show_date_separators: new Preference<boolean>({
 		displayName: "Show date separators",
