@@ -39,7 +39,10 @@ export const isRoomID = (roomID: unknown) => isIdentifier<RoomID>(roomID, "!", f
 export const isRoomAlias = (roomAlias: unknown) => isIdentifier<RoomAlias>(roomAlias, "#", true)
 export const isMXC = (mxc: unknown): mxc is ContentURI => typeof mxc === "string" && mediaRegex.test(mxc)
 
-export function getRelatesTo(evt: MemDBEvent): RelatesTo | undefined {
+export function getRelatesTo(evt?: MemDBEvent | null): RelatesTo | undefined {
+	if (!evt) {
+		return undefined
+	}
 	return (evt.orig_content ?? evt.content)?.["m.relates_to"] as RelatesTo | undefined
 }
 

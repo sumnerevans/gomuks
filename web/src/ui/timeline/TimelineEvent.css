@@ -188,6 +188,18 @@ div.timeline-event {
 		}
 	}
 
+	&.same-thread {
+		margin-top: var(--timeline-message-gap-same-thread);
+
+		&.same-sender > blockquote.reply-body {
+			padding: 0 .5rem .25rem;
+		}
+
+		&.same-sender div.reply-sender {
+			display: none;
+		}
+	}
+
 	&.reply-above {
 		grid-template:
 			"cmc                          cmc                        cmc      empty"  0

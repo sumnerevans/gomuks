@@ -87,6 +87,7 @@
 	--timeline-message-gap: .5rem;
 	--timeline-message-gap-same-sender: calc(var(--timeline-message-gap) / 2);
 	--timeline-message-gap-small-event: 0;
+	--timeline-message-gap-same-thread: 0;
 	--timeline-sender-name-timestamp-gap: .25rem;
 	--timeline-sender-name-content-gap: 0;
 	--timeline-vertical-padding: 0;

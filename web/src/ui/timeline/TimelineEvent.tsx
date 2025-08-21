@@ -287,6 +287,10 @@ const TimelineEvent = ({
 		wrapperClassNames.push("edit-history-event")
 	}
 	if (isSmallThreadMessage) {
+		const prevRelatesTo = getRelatesTo(prevEvt)
+		if (dateSeparator === null && prevRelatesTo?.rel_type === "m.thread" && prevRelatesTo.event_id === threadRoot) {
+			wrapperClassNames.push("same-thread")
+		}
 		wrapperClassNames.push("small-thread-message")
 		eventTimeOnly = true
 		renderAvatar = !smallAvatar
