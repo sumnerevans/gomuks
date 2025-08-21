@@ -1130,7 +1130,7 @@ func ToRespError(err error) mautrix.RespError {
 		} else if httpErr.RespError != nil {
 			return *httpErr.RespError
 		} else {
-			return mautrix.MUnknown.WithMessage("Server returned non-JSON error")
+			return mautrix.MUnknown.WithMessage("Server returned non-JSON error with status %d", httpErr.Response.StatusCode)
 		}
 	} else {
 		return mautrix.MUnknown.WithMessage(err.Error())
