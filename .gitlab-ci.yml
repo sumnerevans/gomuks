@@ -27,7 +27,6 @@ wasm:
   - export GOPATH="$CI_PROJECT_DIR/.cache"
   - export GOCACHE="$CI_PROJECT_DIR/.cache/build"
   script:
-  - cd web
   - ./build-wasm.sh
   artifacts:
     paths:
