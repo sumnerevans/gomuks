@@ -90,28 +90,26 @@ func (gmx *Gomuks) StartServer() {
 		router.Handle("/", gmx.FrontendCacheMiddleware(http.FileServerFS(frontend)))
 		if gmx.Commit != "unknown" && !gmx.BuildTime.IsZero() {
 			gmx.frontendETag = fmt.Sprintf(`"%s-%s"`, gmx.Commit, gmx.BuildTime.Format(time.RFC3339))
-
-			indexFile, err := frontend.Open("index.html")
-			if err != nil {
-				gmx.Log.Err(err).Msg("Failed to open index.html")
-			} else {
-				data, err := io.ReadAll(indexFile)
-				_ = indexFile.Close()
-				if err == nil {
-					metaTags := fmt.Sprintf(
-						metaTagsTemplate,
-						html.EscapeString(gmx.frontendETag),
-						gmx.Config.Push.VAPIDPublicKey,
-					)
-					gmx.indexWithETag = bytes.Replace(
-						data,
-						[]byte("<!-- etag placeholder -->"),
-						[]byte(metaTags),
-						1,
-					)
-				}
-			}
 		}
+		indexFile, err := frontend.Open("index.html")
+		if err != nil {
+			gmx.Log.Fatal().Err(err).Msg("Failed to open index.html")
+		}
+		data, err := io.ReadAll(indexFile)
+		_ = indexFile.Close()
+		if err != nil {
+			gmx.Log.Fatal().Err(err).Msg("Failed to read index.html")
+		}
+		gmx.indexWithMeta = bytes.Replace(
+			data,
+			[]byte("<!-- etag placeholder -->"),
+			[]byte(fmt.Sprintf(
+				metaTagsTemplate,
+				html.EscapeString(gmx.frontendETag),
+				gmx.Config.Push.VAPIDPublicKey,
+			)),
+			1,
+		)
 	}
 	gmx.Server = &http.Server{
 		Addr:    gmx.Config.Web.ListenAddress,
@@ -137,13 +135,13 @@ func (gmx *Gomuks) FrontendCacheMiddleware(next http.Handler) http.Handler {
 		}
 		if gmx.frontendETag != "" {
 			w.Header().Set("ETag", gmx.frontendETag)
-			if r.URL.Path == "/" && gmx.indexWithETag != nil {
-				w.Header().Set("Content-Type", "text/html")
-				w.Header().Set("Content-Length", strconv.Itoa(len(gmx.indexWithETag)))
-				w.WriteHeader(http.StatusOK)
-				_, _ = w.Write(gmx.indexWithETag)
-				return
-			}
+		}
+		if r.URL.Path == "/" {
+			w.Header().Set("Content-Type", "text/html")
+			w.Header().Set("Content-Length", strconv.Itoa(len(gmx.indexWithMeta)))
+			w.WriteHeader(http.StatusOK)
+			_, _ = w.Write(gmx.indexWithMeta)
+			return
 		}
 		next.ServeHTTP(w, r)
 	})
