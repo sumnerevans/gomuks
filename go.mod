@@ -6,31 +6,31 @@ toolchain go1.25.0
 
 require (
 	github.com/SherClockHolmes/webpush-go v1.4.0
-	github.com/alecthomas/chroma/v2 v2.18.0
+	github.com/alecthomas/chroma/v2 v2.20.0
 	github.com/buckket/go-blurhash v1.1.0
 	github.com/chzyer/readline v1.5.1
 	github.com/coder/websocket v1.8.13
 	github.com/disintegration/imaging v1.6.2
 	github.com/gabriel-vasile/mimetype v1.4.9
 	github.com/lucasb-eyer/go-colorful v1.2.0
-	github.com/mattn/go-sqlite3 v1.14.31
+	github.com/mattn/go-sqlite3 v1.14.32
 	github.com/rivo/uniseg v0.4.7
 	github.com/rs/zerolog v1.34.0
 	github.com/tidwall/gjson v1.18.0
 	github.com/tidwall/sjson v1.2.5
 	github.com/yuin/goldmark v1.7.13
 	go.mau.fi/goheif v0.0.0-20250809103256-ca48e8691d2f
-	go.mau.fi/util v0.8.9-0.20250813172851-79bf3eba563d
+	go.mau.fi/util v0.9.0
 	go.mau.fi/webp v0.2.0
-	go.mau.fi/zeroconfig v0.1.4-0.20250815135457-2dde0f0a1f6c
+	go.mau.fi/zeroconfig v0.2.0
 	golang.org/x/crypto v0.41.0
-	golang.org/x/image v0.28.0
+	golang.org/x/image v0.30.0
 	golang.org/x/net v0.43.0
 	golang.org/x/sys v0.35.0
 	golang.org/x/text v0.28.0
 	gopkg.in/yaml.v3 v3.0.1
 	maunium.net/go/mauflag v1.0.0
-	maunium.net/go/mautrix v0.24.3-0.20250815134518-cd022c9010d5
+	maunium.net/go/mautrix v0.25.1-0.20250825120313-fa7c1ae2bcd7
 	mvdan.cc/xurls/v2 v2.6.0
 )
 

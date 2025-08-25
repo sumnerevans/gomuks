@@ -2,13 +2,13 @@ module go.mau.fi/gomuks/desktop
 
 go 1.24.0
 
-toolchain go1.24.5
+toolchain go1.25.0
 
-require github.com/wailsapp/wails/v3 v3.0.0-alpha.21
+require github.com/wailsapp/wails/v3 v3.0.0-alpha.26
 
 require (
 	go.mau.fi/gomuks v0.4.0
-	go.mau.fi/util v0.8.9-0.20250813172851-79bf3eba563d
+	go.mau.fi/util v0.9.0
 )
 
 require (
@@ -18,7 +18,7 @@ require (
 	github.com/ProtonMail/go-crypto v1.1.6 // indirect
 	github.com/SherClockHolmes/webpush-go v1.4.0 // indirect
 	github.com/adrg/xdg v0.5.3 // indirect
-	github.com/alecthomas/chroma/v2 v2.18.0 // indirect
+	github.com/alecthomas/chroma/v2 v2.20.0 // indirect
 	github.com/bep/debounce v1.2.1 // indirect
 	github.com/buckket/go-blurhash v1.1.0 // indirect
 	github.com/cloudflare/circl v1.6.0 // indirect
@@ -47,7 +47,7 @@ require (
 	github.com/lucasb-eyer/go-colorful v1.2.0 // indirect
 	github.com/mattn/go-colorable v0.1.14 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
-	github.com/mattn/go-sqlite3 v1.14.31 // indirect
+	github.com/mattn/go-sqlite3 v1.14.32 // indirect
 	github.com/petermattis/goid v0.0.0-20250813065127-a731cc31b4fe // indirect
 	github.com/pjbgf/sha1cd v0.3.2 // indirect
 	github.com/pkg/browser v0.0.0-20240102092130-5ac0b6a4141c // indirect
@@ -68,10 +68,10 @@ require (
 	github.com/yuin/goldmark v1.7.13 // indirect
 	go.mau.fi/goheif v0.0.0-20250809103256-ca48e8691d2f // indirect
 	go.mau.fi/webp v0.2.0 // indirect
-	go.mau.fi/zeroconfig v0.1.4-0.20250815135457-2dde0f0a1f6c // indirect
+	go.mau.fi/zeroconfig v0.2.0 // indirect
 	golang.org/x/crypto v0.41.0 // indirect
 	golang.org/x/exp v0.0.0-20250813145105-42675adae3e6 // indirect
-	golang.org/x/image v0.28.0 // indirect
+	golang.org/x/image v0.30.0 // indirect
 	golang.org/x/net v0.43.0 // indirect
 	golang.org/x/sys v0.35.0 // indirect
 	golang.org/x/text v0.28.0 // indirect
@@ -79,7 +79,7 @@ require (
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1 // indirect
 	gopkg.in/warnings.v0 v0.1.2 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
-	maunium.net/go/mautrix v0.24.3-0.20250815134518-cd022c9010d5 // indirect
+	maunium.net/go/mautrix v0.25.1-0.20250825120313-fa7c1ae2bcd7 // indirect
 	mvdan.cc/xurls/v2 v2.6.0 // indirect
 )
 
