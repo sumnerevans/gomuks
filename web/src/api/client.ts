@@ -166,7 +166,7 @@ export default class Client {
 		if (!localStorage.push_device_id) {
 			localStorage.push_device_id = crypto.randomUUID()
 		}
-		navigator.serviceWorker.register("/pushmuks-sw.js", { scope: "pushmuks" }).then(async reg => {
+		navigator.serviceWorker.register("pushmuks-sw.js", { scope: "pushmuks" }).then(async reg => {
 			let sub: PushSubscription | null
 			try {
 				if (refresh) {
