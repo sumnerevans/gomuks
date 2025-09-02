@@ -58,6 +58,7 @@ const GIFPicker = ({ style, onSelect, room }: MediaPickerProps) => {
 				size: gif.size,
 				w: gif.width,
 				h: gif.height,
+				is_animated: true,
 			},
 			url: gif.proxied_mxc,
 		})

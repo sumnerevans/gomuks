@@ -311,6 +311,7 @@ export interface MediaInfo {
 	size?: number
 	w?: number
 	h?: number
+	is_animated?: boolean
 	duration?: number
 	thumbnail_url?: ContentURI
 	thumbnail_file?: EncryptedFile
