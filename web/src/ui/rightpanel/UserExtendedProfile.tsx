@@ -64,7 +64,7 @@ const SetTimeZoneElement = ({ tz, client, refreshProfile }: SetTimezoneProps) =>
 		if (!zones.includes(newTz)) {
 			return
 		}
-		client.rpc.setProfileField("us.cloke.msc4175.tz", newTz).then(
+		client.rpc.setProfileField("m.tz", newTz).then(
 			() => refreshProfile(),
 			err => {
 				console.error("Failed to set time zone:", err)
@@ -95,7 +95,7 @@ const UserExtendedProfile = ({ profile, refreshProfile, client, userID }: Extend
 		return null
 	}
 
-	const extendedProfileKeys = ["us.cloke.msc4175.tz", "io.fsky.nyx.pronouns"]
+	const extendedProfileKeys = ["m.tz", "us.cloke.msc4175.tz", "io.fsky.nyx.pronouns"]
 	const hasExtendedProfile = extendedProfileKeys.some((key) => profile[key])
 	if (!hasExtendedProfile && client.userID !== userID) {
 		return null
@@ -104,7 +104,7 @@ const UserExtendedProfile = ({ profile, refreshProfile, client, userID }: Extend
 	// otherwise there's an ugly and pointless <hr/> for no real reason.
 
 	const pronouns = ensureArray(profile["io.fsky.nyx.pronouns"]) as PronounSet[]
-	const userTimeZone = ensureString(profile["us.cloke.msc4175.tz"])
+	const userTimeZone = ensureString(profile["m.tz"] ?? profile["us.cloke.msc4175.tz"])
 	return <div className="extended-profile">
 		{userTimeZone && <ClockElement tz={userTimeZone} />}
 		{userID === client.userID &&
