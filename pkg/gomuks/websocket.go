@@ -98,7 +98,7 @@ func (gmx *Gomuks) HandleWebsocket(w http.ResponseWriter, r *http.Request) {
 		}()
 		log.Debug().Msg("Enabled flate compression for websocket messages")
 	}
-	conn.SetReadLimit(128 * 1024)
+	conn.SetReadLimit(1024 * 1024)
 	ctx, cancel := context.WithCancel(context.Background())
 	ctx = log.WithContext(ctx)
 	var listenerID uint64
