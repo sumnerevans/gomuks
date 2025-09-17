@@ -1,7 +1,9 @@
-import { useEffect, useState } from "react"
+import { use, useEffect, useState } from "react"
 import Client from "@/api/client.ts"
 import { PronounSet, UserProfile } from "@/api/types"
 import { ensureArray, ensureString } from "@/util/validation.ts"
+import { ModalContext } from "../modal"
+import JSONView from "../util/JSONView.tsx"
 
 interface ExtendedProfileProps {
 	profile: UserProfile | null
@@ -91,14 +93,22 @@ const SetTimeZoneElement = ({ tz, client, refreshProfile }: SetTimezoneProps) =>
 
 
 const UserExtendedProfile = ({ profile, refreshProfile, client, userID }: ExtendedProfileProps)=>  {
+	const openModal = use(ModalContext)!
 	if (!profile) {
 		return null
 	}
 
-	const extendedProfileKeys = ["m.tz", "us.cloke.msc4175.tz", "io.fsky.nyx.pronouns"]
-	const hasExtendedProfile = extendedProfileKeys.some((key) => profile[key])
+	const hasExtendedProfile = Object.keys(profile).some((key) => key !== "displayname" && key !== "avatar_url")
 	if (!hasExtendedProfile && client.userID !== userID) {
 		return null
+	}
+
+	const viewExtensibleProfile = () => {
+		openModal({
+			dimmed: true,
+			boxed: true,
+			content: <JSONView data={profile}/>,
+		})
 	}
 	// Explicitly only return something if the profile has the keys we're looking for.
 	// otherwise there's an ugly and pointless <hr/> for no real reason.
@@ -113,6 +123,7 @@ const UserExtendedProfile = ({ profile, refreshProfile, client, userID }: Extend
 			<div>Pronouns:</div>
 			<div>{pronouns.map(pronounSet => ensureString(pronounSet.summary)).join(", ")}</div>
 		</>}
+		<button onClick={viewExtensibleProfile}>View raw profile</button>
 	</div>
 }
 

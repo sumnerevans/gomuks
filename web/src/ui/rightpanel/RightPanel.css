@@ -125,6 +125,11 @@ div.right-panel-content.user {
 			box-sizing: border-box;
 			border-bottom: 1px solid var(--blockquote-border-color);
 		}
+
+		> button {
+			grid-column: span 2;
+			padding: .25rem;
+		}
 	}
 
 	hr {
