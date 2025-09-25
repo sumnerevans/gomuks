@@ -18,6 +18,7 @@ import Client from "@/api/client.ts"
 import { RoomStateStore, useRoomTimeline } from "@/api/statestore"
 import { MemDBEvent, MembershipAction } from "@/api/types"
 import { useRoomContext } from "@/ui/roomview/roomcontext.ts"
+import { getUserLevel } from "@/util/powerlevel.ts"
 import { getPowerLevels } from "../menu/util.ts"
 import { BulkRedactModal, ConfirmWithMessageModal, ModalContext } from "../modal"
 import StartDMButton from "./StartDMButton.tsx"
@@ -43,12 +44,12 @@ const UserModeration = ({ userID, client, member, room }: UserModerationProps) =
 		if (!room) {
 			throw new Error("hasPL called without room")
 		}
-		const [pls, ownPL] = getPowerLevels(room, client)
+		const [pls, ownPL, createEvent] = getPowerLevels(room, client)
 		if(action === "invite") {
 			return ownPL >= (pls.invite ?? 0)
 		}
-		const otherUserPL = pls.users?.[userID] ?? pls.users_default ?? 0
-		return ownPL >= (pls[action] ?? 50) && (action==="redact" ? true : ownPL > otherUserPL)
+		const otherUserPL = getUserLevel(pls, createEvent, userID)
+		return ownPL >= (pls[action] ?? 50) && (action === "redact" ? true : ownPL > otherUserPL)
 	}
 
 	const runAction = (action: MembershipAction) => {
