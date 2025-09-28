@@ -13,31 +13,62 @@
 //
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
-import { useMemo, useState } from "react"
+import { useState } from "react"
+import { RoomStateStore } from "@/api/statestore"
 import { MemDBEvent } from "@/api/types"
+import useEvent from "@/util/useEvent.ts"
 import Toggle from "../util/Toggle.tsx"
 import ConfirmModal from "./ConfirmModal.tsx"
 
-type ShareConfirmArgs = readonly [boolean, boolean]
-
 export interface ShareModalProps {
-	evt: MemDBEvent
-	onConfirm: (useMatrixTo: boolean, includeEvent: boolean) => void
-	generateLink: (useMatrixTo: boolean, includeEvent: boolean) => string
+	room: RoomStateStore
+	evt?: MemDBEvent
 }
 
-const ShareModal = ({ evt, onConfirm, generateLink }: ShareModalProps) => {
-	const [useMatrixTo, setUseMatrixTo] = useState(false)
-	const [includeEvent, setIncludeEvent] = useState(true)
-	const confirmArgs = useMemo(() => [useMatrixTo, includeEvent] as const, [useMatrixTo, includeEvent])
-	const link = generateLink(useMatrixTo, includeEvent)
+const emptyArgs = [] as const
 
-	return <ConfirmModal<ShareConfirmArgs>
+const lessNoisyEncodeURIComponent = (str: string) => encodeURIComponent(str).replace("%3A", ":")
+
+export const ShareModal = ({ room, evt }: ShareModalProps) => {
+	const [useMatrixTo, setUseMatrixTo] = useState(false)
+	const [includeEvent, setIncludeEvent] = useState(!!evt)
+	const alias = room.meta.current.canonical_alias
+	const [useRoomAlias, setUseRoomAlias] = useState(!evt && !!alias)
+	const actuallyUseAlias = alias && useRoomAlias
+
+	let generatedURL = useMatrixTo ? "https://matrix.to/#/" : "matrix:"
+	if (useMatrixTo) {
+		generatedURL += lessNoisyEncodeURIComponent(actuallyUseAlias ? alias : room.roomID)
+	} else if (actuallyUseAlias) {
+		generatedURL += "r/" + lessNoisyEncodeURIComponent(`${alias.slice(1)}`)
+	} else {
+		generatedURL += "roomid/" + lessNoisyEncodeURIComponent(`${room.roomID.slice(1)}`)
+	}
+	if (evt && includeEvent) {
+		if (useMatrixTo) {
+			generatedURL += `/${encodeURIComponent(evt.event_id)}`
+		} else {
+			generatedURL += `/e/${encodeURIComponent(evt.event_id.slice(1))}`
+		}
+	}
+	if (!actuallyUseAlias) {
+		generatedURL += "?" + new URLSearchParams(
+			room.getViaServers().map(server => ["via", server]),
+		).toString()
+	}
+
+	const onConfirm = useEvent(() => {
+		navigator.clipboard.writeText(generatedURL).catch(
+			err => window.alert(`Failed to copy link: ${err}`),
+		)
+	})
+
+	return <ConfirmModal<readonly never[]>
 		evt={evt}
-		title="Share Message"
+		title={evt ? "Share Message" : "Share Room"}
 		confirmButton="Copy to clipboard"
 		onConfirm={onConfirm}
-		confirmArgs={confirmArgs}
+		confirmArgs={emptyArgs}
 	>
 		<div className="toggle-sheet">
 			<label htmlFor="use-matrix-to">Use matrix.to link</label>
@@ -46,15 +77,24 @@ const ShareModal = ({ evt, onConfirm, generateLink }: ShareModalProps) => {
 				checked={useMatrixTo}
 				onChange={evt => setUseMatrixTo(evt.target.checked)}
 			/>
-			<label htmlFor="share-event">Link to this specific event</label>
-			<Toggle
-				id="share-event"
-				checked={includeEvent}
-				onChange={evt => setIncludeEvent(evt.target.checked)}
-			/>
+			{evt ? <>
+				<label htmlFor="share-event">Link to this specific event</label>
+				<Toggle
+					id="share-event"
+					checked={includeEvent}
+					onChange={evt => setIncludeEvent(evt.target.checked)}
+				/>
+			</> : alias ? <>
+				<label htmlFor="use-room-alias">Link to room alias</label>
+				<Toggle
+					id="use-room-alias"
+					checked={useRoomAlias}
+					onChange={evt => setUseRoomAlias(evt.target.checked)}
+				/>
+			</> : null}
 		</div>
 		<div className="output-preview">
-			<span className="no-select">Preview: </span><code>{link}</code>
+			<span className="no-select">Preview: </span><code>{generatedURL}</code>
 		</div>
 	</ConfirmModal>
 }

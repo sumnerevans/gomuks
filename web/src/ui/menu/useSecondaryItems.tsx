@@ -116,42 +116,11 @@ export const useSecondaryItems = (
 	}
 
 	const onClickShareEvent = () => {
-		const lessNoisyEncodeURIComponent = (str: string) => encodeURIComponent(str).replace("%3A", ":")
-		const generateLink = (useMatrixTo: boolean, includeEvent: boolean) => {
-			const isRoomIDLink = true
-			let generatedURL = useMatrixTo ? "https://matrix.to/#/" : "matrix:roomid/"
-			if (useMatrixTo) {
-				generatedURL += lessNoisyEncodeURIComponent(evt.room_id)
-			} else {
-				generatedURL += lessNoisyEncodeURIComponent(`${evt.room_id.slice(1)}`)
-			}
-			if (includeEvent) {
-				if (useMatrixTo) {
-					generatedURL += `/${encodeURIComponent(evt.event_id)}`
-				} else {
-					generatedURL += `/e/${encodeURIComponent(evt.event_id.slice(1))}`
-				}
-			}
-			if (isRoomIDLink) {
-				generatedURL += "?" + new URLSearchParams(
-					roomCtx.store.getViaServers().map(server => ["via", server]),
-				).toString()
-			}
-			return generatedURL
-		}
 		openModal({
 			dimmed: true,
 			boxed: true,
 			content: <RoomContext value={roomCtx}>
-				<ShareModal
-					evt={evt}
-					onConfirm={(useMatrixTo: boolean, includeEvent: boolean) => {
-						navigator.clipboard.writeText(generateLink(useMatrixTo, includeEvent)).catch(
-							err => window.alert(`Failed to copy link: ${err}`),
-						)
-					}}
-					generateLink={generateLink}
-				/>
+				<ShareModal room={roomCtx.store} evt={evt} />
 			</RoomContext>,
 		})
 	}

@@ -19,7 +19,7 @@ import TimelineEvent from "../timeline/TimelineEvent.tsx"
 import { ModalCloseContext } from "./contexts.ts"
 import "./ConfirmModal.css"
 
-export interface ConfirmProps<T extends readonly unknown[] = []> {
+export interface ConfirmProps<T extends readonly unknown[]> {
 	evt?: MemDBEvent
 	title: string
 	description?: string | JSX.Element
@@ -29,7 +29,7 @@ export interface ConfirmProps<T extends readonly unknown[] = []> {
 	confirmArgs: T
 }
 
-const ConfirmModal = <T extends readonly unknown[] = []>({
+const ConfirmModal = <T extends readonly unknown[] = readonly never[]>({
 	evt,
 	title,
 	description,

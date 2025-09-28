@@ -20,11 +20,12 @@ import { RoomStateStore, SpaceEdgeStore } from "@/api/statestore"
 import { useEventAsState } from "@/util/eventdispatcher.ts"
 import ClientContext from "../ClientContext.ts"
 import MainScreenContext from "../MainScreenContext.ts"
-import { ModalCloseContext } from "../modal"
+import { ModalCloseContext, ModalContext, ShareModal } from "../modal"
 import SettingsView from "../settings/SettingsView.tsx"
 import { getRightOpeningModalStyleFromButton } from "./util.ts"
 import ChatIcon from "@/icons/chat.svg?react"
 import SettingsIcon from "@/icons/settings.svg?react"
+import ShareIcon from "@/icons/share.svg?react"
 import "./RoomMenu.css"
 
 interface ChildSpaceProps {
@@ -79,6 +80,7 @@ interface SpaceMenuProps {
 }
 
 export const SpaceMenu = ({ room, space, style }: SpaceMenuProps) => {
+	const openModal = use(ModalContext)
 	const closeModal = use(ModalCloseContext)
 	const mainScreen = use(MainScreenContext)!
 	const client = use(ClientContext)!
@@ -95,9 +97,17 @@ export const SpaceMenu = ({ room, space, style }: SpaceMenuProps) => {
 		closeModal()
 		mainScreen.setActiveRoom(room.roomID)
 	}
+	const onClickShare = () => {
+		openModal({
+			dimmed: true,
+			boxed: true,
+			content: <ShareModal room={room}/>,
+		})
+	}
 
 	return <div className="context-menu space-list-menu" style={style}>
 		<button className="context-menu-item" onClick={openSettings}><SettingsIcon /> Settings</button>
+		<button onClick={onClickShare}><ShareIcon /> Share</button>
 		<button className="context-menu-item" onClick={openTimeline}><ChatIcon /> View timeline</button>
 		{space.childSpaces.values().map(child =>
 			<ChildSpace client={client} child={child} key={child.id} />)}

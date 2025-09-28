@@ -18,7 +18,7 @@ import { RoomListEntry, RoomStateStore, useAccountData } from "@/api/statestore"
 import { RoomID } from "@/api/types"
 import { useEventAsState } from "@/util/eventdispatcher.ts"
 import ClientContext from "../ClientContext.ts"
-import { ModalCloseContext } from "../modal"
+import { ModalCloseContext, ModalContext, ShareModal } from "../modal"
 import SettingsView from "../settings/SettingsView.tsx"
 import DoorOpenIcon from "@/icons/door-open.svg?react"
 import MarkReadIcon from "@/icons/mark-read.svg?react"
@@ -26,6 +26,7 @@ import MarkUnreadIcon from "@/icons/mark-unread.svg?react"
 import NotificationsOffIcon from "@/icons/notifications-off.svg?react"
 import NotificationsIcon from "@/icons/notifications.svg?react"
 import SettingsIcon from "@/icons/settings.svg?react"
+import ShareIcon from "@/icons/share.svg?react"
 import "./RoomMenu.css"
 
 interface RoomMenuProps {
@@ -91,6 +92,7 @@ const MarkReadButton = ({ room }: { room: RoomStateStore }) => {
 }
 
 export const RoomMenu = ({ room, style }: RoomMenuProps) => {
+	const openModal = use(ModalContext)
 	const closeModal = use(ModalCloseContext)
 	const client = use(ClientContext)!
 	const openSettings = () => {
@@ -112,9 +114,17 @@ export const RoomMenu = ({ room, style }: RoomMenuProps) => {
 		})
 		closeModal()
 	}
+	const onClickShare = () => {
+		openModal({
+			dimmed: true,
+			boxed: true,
+			content: <ShareModal room={room}/>,
+		})
+	}
 	return <div className="context-menu room-list-menu" style={style}>
 		<MarkReadButton room={room} />
 		<MuteButton roomID={room.roomID}/>
+		<button onClick={onClickShare}><ShareIcon /> Share</button>
 		<button onClick={openSettings}><SettingsIcon /> Settings</button>
 		<button onClick={leaveRoom}><DoorOpenIcon /> Leave room</button>
 	</div>
