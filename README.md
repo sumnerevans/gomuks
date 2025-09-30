@@ -16,3 +16,6 @@ For installation and usage instructions, see [docs.mau.fi](https://docs.mau.fi/g
 
 ## Discussion
 Matrix room: [#gomuks:gomuks.app](https://matrix.to/#/#gomuks:gomuks.app)
+
+## Preview (web)
+![](./preview.png)
