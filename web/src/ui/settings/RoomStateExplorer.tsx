@@ -47,8 +47,8 @@ const StateEventView = ({ room, type, stateKey, onBack, onDone }: StateEventView
 	const event = useRoomState(room, type, stateKey)
 	const isNewEvent = type === undefined
 	const [editingContent, setEditingContent] = useState<string | null>(isNewEvent ? "{\n\n}" : null)
-	const [newType, setNewType] = useState<string>("")
-	const [newStateKey, setNewStateKey] = useState<string>("")
+	const [newType, setNewType] = useState<string>(type || "")
+	const [newStateKey, setNewStateKey] = useState<string>(stateKey || "")
 	const client = use(ClientContext)!
 
 	const sendEdit = () => {
@@ -61,8 +61,8 @@ const StateEventView = ({ room, type, stateKey, onBack, onDone }: StateEventView
 		}
 		client.rpc.setState(
 			room.roomID,
-			type ?? newType,
-			stateKey ?? newStateKey,
+			newType,
+			newStateKey,
 			parsedContent,
 		).then(
 			() => {
@@ -85,26 +85,23 @@ const StateEventView = ({ room, type, stateKey, onBack, onDone }: StateEventView
 		<div className="state-explorer state-event-view">
 			<div className="state-header">
 				{isNewEvent
-					? <>
-						<h3>New state event</h3>
-						<div className="new-event-type">
-							<input
-								autoFocus
-								type="text"
-								value={newType}
-								onChange={evt => setNewType(evt.target.value)}
-								placeholder="Event type"
-							/>
-							<input
-								type="text"
-								value={newStateKey}
-								onChange={evt => setNewStateKey(evt.target.value)}
-								placeholder="State key"
-							/>
-						</div>
-					</>
-					: <h3><code>{type}</code> ({stateKey ? <code>{stateKey}</code> : "no state key"})</h3>
-				}
+					? <h3>New state event</h3>
+					: <h3><code>{type}</code> ({stateKey ? <code>{stateKey}</code> : "no state key"})</h3>}
+				{editingContent ? <div className="new-event-type">
+					<input
+						autoFocus
+						type="text"
+						value={newType}
+						onChange={evt => setNewType(evt.target.value)}
+						placeholder="Event type"
+					/>
+					<input
+						type="text"
+						value={newStateKey}
+						onChange={evt => setNewStateKey(evt.target.value)}
+						placeholder="State key"
+					/>
+				</div> : null}
 			</div>
 			<div className="state-event-content">
 				{editingContent !== null
