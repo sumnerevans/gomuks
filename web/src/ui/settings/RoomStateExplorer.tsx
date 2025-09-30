@@ -13,8 +13,9 @@
 //
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
-import { use, useCallback, useState } from "react"
-import { RoomStateStore, useRoomState } from "@/api/statestore"
+import { JSX, use, useCallback, useState } from "react"
+import { RoomStateStore, StateStore, useAccountData, useRoomAccountData, useRoomState } from "@/api/statestore"
+import { MemDBEvent, UnknownEventContent } from "@/api/types"
 import ClientContext from "../ClientContext.ts"
 import JSONView from "../util/JSONView"
 import "./RoomStateExplorer.css"
@@ -23,17 +24,49 @@ interface StateExplorerProps {
 	room: RoomStateStore
 }
 
-interface StateEventViewProps {
-	room: RoomStateStore
+enum EventKind {
+	None,
+	Message,
+	State,
+	AccountData,
+	RoomAccountData,
+}
+
+function kindName(kind: EventKind): string {
+	switch (kind) {
+	case EventKind.None:
+		return ""
+	case EventKind.Message:
+		return "Message"
+	case EventKind.State:
+		return "Room State"
+	case EventKind.AccountData:
+		return "Account Data"
+	case EventKind.RoomAccountData:
+		return "Room Account Data"
+	}
+}
+
+interface BaseEventViewProps {
 	type?: string
 	stateKey?: string
 	onBack: () => void
 	onDone?: (type: string, stateKey: string) => void
 }
 
-interface NewMessageEventViewProps {
+interface EventViewProps extends BaseEventViewProps {
+	kind: EventKind
+	event: MemDBEvent | UnknownEventContent | null
+	room?: RoomStateStore
+	nestedContent?: boolean
+}
+
+interface RoomEventViewProps extends BaseEventViewProps {
 	room: RoomStateStore
-	onBack: () => void
+}
+
+interface GlobalEventViewProps extends BaseEventViewProps {
+	store: StateStore
 }
 
 interface StateKeyListProps {
@@ -43,12 +76,54 @@ interface StateKeyListProps {
 	onBack: () => void
 }
 
-const StateEventView = ({ room, type, stateKey, onBack, onDone }: StateEventViewProps) => {
+const StateEventView = ({
+	room, type, stateKey, onBack, onDone,
+}: RoomEventViewProps) => {
 	const event = useRoomState(room, type, stateKey)
+	return <EventView
+		room={room}
+		kind={EventKind.State}
+		type={type}
+		stateKey={stateKey}
+		event={event}
+		nestedContent={true}
+		onBack={onBack}
+		onDone={onDone}
+	/>
+}
+
+const RoomAccountDataEventView = ({
+	room, type, onBack, onDone,
+}: RoomEventViewProps) => {
+	const content = useRoomAccountData(room, type)
+	return <EventView
+		room={room} kind={EventKind.AccountData} type={type} event={content} onBack={onBack} onDone={onDone}
+	/>
+}
+
+const GlobalAccountDataEventView = ({
+	store, type, onBack, onDone,
+}: GlobalEventViewProps) => {
+	const content = useAccountData(store, type)
+	return <EventView
+		kind={EventKind.AccountData} type={type} event={content} onBack={onBack} onDone={onDone}
+	/>
+}
+
+const NewMessageEventView = ({ room, onBack, onDone }: RoomEventViewProps) => {
+	return <EventView
+		kind={EventKind.Message} event={null} room={room} onBack={onBack} onDone={onDone}
+	/>
+}
+
+const EventView = ({
+	room, kind, event, nestedContent, type, stateKey, onBack, onDone,
+}: EventViewProps) => {
 	const isNewEvent = type === undefined
 	const [editingContent, setEditingContent] = useState<string | null>(isNewEvent ? "{\n\n}" : null)
 	const [newType, setNewType] = useState<string>(type || "")
 	const [newStateKey, setNewStateKey] = useState<string>(stateKey || "")
+	const [disableEncryption, setDisableEncryption] = useState<boolean>(false)
 	const client = use(ClientContext)!
 
 	const sendEdit = () => {
@@ -59,34 +134,51 @@ const StateEventView = ({ room, type, stateKey, onBack, onDone }: StateEventView
 			window.alert(`Failed to parse JSON: ${err}`)
 			return
 		}
-		client.rpc.setState(
-			room.roomID,
-			newType,
-			newStateKey,
-			parsedContent,
-		).then(
-			() => {
-				console.log("Updated room state", room.roomID, type, stateKey)
-				setEditingContent(null)
-				if (isNewEvent) {
-					onDone?.(newType, newStateKey)
-				}
-			},
-			err => {
-				console.error("Failed to update room state", err)
-				window.alert(`Failed to update room state: ${err}`)
-			},
-		)
+		let resp: Promise<unknown>
+		if (kind === EventKind.State) {
+			resp = client.rpc.setState(
+				room!.roomID,
+				newType,
+				newStateKey,
+				parsedContent,
+			)
+		} else if (kind === EventKind.Message) {
+			resp = client.sendEvent(room!.roomID, newType, parsedContent, disableEncryption)
+		} else if (kind === EventKind.AccountData || kind === EventKind.RoomAccountData) {
+			resp = client.rpc.setAccountData(
+				newType,
+				parsedContent,
+				kind === EventKind.RoomAccountData ? room!.roomID : undefined,
+			)
+		} else {
+			throw new Error("Invalid event kind for editing")
+		}
+		resp.then(() => {
+			console.log("Sent updated event", kind, room?.roomID, type, stateKey)
+			setEditingContent(null)
+			if (isNewEvent) {
+				onDone?.(newType, newStateKey)
+			}
+		}, err => {
+			console.error("Failed to send updated event", err)
+			window.alert(`Failed to send updated event: ${err}`)
+		})
 	}
 	const stopEdit = () => setEditingContent(null)
-	const startEdit = () => setEditingContent(JSON.stringify(event?.content || {}, null, 4))
+	const startEdit = () => setEditingContent(
+		JSON.stringify((nestedContent ? event?.content : event) || {}, null, 4),
+	)
 
 	return (
 		<div className="state-explorer state-event-view">
 			<div className="state-header">
 				{isNewEvent
-					? <h3>New state event</h3>
-					: <h3><code>{type}</code> ({stateKey ? <code>{stateKey}</code> : "no state key"})</h3>}
+					? <h3>New {kindName(kind).toLowerCase()} event</h3>
+					: <h3>
+						{kindName(kind)}: <code>{type}</code> {kind === EventKind.State ? <>
+							({stateKey ? <code>{stateKey}</code> : "no state key"})
+						</> : null}
+					</h3>}
 				{editingContent ? <div className="new-event-type">
 					<input
 						autoFocus
@@ -95,12 +187,12 @@ const StateEventView = ({ room, type, stateKey, onBack, onDone }: StateEventView
 						onChange={evt => setNewType(evt.target.value)}
 						placeholder="Event type"
 					/>
-					<input
+					{kind === EventKind.State ? <input
 						type="text"
 						value={newStateKey}
 						onChange={evt => setNewStateKey(evt.target.value)}
 						placeholder="State key"
-					/>
+					/> : null}
 				</div> : null}
 			</div>
 			<div className="state-event-content">
@@ -113,71 +205,20 @@ const StateEventView = ({ room, type, stateKey, onBack, onDone }: StateEventView
 				{editingContent !== null ? <>
 					<button onClick={isNewEvent ? onBack : stopEdit}>Back</button>
 					<div className="spacer"/>
+					{kind === EventKind.Message && room!.meta.current.encryption_event ? <label>
+						<input
+							type="checkbox"
+							checked={disableEncryption}
+							onChange={evt => setDisableEncryption(evt.target.checked)}
+						/>
+						Disable encryption
+					</label> : null}
 					<button onClick={sendEdit}>Send</button>
 				</> : <>
 					<button onClick={onBack}>Back</button>
 					<div className="spacer"/>
 					<button onClick={startEdit}>Edit</button>
 				</>}
-			</div>
-		</div>
-	)
-}
-
-const NewMessageEventView = ({ room, onBack }: NewMessageEventViewProps) => {
-	const [content, setContent] = useState<string>("{\n\n}")
-	const [type, setType] = useState<string>("")
-	const [disableEncryption, setDisableEncryption] = useState<boolean>(false)
-	const client = use(ClientContext)!
-
-	const sendEvent = () => {
-		let parsedContent
-		try {
-			parsedContent = JSON.parse(content || "{}")
-		} catch (err) {
-			window.alert(`Failed to parse JSON: ${err}`)
-			return
-		}
-		client.sendEvent(room.roomID, type, parsedContent, disableEncryption).then(
-			() => {
-				console.log("Successfully sent message event", room.roomID, type)
-				onBack()
-			},
-			err => {
-				console.error("Failed to send message event", err)
-				window.alert(`Failed to send message event: ${err}`)
-			},
-		)
-	}
-
-	return (
-		<div className="state-explorer state-event-view">
-			<div className="state-header">
-				<h3>New message event</h3>
-				<div className="new-event-type">
-					<input
-						autoFocus
-						type="text"
-						value={type}
-						onChange={evt => setType(evt.target.value)}
-						placeholder="Event type"
-					/>
-				</div>
-			</div>
-			<div className="state-event-content">
-				<textarea rows={10} value={content} onChange={evt => setContent(evt.target.value)}/>
-			</div>
-			<div className="nav-buttons">
-				<button onClick={onBack}>Back</button>
-				<button onClick={sendEvent}>Send</button>
-				{room.meta.current.encryption_event ? <label>
-					<input
-						type="checkbox"
-						checked={disableEncryption}
-						onChange={evt => setDisableEncryption(evt.target.checked)}
-					/>
-					Disable encryption
-				</label> : null}
 			</div>
 		</div>
 	)
@@ -214,7 +255,8 @@ const StateKeyList = ({ room, type, onSelectStateKey, onBack }: StateKeyListProp
 }
 
 export const StateExplorer = ({ room }: StateExplorerProps) => {
-	const [creatingNew, setCreatingNew] = useState<"message" | "state" | null>(null)
+	const [viewKind, setViewKind] = useState<EventKind>(EventKind.State)
+	const [creatingNew, setCreatingNew] = useState<EventKind | null>(null)
 	const [selectedType, setSelectedType] = useState<string | null>(null)
 	const [selectedStateKey, setSelectedStateKey] = useState<string | null>(null)
 	const [loadingState, setLoadingState] = useState(false)
@@ -222,6 +264,11 @@ export const StateExplorer = ({ room }: StateExplorerProps) => {
 	const client = use(ClientContext)!
 
 	const handleTypeSelect = (type: string) => {
+		if (viewKind !== EventKind.State) {
+			setSelectedType(type)
+			setSelectedStateKey(null)
+			return
+		}
 		const stateKeysMap = room.state.get(type)
 		if (!stateKeysMap) {
 			return
@@ -244,94 +291,129 @@ export const StateExplorer = ({ room }: StateExplorerProps) => {
 			setCreatingNew(null)
 		} else if (selectedStateKey !== null && selectedType !== null) {
 			setSelectedStateKey(null)
-			const stateKeysMap = room.state.get(selectedType)
-			if (stateKeysMap?.size === 1 && stateKeysMap.has("")) {
+			if (viewKind !== EventKind.State) {
 				setSelectedType(null)
+			} else {
+				const stateKeysMap = room.state.get(selectedType)
+				if (stateKeysMap?.size === 1 && stateKeysMap.has("")) {
+					setSelectedType(null)
+				}
 			}
 		} else if (selectedType !== null) {
 			setSelectedType(null)
 		}
-	}, [selectedType, selectedStateKey, creatingNew, room])
+	}, [viewKind, selectedType, selectedStateKey, creatingNew, room])
 	const handleNewEventDone = useCallback((type: string, stateKey?: string) => {
 		setCreatingNew(null)
-		if (stateKey !== undefined) {
-			setSelectedType(type)
-			setSelectedStateKey(stateKey)
-		}
+		setSelectedType(type)
+		setSelectedStateKey(stateKey ?? null)
 	}, [])
 
-	if (creatingNew === "state") {
-		return <StateEventView
-			room={room}
-			onBack={handleBack}
-			onDone={handleNewEventDone}
-		/>
-	} else if (creatingNew === "message") {
-		return <NewMessageEventView
-			room={room}
-			onBack={handleBack}
-		/>
-	} else if (selectedType !== null && selectedStateKey !== null) {
-		return <StateEventView
-			room={room}
-			type={selectedType}
-			stateKey={selectedStateKey}
-			onBack={handleBack}
-		/>
-	} else if (selectedType !== null) {
-		return <StateKeyList
-			room={room}
-			type={selectedType}
-			onSelectStateKey={setSelectedStateKey}
-			onBack={handleBack}
-		/>
-	} else {
-		const loadRoomState = () => {
-			setLoadingState(true)
-			client.loadRoomState(room.roomID, {
-				omitMembers: false,
-				refetch: room.stateLoaded && room.fullMembersLoaded,
-			}).then(
-				() => {
-					console.log("Room state loaded from devtools", room.roomID)
-				},
-				err => {
-					console.error("Failed to fetch room state", err)
-					window.alert(`Failed to fetch room state: ${err}`)
-				},
-			).finally(() => setLoadingState(false))
-		}
-		const resetTimeline = () => {
-			setResettingTimeline(true)
-			client.resetTimeline(room.roomID)
-				.finally(() => setResettingTimeline(false))
-		}
-		return <div className="state-explorer">
-			<h3>Room State Explorer</h3>
-			<div className="state-button-list">
-				{Array.from(room.state?.keys().map(type => (
-					<button key={type} onClick={() => handleTypeSelect(type)}>
-						<code>{type}</code>
-					</button>
-				)) ?? [])}
-			</div>
-			<div className="nav-buttons">
-				<button onClick={loadRoomState} disabled={loadingState}>
-					{room.stateLoaded
-						? room.fullMembersLoaded
-							? "Resync full room state"
-							: "Load room members"
-						: "Load room state and members"}
-				</button>
-				<button onClick={resetTimeline} disabled={resettingTimeline}>
-					Reset timeline
-				</button>
-				<div className="spacer"/>
-				<button onClick={() => setCreatingNew("message")}>Send new message event</button>
-				<button onClick={() => setCreatingNew("state")}>Send new state event</button>
-			</div>
-		</div>
+	switch (creatingNew) {
+	case EventKind.State:
+		return <StateEventView room={room} onBack={handleBack} onDone={handleNewEventDone} />
+	case EventKind.Message:
+		return <NewMessageEventView room={room} onBack={handleBack} onDone={handleBack} />
+	case EventKind.AccountData:
+		return <GlobalAccountDataEventView store={client.store} onBack={handleBack} onDone={handleNewEventDone} />
+	case EventKind.RoomAccountData:
+		return <RoomAccountDataEventView room={room} onBack={handleBack} onDone={handleNewEventDone} />
 	}
+	if (selectedType !== null) {
+		switch (viewKind) {
+		case EventKind.State:
+			if (selectedStateKey === null) {
+				return <StateKeyList
+					room={room} type={selectedType} onSelectStateKey={setSelectedStateKey} onBack={handleBack}
+				/>
+			}
+			return <StateEventView room={room} type={selectedType} stateKey={selectedStateKey!} onBack={handleBack} />
+		case EventKind.AccountData:
+			return <GlobalAccountDataEventView store={client.store} type={selectedType} onBack={handleBack} />
+		case EventKind.RoomAccountData:
+			return <RoomAccountDataEventView room={room} type={selectedType} onBack={handleBack} />
+		default:
+			return <div>Invalid view kind</div>
+		}
+	}
+	const loadRoomState = () => {
+		setLoadingState(true)
+		client.loadRoomState(room.roomID, {
+			omitMembers: false,
+			refetch: room.stateLoaded && room.fullMembersLoaded,
+		}).then(
+			() => {
+				console.log("Room state loaded from devtools", room.roomID)
+			},
+			err => {
+				console.error("Failed to fetch room state", err)
+				window.alert(`Failed to fetch room state: ${err}`)
+			},
+		).finally(() => setLoadingState(false))
+	}
+	const resetTimeline = () => {
+		setResettingTimeline(true)
+		client.resetTimeline(room.roomID)
+			.finally(() => setResettingTimeline(false))
+	}
+	let stateKeys: MapIterator<string>
+	let navButtons: JSX.Element
+	switch (viewKind) {
+	case EventKind.State:
+		stateKeys = room.state.keys()
+		navButtons = <>
+			<button onClick={loadRoomState} disabled={loadingState}>
+				{room.stateLoaded
+					? room.fullMembersLoaded
+						? "Resync full room state"
+						: "Load room members"
+					: "Load room state and members"}
+			</button>
+			<button onClick={resetTimeline} disabled={resettingTimeline}>
+				Reset timeline
+			</button>
+			<div className="spacer"/>
+			<button onClick={() => setCreatingNew(EventKind.Message)}>Send new message event</button>
+			<button onClick={() => setCreatingNew(EventKind.State)}>Send new state event</button>
+		</>
+		break
+	case EventKind.AccountData:
+		stateKeys = client.store.accountData.keys()
+		navButtons = <>
+			<div className="spacer"/>
+			<button onClick={() => setCreatingNew(EventKind.AccountData)}>Send new account data event</button>
+		</>
+		break
+	case EventKind.RoomAccountData:
+		stateKeys = room.accountData.keys()
+		navButtons = <>
+			<div className="spacer"/>
+			<button onClick={() => setCreatingNew(EventKind.RoomAccountData)}>Send new room account data event</button>
+		</>
+		break
+	default:
+		return <div className="state-explorer">Invalid view kind</div>
+	}
+	const kinds = [EventKind.State, EventKind.AccountData, EventKind.RoomAccountData]
+	return <div className="state-explorer">
+		<div className="title-bar">
+			{kinds.map(kind =>
+				<button key={kind} disabled={viewKind === kind} onClick={() => setViewKind(kind)}>
+					{kindName(kind)}
+				</button>,
+			)}
+		</div>
+		<div className="state-button-list">
+			{Array.from(stateKeys.map(type => (
+				<button key={type} onClick={() => handleTypeSelect(type)}>
+					<code>{type}</code>
+				</button>
+			)) ?? [])}
+		</div>
+		<div className="nav-buttons">
+			{navButtons}
+		</div>
+	</div>
 }
 
 export default StateExplorer

@@ -140,17 +140,17 @@ export function useRoomEvent(room: RoomStateStore, eventID: EventID | null): Mem
 	)
 }
 
-export function useAccountData(ss: StateStore, type: EventType): UnknownEventContent | null {
+export function useAccountData(ss: StateStore, type?: EventType): UnknownEventContent | null {
 	return useSyncExternalStore(
-		ss.accountDataSubs.getSubscriber(type),
-		() => ss.accountData.get(type) ?? null,
+		type !== undefined ? ss.accountDataSubs.getSubscriber(type) : noopSubscribe,
+		() => type !== undefined ? ss.accountData.get(type) ?? null : null,
 	)
 }
 
-export function useRoomAccountData(room: RoomStateStore | null, type: EventType): UnknownEventContent | null {
+export function useRoomAccountData(room: RoomStateStore | null, type?: EventType): UnknownEventContent | null {
 	return useSyncExternalStore(
-		room ? room.accountDataSubs.getSubscriber(type) : noopSubscribe,
-		() => room?.accountData.get(type) ?? null,
+		room && type !== undefined ? room.accountDataSubs.getSubscriber(type) : noopSubscribe,
+		() => type !== undefined ? room?.accountData.get(type) ?? null : null,
 	)
 }
 
