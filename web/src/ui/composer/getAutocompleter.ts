@@ -54,6 +54,7 @@ export function isLegacyCommand(text: string): boolean {
 		|| text.startsWith("/rainbow ")
 		|| text.startsWith("/html ")
 		|| text.startsWith("/timestamp ")
+		|| text.startsWith("/unencrypted ")
 }
 
 export function getAutocompleter(
