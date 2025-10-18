@@ -97,7 +97,7 @@ const RoomAccountDataEventView = ({
 }: RoomEventViewProps) => {
 	const content = useRoomAccountData(room, type)
 	return <EventView
-		room={room} kind={EventKind.AccountData} type={type} event={content} onBack={onBack} onDone={onDone}
+		room={room} kind={EventKind.RoomAccountData} type={type} event={content} onBack={onBack} onDone={onDone}
 	/>
 }
 
