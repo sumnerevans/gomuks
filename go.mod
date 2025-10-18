@@ -2,7 +2,7 @@ module go.mau.fi/gomuks
 
 go 1.24.0
 
-toolchain go1.25.1
+toolchain go1.25.3
 
 require (
 	github.com/SherClockHolmes/webpush-go v1.4.0
@@ -20,17 +20,17 @@ require (
 	github.com/tidwall/sjson v1.2.5
 	github.com/yuin/goldmark v1.7.13
 	go.mau.fi/goheif v0.0.0-20250809103256-ca48e8691d2f
-	go.mau.fi/util v0.9.1
+	go.mau.fi/util v0.9.2
 	go.mau.fi/webp v0.2.0
 	go.mau.fi/zeroconfig v0.2.0
-	golang.org/x/crypto v0.42.0
-	golang.org/x/image v0.31.0
-	golang.org/x/net v0.44.0
-	golang.org/x/sys v0.36.0
-	golang.org/x/text v0.29.0
+	golang.org/x/crypto v0.43.0
+	golang.org/x/image v0.32.0
+	golang.org/x/net v0.46.0
+	golang.org/x/sys v0.37.0
+	golang.org/x/text v0.30.0
 	gopkg.in/yaml.v3 v3.0.1
 	maunium.net/go/mauflag v1.0.0
-	maunium.net/go/mautrix v0.25.2-0.20250922172849-5c580a785903
+	maunium.net/go/mautrix v0.25.2
 	mvdan.cc/xurls/v2 v2.6.0
 )
 
@@ -45,6 +45,6 @@ require (
 	github.com/rs/xid v1.6.0 // indirect
 	github.com/tidwall/match v1.1.1 // indirect
 	github.com/tidwall/pretty v1.2.1 // indirect
-	golang.org/x/exp v0.0.0-20250911091902-df9299821621 // indirect
+	golang.org/x/exp v0.0.0-20251009144603-d2f985daa21b // indirect
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1 // indirect
 )
