@@ -18,11 +18,8 @@
 package main
 
 import (
-	"bufio"
 	"encoding/json"
-	"errors"
 	"fmt"
-	"io"
 	"net/http"
 	"os"
 	"slices"
@@ -30,6 +27,7 @@ import (
 	"strings"
 
 	"go.mau.fi/util/exerrors"
+	"go.mau.fi/util/unicodeurls"
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
 )
@@ -86,25 +84,15 @@ func unifiedToUnicode(input string) string {
 	return string(output)
 }
 
-func getVariationSequences() (output map[string]struct{}) {
-	variationSequences := exerrors.Must(http.Get("https://www.unicode.org/Public/15.1.0/ucd/emoji/emoji-variation-sequences.txt"))
-	buf := bufio.NewReader(variationSequences.Body)
-	output = make(map[string]struct{})
-	for {
-		line, err := buf.ReadString('\n')
-		if errors.Is(err, io.EOF) {
-			break
-		} else if err != nil {
-			panic(err)
-		}
+func getVariationSequences() (output map[string]bool) {
+	return unicodeurls.ReadDataFileMap(unicodeurls.EmojiVariationSequences, func(line string) (string, bool, bool) {
 		parts := strings.Split(line, "; ")
 		if len(parts) < 2 || parts[1] != "emoji style" {
-			continue
+			return "", false, false
 		}
 		unifiedParts := strings.Split(parts[0], " ")
-		output[unifiedParts[0]] = struct{}{}
-	}
-	return
+		return unifiedParts[0], true, true
+	})
 }
 
 type outputEmoji struct {
@@ -209,7 +197,7 @@ func main() {
 		if wrapped.Title == "" {
 			wrapped.Title = titler.String(emoji.Name)
 		}
-		if _, needsVariation := vs[emoji.Unified]; needsVariation {
+		if vs[emoji.Unified] {
 			wrapped.Unicode += "\ufe0f"
 		}
 		data.Emojis[i] = wrapped
