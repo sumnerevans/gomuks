@@ -1655,6 +1655,24 @@
       ]
     },
     {
+      "u": "🫪",
+      "c": 7,
+      "t": "Distorted Face",
+      "n": "distorted_face",
+      "s": [
+        "distortedface"
+      ]
+    },
+    {
+      "u": "🫯",
+      "c": 7,
+      "t": "Fight Cloud",
+      "n": "fight_cloud",
+      "s": [
+        "fightcloud"
+      ]
+    },
+    {
       "u": "👋",
       "c": 6,
       "t": "Waving Hand",
@@ -5404,6 +5422,24 @@
       ]
     },
     {
+      "u": "🫈",
+      "c": 6,
+      "t": "Hairy Creature",
+      "n": "hairy_creature",
+      "s": [
+        "hairycreature"
+      ]
+    },
+    {
+      "u": "🧑‍🩰",
+      "c": 6,
+      "t": "Ballet Dancer",
+      "n": "ballet_dancer",
+      "s": [
+        "balletdancer"
+      ]
+    },
+    {
       "u": "🏻",
       "c": 2,
       "t": "Light Skin Tone",
@@ -6921,6 +6957,15 @@
       "n": "leafless_tree",
       "s": [
         "leaflesstree"
+      ]
+    },
+    {
+      "u": "🫍",
+      "c": 1,
+      "t": "Orca",
+      "n": "orca",
+      "s": [
+        "orca"
       ]
     },
     {
@@ -10114,6 +10159,15 @@
       "s": [
         "ocean",
         "waterwave"
+      ]
+    },
+    {
+      "u": "🛘",
+      "c": 9,
+      "t": "Landslide",
+      "n": "landslide",
+      "s": [
+        "landslide"
       ]
     },
     {
@@ -13330,6 +13384,24 @@
       "s": [
         "identificationcard",
         "idcard"
+      ]
+    },
+    {
+      "u": "🪊",
+      "c": 5,
+      "t": "Trombone",
+      "n": "trombone",
+      "s": [
+        "trombone"
+      ]
+    },
+    {
+      "u": "🪎",
+      "c": 5,
+      "t": "Treasure Chest",
+      "n": "treasure_chest",
+      "s": [
+        "treasurechest"
       ]
     },
     {

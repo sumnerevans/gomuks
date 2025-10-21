@@ -18,10 +18,12 @@
 package main
 
 import (
+	"cmp"
 	"encoding/json"
 	"fmt"
 	"net/http"
 	"os"
+	"regexp"
 	"slices"
 	"strconv"
 	"strings"
@@ -95,6 +97,47 @@ func getVariationSequences() (output map[string]bool) {
 	})
 }
 
+var emojiDescRegex = regexp.MustCompile(`.+E\d+\.\d+ (.+)\n$`)
+
+type OfficialEmoji struct {
+	Unified   string
+	Unicode   string
+	Name      string
+	ShortCode string
+	Group     int
+}
+
+func getOfficialEmojis() []*OfficialEmoji {
+	var currentGroupIndex int
+	return unicodeurls.ReadDataFileList(unicodeurls.EmojiTest, func(line string) (*OfficialEmoji, bool) {
+		if strings.HasPrefix(line, "# group: ") {
+			currentGroupName := strings.TrimSpace(strings.TrimPrefix(line, "# group: "))
+			currentGroupIndex = slices.Index(categories, currentGroupName)
+			if currentGroupIndex == -1 {
+				panic(fmt.Errorf("unknown group %q", currentGroupName))
+			}
+			return nil, false
+		}
+		parts := strings.Split(line, "; ")
+		if len(parts) < 2 || !strings.HasPrefix(parts[1], "fully-qualified") || strings.Contains(parts[1], "skin tone") {
+			return nil, false
+		}
+		match := emojiDescRegex.FindStringSubmatch(parts[1])
+		if match == nil {
+			return nil, false
+		}
+
+		unified := strings.ReplaceAll(strings.TrimSpace(parts[0]), " ", "-")
+		return &OfficialEmoji{
+			Unified:   unified,
+			Unicode:   unifiedToUnicode(unified),
+			Name:      strings.TrimSpace(titler.String(match[1])),
+			ShortCode: strings.ReplaceAll(strings.TrimSpace(match[1]), " ", "_"),
+			Group:     currentGroupIndex,
+		}, true
+	}, unicodeurls.ReadParams{ProcessComments: true})
+}
+
 type outputEmoji struct {
 	Unicode    string   `json:"u"`
 	Category   int      `json:"c"`
@@ -157,6 +200,32 @@ func regionalIndicators(yield func(Emoji) bool) {
 	}
 }
 
+var categories = []string{
+	"Activities",
+	"Animals & Nature",
+	"Component",
+	"Flags",
+	"Food & Drink",
+	"Objects",
+	"People & Body",
+	"Smileys & Emotion",
+	"Symbols",
+	"Travel & Places",
+}
+
+var categoryOrder = []string{
+	"Smileys & Emotion",
+	"People & Body",
+	"Component",
+	"Animals & Nature",
+	"Food & Drink",
+	"Travel & Places",
+	"Activities",
+	"Objects",
+	"Symbols",
+	"Flags",
+}
+
 func main() {
 	var emojis []Emoji
 	resp := exerrors.Must(http.Get("https://raw.githubusercontent.com/iamcal/emoji-data/master/emoji.json"))
@@ -173,7 +242,7 @@ func main() {
 
 	data := &outputData{
 		Emojis:     make([]*outputEmoji, len(emojis)),
-		Categories: []string{"Activities", "Animals & Nature", "Component", "Flags", "Food & Drink", "Objects", "People & Body", "Smileys & Emotion", "Symbols", "Travel & Places"},
+		Categories: categories,
 	}
 	existingShortcodes := make(map[string]struct{})
 	emojiMap := make(map[string]*outputEmoji)
@@ -201,6 +270,29 @@ func main() {
 			wrapped.Unicode += "\ufe0f"
 		}
 		data.Emojis[i] = wrapped
+	}
+	addedUnicode := false
+	for _, emoji := range getOfficialEmojis() {
+		_, ok := emojiMap[emoji.Unified]
+		if ok {
+			continue
+		}
+		addedUnicode = true
+		fmt.Println("Adding", emoji.Unicode, emoji.Unified, "from upstream list")
+		wrapped := &outputEmoji{
+			Unicode:    emoji.Unicode,
+			Category:   emoji.Group,
+			Title:      emoji.Name,
+			Name:       emoji.ShortCode,
+			Shortcodes: []string{strings.ReplaceAll(emoji.ShortCode, "_", "")},
+		}
+		emojiMap[emoji.Unified] = wrapped
+		data.Emojis = append(data.Emojis, wrapped)
+	}
+	if addedUnicode {
+		slices.SortStableFunc(data.Emojis, func(a, b *outputEmoji) int {
+			return cmp.Compare(slices.Index(categoryOrder, categories[a.Category]), slices.Index(categoryOrder, categories[b.Category]))
+		})
 	}
 	var moreShortcodes map[string]stringOrArray
 	resp = exerrors.Must(http.Get("https://raw.githubusercontent.com/milesj/emojibase/refs/heads/master/packages/data/en/shortcodes/emojibase.raw.json"))
