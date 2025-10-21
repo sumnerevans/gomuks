@@ -17,7 +17,7 @@ variables:
   GOTOOLCHAIN: local
 
 wasm:
-  image: golang:1.25-alpine
+  image: ${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/golang:1.25-alpine
   stage: frontend
   cache:
     paths:
@@ -37,7 +37,7 @@ wasm:
     expire_in: 1 hour
 
 frontend:
-  image: node:24-alpine
+  image: ${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/node:24-alpine
   stage: frontend
   cache:
     paths:
@@ -56,7 +56,7 @@ frontend:
   - wasm
 
 deploy wasmuks:
-  image: golang:1.25-alpine
+  image: ${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/golang:1.25-alpine
   stage: frontend
   tags:
   - webdeploy
@@ -98,13 +98,19 @@ deploy wasmuks:
   - frontend
 
 .build-docker: &build-docker
-  image: docker:latest
+  image: ${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/docker:latest
   stage: docker
   before_script:
-  - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+  - docker login -u "$CI_DEPENDENCY_PROXY_USER" -p "$CI_DEPENDENCY_PROXY_PASSWORD" "$CI_DEPENDENCY_PROXY_SERVER"
+  - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" "$CI_REGISTRY"
   script:
   - docker pull $CI_REGISTRY_IMAGE:latest || true
-  - docker build --pull --cache-from $CI_REGISTRY_IMAGE:latest --tag $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA-$DOCKER_ARCH . --file Dockerfile.ci
+  - |
+    docker build \
+      --pull --cache-from $CI_REGISTRY_IMAGE:latest \
+      --tag $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA-$DOCKER_ARCH \
+      --build-arg DOCKER_HUB=$CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX \
+      . --file Dockerfile.ci
   - docker push $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA-$DOCKER_ARCH
   after_script:
   - docker rmi $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA-$DOCKER_ARCH
@@ -192,12 +198,13 @@ docker/arm64:
     DOCKER_ARCH: arm64
 
 docker/manifest:
+  image: ${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/docker:latest
   stage: docker
   variables:
     GIT_STRATEGY: none
   before_script:
   - "mkdir -p $HOME/.docker && echo '{\"experimental\": \"enabled\"}' > $HOME/.docker/config.json"
-  - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+  - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" "$CI_REGISTRY"
   needs:
   - docker/amd64
   - docker/arm64
