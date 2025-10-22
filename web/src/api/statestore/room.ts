@@ -271,7 +271,8 @@ export class RoomStateStore {
 		const createEvt = this.getStateEvent("m.room.create", "")
 		const membersCache = memberEvtIDs.values()
 			.map(rowID => this.eventsByRowID.get(rowID))
-			.filter((evt): evt is MemDBEvent => !!evt && evt.content.membership === "join")
+			.filter((evt): evt is MemDBEvent => !!evt &&
+				(evt.content.membership === "join" || evt.content.membership === "invite"))
 			.map((evt): AutocompleteMemberEntry => ({
 				userID: evt.state_key!,
 				displayName: getDisplayname(evt.state_key!, evt.content as MemberEventContent),

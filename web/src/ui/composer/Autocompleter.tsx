@@ -202,6 +202,7 @@ const userFuncs = {
 			src={getAvatarThumbnailURL(user.userID, { displayname: user.displayName, avatar_url: user.avatarURL })}
 			alt=""
 		/>
+		{user.event.content.membership === "invite" ? <span className="invited-indicator">(invited) </span> : null}
 		{user.displayName}
 	</>,
 }

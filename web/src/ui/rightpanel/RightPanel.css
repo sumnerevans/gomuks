@@ -264,6 +264,11 @@ div.right-panel-content.thread {
 	overflow: hidden;
 }
 
+span.invited-indicator {
+	opacity: .7;
+	font-size: .7rem;
+}
+
 div.right-panel-content.members {
 	overflow: hidden;
 	display: flex;

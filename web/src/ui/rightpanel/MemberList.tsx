@@ -37,7 +37,10 @@ const MemberRow = ({ evt, onClick }: MemberRowProps) => {
 			alt=""
 			loading="lazy"
 		/>
-		<div className="displayname">{getDisplayname(userID, content)}</div>
+		<div className="displayname">
+			{evt.content.membership === "invite" ? <span className="invited-indicator">(invited) </span> : null}
+			{getDisplayname(userID, content)}
+		</div>
 		<div className="user-id">{userID}</div>
 	</div>
 }

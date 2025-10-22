@@ -37,6 +37,10 @@ div.autocompletions, div.command-arguments {
 			background-color: var(--light-hover-color);
 		}
 
+		&.ac-user {
+			text-wrap: nowrap;
+		}
+
 		&.ac-command {
 			height: auto;
 			contain-intrinsic-height: unset;
