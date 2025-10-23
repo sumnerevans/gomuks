@@ -65,3 +65,10 @@ export const jumpToVisibleEvent = (evtID: EventID, parent?: Element | null): boo
 	}, 3000)
 	return true
 }
+
+export const jumpToEventInView = (roomCtx: RoomContextData, evtID: EventID, parent?: Element | null) => {
+	if (!parent || !jumpToVisibleEvent(evtID, parent)) {
+		console.info("Using event context modal to jump to event", evtID)
+		openEventContextModal(roomCtx, evtID)
+	}
+}

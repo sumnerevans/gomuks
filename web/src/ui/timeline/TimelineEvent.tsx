@@ -32,7 +32,7 @@ import { EventFixedMenu, EventFullMenu, EventHoverMenu, getModalStyleFromMouse }
 import { ModalContext, NestableModalContext } from "../modal"
 import { useRoomContext } from "../roomview/roomcontext.ts"
 import URLPreview from "../urlpreview/URLPreview.tsx"
-import { jumpToVisibleEvent, openEventContextModal } from "../util/jumpToEvent.tsx"
+import { jumpToEventInView } from "../util/jumpToEvent.tsx"
 import EventEditHistory from "./EventEditHistory.tsx"
 import ReadReceipts from "./ReadReceipts.tsx"
 import { ReplyBody, ReplyIDBody } from "./ReplyBody.tsx"
@@ -162,9 +162,7 @@ const TimelineEvent = ({
 	}
 	const onClickTimestamp = () => {
 		if (viewType === "pinned") {
-			if (!jumpToVisibleEvent(evt.event_id, document.querySelector("div.room-view"))) {
-				openEventContextModal(roomCtx, evt.event_id)
-			}
+			jumpToEventInView(roomCtx, evt.event_id, document.querySelector("div.room-view"))
 		}
 	}
 	const openEditHistory = () => {
