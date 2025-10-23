@@ -43,6 +43,7 @@ import (
 	"maunium.net/go/mautrix"
 
 	"go.mau.fi/gomuks/pkg/hicli"
+	"go.mau.fi/gomuks/version"
 )
 
 func (gmx *Gomuks) CreateAPIRouter() http.Handler {
@@ -88,8 +89,8 @@ func (gmx *Gomuks) StartServer() {
 		gmx.Log.Warn().Msg("Frontend not found")
 	} else {
 		router.Handle("/", gmx.FrontendCacheMiddleware(http.FileServerFS(frontend)))
-		if gmx.Commit != "unknown" && !gmx.BuildTime.IsZero() {
-			gmx.frontendETag = fmt.Sprintf(`"%s-%s"`, gmx.Commit, gmx.BuildTime.Format(time.RFC3339))
+		if version.Gomuks.Commit != "unknown" && !version.Gomuks.BuildTime.IsZero() {
+			gmx.frontendETag = fmt.Sprintf(`"%s-%s"`, version.Gomuks.Commit, version.Gomuks.BuildTime.Format(time.RFC3339))
 		}
 		indexFile, err := frontend.Open("index.html")
 		if err != nil {

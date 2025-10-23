@@ -18,15 +18,10 @@ package version
 
 import (
 	"fmt"
-	"runtime"
-	"strings"
-	"time"
 
+	"go.mau.fi/util/progver"
 	"maunium.net/go/mautrix"
 )
-
-const StaticVersion = "0.4.0"
-const URL = "https://github.com/gomuks/gomuks"
 
 var (
 	Tag       = "unknown"
@@ -34,43 +29,13 @@ var (
 	BuildTime = "unknown"
 )
 
-var (
-	Version          string
-	Description      string
-	LinkifiedVersion string
-	ParsedBuildTime  time.Time
-)
+var Gomuks = progver.ProgramVersion{
+	Name:        "gomuks",
+	URL:         "https://github.com/gomuks/gomuks",
+	BaseVersion: "25.10",
+	SemCalVer:   true,
+}.Init(Tag, Commit, BuildTime)
 
 func init() {
-	tagWithoutV := strings.TrimPrefix(Tag, "v")
-	if tagWithoutV != StaticVersion {
-		suffix := "+dev"
-		if len(Commit) > 8 {
-			Version = fmt.Sprintf("%s%s.%s", StaticVersion, suffix, Commit[:8])
-		} else {
-			Version = fmt.Sprintf("%s%s.unknown", StaticVersion, suffix)
-		}
-	} else {
-		Version = StaticVersion
-	}
-
-	LinkifiedVersion = fmt.Sprintf("v%s", Version)
-	if tagWithoutV == Version {
-		LinkifiedVersion = fmt.Sprintf("[v%s](%s/releases/v%s)", Version, URL, tagWithoutV)
-	} else if len(Commit) > 8 {
-		LinkifiedVersion = strings.Replace(LinkifiedVersion, Commit[:8], fmt.Sprintf("[%s](%s/commit/%s)", Commit[:8], URL, Commit), 1)
-	}
-	if BuildTime != "unknown" {
-		ParsedBuildTime, _ = time.Parse(time.RFC3339, BuildTime)
-	}
-	var builtWith string
-	if ParsedBuildTime.IsZero() {
-		BuildTime = "unknown"
-		builtWith = runtime.Version()
-	} else {
-		BuildTime = ParsedBuildTime.Format(time.RFC1123)
-		builtWith = fmt.Sprintf("built at %s with %s", BuildTime, runtime.Version())
-	}
-	mautrix.DefaultUserAgent = fmt.Sprintf("gomuks/%s %s", Version, mautrix.DefaultUserAgent)
-	Description = fmt.Sprintf("gomuks %s on %s/%s (%s)", Version, runtime.GOOS, runtime.GOARCH, builtWith)
+	mautrix.DefaultUserAgent = fmt.Sprintf("gomuks/%s %s", Gomuks.FormattedVersion, mautrix.DefaultUserAgent)
 }

@@ -41,17 +41,13 @@ import (
 
 	"go.mau.fi/gomuks/pkg/hicli"
 	"go.mau.fi/gomuks/pkg/hicli/jsoncmd"
+	"go.mau.fi/gomuks/version"
 )
 
 type Gomuks struct {
 	Log    *zerolog.Logger
 	Server *http.Server
 	Client *hicli.HiClient
-
-	Version          string
-	Commit           string
-	LinkifiedVersion string
-	BuildTime        time.Time
 
 	ConfigDir string
 	DataDir   string
@@ -265,9 +261,9 @@ func (gmx *Gomuks) Run() {
 	}
 	gmx.SetupLog()
 	gmx.Log.Info().
-		Str("version", gmx.Version).
+		Str("version", version.Gomuks.FormattedVersion).
 		Str("go_version", runtime.Version()).
-		Time("built_at", gmx.BuildTime).
+		Time("built_at", version.Gomuks.BuildTime).
 		Msg("Initializing gomuks")
 	gmx.StartServer()
 	gmx.StartClient()

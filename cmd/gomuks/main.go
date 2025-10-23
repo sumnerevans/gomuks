@@ -52,15 +52,11 @@ func main() {
 		flag.PrintHelp()
 		os.Exit(0)
 	} else if *wantVersion {
-		fmt.Println(version.Description)
+		fmt.Println(version.Gomuks.VersionDescription)
 		os.Exit(0)
 	}
 
 	gmx := gomuks.NewGomuks()
-	gmx.Version = version.Version
-	gmx.Commit = version.Commit
-	gmx.LinkifiedVersion = version.LinkifiedVersion
-	gmx.BuildTime = version.ParsedBuildTime
 	gmx.FrontendFS = web.Frontend
 	gmx.Run()
 }

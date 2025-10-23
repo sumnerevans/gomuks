@@ -91,10 +91,6 @@ func (c *CommandHandler) Init() {
 
 func main() {
 	gmx := gomuks.NewGomuks()
-	gmx.Version = version.Version
-	gmx.Commit = version.Commit
-	gmx.LinkifiedVersion = version.LinkifiedVersion
-	gmx.BuildTime = version.ParsedBuildTime
 	gmx.DisableAuth = true
 	exhttp.AutoAllowCORS = false
 	hicli.InitialDeviceDisplayName = "gomuks desktop"
@@ -107,9 +103,9 @@ func main() {
 	}
 	gmx.SetupLog()
 	gmx.Log.Info().
-		Str("version", gmx.Version).
+		Str("version", version.Gomuks.FormattedVersion).
 		Str("go_version", runtime.Version()).
-		Time("built_at", gmx.BuildTime).
+		Time("built_at", version.Gomuks.BuildTime).
 		Msg("Initializing gomuks desktop")
 	gmx.StartClient()
 	gmx.Log.Info().Msg("Initialization complete, starting desktop app")
