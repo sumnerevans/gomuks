@@ -57,8 +57,8 @@ export function calculateMediaSize(
 
 	const origWidth = width
 	const origHeight = height
+	const aspectRatio = width / height
 	if (width > imageContainerWidth || height > imageContainerHeight) {
-		const aspectRatio = width / height
 		if (aspectRatio > imageContainerAspectRatio) {
 			width = imageContainerWidth
 			height = imageContainerWidth / aspectRatio
@@ -75,11 +75,17 @@ export function calculateMediaSize(
 	// The full image can always be viewed by clicking.
 	if (height < minHeight) {
 		height = minHeight
+		if (width < imageContainerWidth) {
+			width = Math.min(imageContainerWidth, height * aspectRatio)
+		}
 		extraMediaStyle.objectFit = "cover"
 		extraMediaStyle.height = "100%"
 	}
 	if (width < minWidth) {
 		width = minWidth
+		if (height < imageContainerHeight) {
+			height = Math.min(imageContainerHeight, width / aspectRatio)
+		}
 		extraMediaStyle.objectFit = "cover"
 		extraMediaStyle.width = "100%"
 	}
