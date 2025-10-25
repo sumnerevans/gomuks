@@ -72,7 +72,6 @@ export class InvitedRoomStore implements RoomListEntry, RoomSummary {
 				this.join_rule = ensureString(state.content.join_rule) as JoinRule
 			}
 		}
-		this.search_name = toSearchableString(this.name ?? "")
 		const ownMemberEvt = members.get(parent.userID)
 		if (ownMemberEvt) {
 			this.invited_by = ownMemberEvt.sender
@@ -92,6 +91,7 @@ export class InvitedRoomStore implements RoomListEntry, RoomSummary {
 			this.name = getDisplayname(this.invited_by, this.inviter_profile)
 			this.avatar = this.inviter_profile?.avatar_url
 		}
+		this.search_name = toSearchableString(this.name ?? "")
 	}
 
 	get membership(): Membership {
