@@ -285,18 +285,10 @@ func (gmx *Gomuks) doBasicAuth(r *http.Request) (found, correct bool) {
 	return
 }
 
-func isImageFetch(header http.Header) bool {
-	return header.Get("Sec-Fetch-Site") == "cross-site" &&
-		header.Get("Sec-Fetch-Mode") == "no-cors" &&
-		header.Get("Sec-Fetch-Dest") == "image"
-}
-
 func (gmx *Gomuks) AuthMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if strings.HasPrefix(r.URL.Path, "/media") &&
-			isImageFetch(r.Header) &&
-			gmx.validateAuth(r.URL.Query().Get("image_auth"), true) &&
-			r.URL.Query().Get("encrypted") == "false" {
+			gmx.validateAuth(r.URL.Query().Get("image_auth"), true) {
 			next.ServeHTTP(w, r)
 			return
 		}
