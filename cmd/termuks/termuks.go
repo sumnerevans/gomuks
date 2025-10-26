@@ -1,9 +1,9 @@
 package main
 
 import (
-	"go.mau.fi/gomuks/tui/ui"
+	"go.mau.fi/gomuks/tui"
 )
 
 func main() {
-	ui.NewGomuksTUI().Run()
+	tui.NewGomuksTUI().Run()
 }
