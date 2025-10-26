@@ -90,9 +90,11 @@ deploy wasmuks:
   - export GO_LDFLAGS="-s -w -linkmode external -extldflags -static -X go.mau.fi/gomuks/version.Tag=$CI_COMMIT_TAG -X go.mau.fi/gomuks/version.Commit=$CI_COMMIT_SHA -X 'go.mau.fi/gomuks/version.BuildTime=`date -Iseconds`' -X 'maunium.net/go/mautrix.GoModVersion=$MAUTRIX_VERSION'"
   script:
   - go build -ldflags "$GO_LDFLAGS" ./cmd/gomuks
+  - go build -ldflags "$GO_LDFLAGS" ./cmd/termuks
   artifacts:
     paths:
     - gomuks
+    - termuks
   dependencies:
   - frontend
   needs:
@@ -159,7 +161,8 @@ macos/arm64:
   - export LIBRARY_PATH=$(brew --prefix)/lib
   - export CPATH=$(brew --prefix)/include
   script:
-  - go build -ldflags "$GO_LDFLAGS" -o gomuks ./cmd/gomuks
+  - go build -ldflags "$GO_LDFLAGS" ./cmd/gomuks
+  - go build -ldflags "$GO_LDFLAGS" ./cmd/termuks
   - install_name_tool -change $(brew --prefix)/opt/libolm/lib/libolm.3.dylib @rpath/libolm.3.dylib gomuks
   - install_name_tool -add_rpath @executable_path gomuks
   - install_name_tool -add_rpath /opt/homebrew/opt/libolm/lib gomuks
@@ -168,6 +171,7 @@ macos/arm64:
   artifacts:
     paths:
     - gomuks
+    - termuks
     - libolm.3.dylib
   dependencies:
   - frontend
