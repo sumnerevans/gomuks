@@ -63,6 +63,9 @@ type WebConfig struct {
 	DebugEndpoints  bool     `yaml:"debug_endpoints"`
 	EventBufferSize int      `yaml:"event_buffer_size"`
 	OriginPatterns  []string `yaml:"origin_patterns"`
+	InsecureCookies bool     `yaml:"insecure_cookies"`
+
+	DisableAuthBecauseIWantMyAccountToBeHacked bool `yaml:"disable_auth_because_i_want_my_account_to_be_hacked"`
 }
 
 var defaultFileWriter = zeroconfig.WriterConfig{

@@ -187,6 +187,9 @@ func (gmx *Gomuks) validateToken(token string, output any) bool {
 }
 
 func (gmx *Gomuks) validateAuth(token string, imageOnly bool) bool {
+	if gmx.Config.Web.DisableAuthBecauseIWantMyAccountToBeHacked {
+		return true
+	}
 	if len(token) > 500 {
 		return false
 	}
@@ -244,13 +247,13 @@ func (gmx *Gomuks) writeTokenCookie(w http.ResponseWriter, created, jsonOutput, 
 }
 
 func (gmx *Gomuks) Authenticate(w http.ResponseWriter, r *http.Request) {
-	if gmx.DisableAuth {
+	if gmx.DisableAuth || gmx.Config.Web.DisableAuthBecauseIWantMyAccountToBeHacked {
 		w.WriteHeader(http.StatusOK)
 		return
 	}
 	jsonOutput := r.URL.Query().Get("output") == "json"
 	allowPrompt := r.URL.Query().Get("no_prompt") != "true"
-	insecureCookie := r.URL.Query().Get("insecure_cookie") == "true"
+	insecureCookie := r.URL.Query().Get("insecure_cookie") == "true" || gmx.Config.Web.InsecureCookies
 	authCookie, err := r.Cookie("gomuks_auth")
 	if err == nil && gmx.validateAuth(authCookie.Value, false) {
 		hlog.FromRequest(r).Debug().Msg("Authentication successful with existing cookie")
