@@ -67,6 +67,7 @@ import {
 	charToAutocompleteType,
 	emojiQueryRegex,
 	getAutocompleter,
+	isLegacyCommand,
 	startsWithSingleSlash,
 } from "./getAutocompleter.ts"
 import { interceptCommand } from "./localcommands.ts"
@@ -516,20 +517,21 @@ const MessageComposer = () => {
 		filename: string,
 		encodingOpts?: MediaEncodingOptions,
 	) => {
+		const encryptUpload = Boolean(isEncrypted && !encodingOpts?._no_encrypt)
 		if (client.rpc.rpcMediaUpload) {
 			setLoadingMedia(0)
-			client.rpc.uploadMedia(file, filename, isEncrypted).then(
+			client.rpc.uploadMedia(file, filename, encryptUpload).then(
 				media => setState({ media, location: null }),
 				err => window.alert(`Failed to upload file: ${err.message}`),
 			).finally(() => setLoadingMedia(null))
 			return
 		}
 		const params = new URLSearchParams([
-			["encrypt", isEncrypted.toString()],
+			["encrypt", encryptUpload.toString()],
 			["progress", "true"],
 			["filename", filename],
 			...Object.entries(encodingOpts ?? {})
-				.filter(([, value]) => !!value)
+				.filter(([key, value]) => !key.startsWith("_") && !!value)
 				.map(([key, value]) => [key, value.toString()]),
 		])
 		const xhr = new XMLHttpRequest()
@@ -580,14 +582,16 @@ const MessageComposer = () => {
 		if (!file) {
 			return
 		}
-		if (room.preferences.upload_dialog) {
+		if (room.preferences.upload_dialog || (state.text.startsWith("/") && !isLegacyCommand(state.text))) {
 			const objectURL = URL.createObjectURL(file)
 			openModal({
 				dimmed: true,
 				boxed: true,
 				innerBoxClass: "media-upload-modal-wrapper",
 				onClose: () => URL.revokeObjectURL(objectURL),
-				content: <MediaUploadDialog file={file} blobURL={objectURL} doUploadFile={doUploadFile}/>,
+				content: <MediaUploadDialog
+					file={file} blobURL={objectURL} doUploadFile={doUploadFile} isEncrypted={isEncrypted}
+				/>,
 			})
 		} else {
 			doUploadFile(file, file.name)

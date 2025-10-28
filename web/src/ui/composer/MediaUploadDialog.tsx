@@ -23,6 +23,7 @@ export interface MediaUploadDialogProps {
 	file: File
 	blobURL: string
 	doUploadFile: (file: Blob, filename: string, encodingOpts?: MediaEncodingOptions) => void
+	isEncrypted: boolean
 }
 
 function formatSize(bytes: number): string {
@@ -46,13 +47,14 @@ interface dimensions {
 	height: number
 }
 
-const MediaUploadDialog = ({ file, blobURL, doUploadFile }: MediaUploadDialogProps) => {
+const MediaUploadDialog = ({ file, blobURL, doUploadFile, isEncrypted }: MediaUploadDialogProps) => {
 	const videoRef = useRef<HTMLVideoElement>(null)
 	const [name, setName] = useState(file.name)
 	const [reencTarget, setReencTarget] = useState(nonEncodableSources.includes(file.type) ? "image/jpeg" : "")
 	const [jpegQuality, setJPEGQuality] = useState(80)
 	const [resizeSlider, setResizeSlider] = useState(100)
 	const [origDimensions, setOrigDimensions] = useState<dimensions | null>(null)
+	const [noEncrypt, setNoEncrypt] = useState(false)
 	const closeModal = use(ModalCloseContext)
 	let previewContent: JSX.Element | null = null
 	let reencTargets: string[] | null = null
@@ -98,6 +100,7 @@ const MediaUploadDialog = ({ file, blobURL, doUploadFile }: MediaUploadDialogPro
 			resize_width: resizeSlider !== 100 ? resizedWidth : undefined,
 			resize_height: resizeSlider !== 100 ? resizedHeight : undefined,
 			resize_percent: resizeSlider,
+			_no_encrypt: noEncrypt,
 		})
 		closeModal()
 	}
@@ -111,12 +114,13 @@ const MediaUploadDialog = ({ file, blobURL, doUploadFile }: MediaUploadDialogPro
 			<div className="meta-key">Original size</div>
 			<div className="meta-value">{formatSize(file.size)}</div>
 
-			<div className="meta-key">File name</div>
+			<label htmlFor="input-file-name" className="meta-key">File name</label>
 			<div className="meta-value">
 				<input
 					autoFocus={!isMobileDevice}
 					type="text"
 					value={name}
+					id="input-file-name"
 					onChange={evt => setName(evt.target.value)}
 				/>
 			</div>
@@ -127,9 +131,9 @@ const MediaUploadDialog = ({ file, blobURL, doUploadFile }: MediaUploadDialogPro
 			</div>
 
 			{reencTargets && <>
-				<div className="meta-key">Re-encode</div>
+				<label htmlFor="select-reenc-type" className="meta-key">Re-encode</label>
 				<div className="meta-value meta-value-long">
-					<select value={reencTarget} onChange={evt => {
+					<select value={reencTarget} id="select-reenc-type" onChange={evt => {
 						setReencTarget(evt.target.value)
 						setResizeSlider(100)
 					}}>
@@ -138,13 +142,14 @@ const MediaUploadDialog = ({ file, blobURL, doUploadFile }: MediaUploadDialogPro
 					</select>
 				</div>
 
-				<div className="meta-key">Resize</div>
+				<label htmlFor="slider-resize" className="meta-key">Resize</label>
 				<div className="meta-value meta-value-long">
 					<input
 						type="range"
 						min={1}
 						max={100}
 						value={resizeSlider}
+						id="slider-resize"
 						onChange={evt => {
 							setResizeSlider(parseInt(evt.target.value))
 							if (reencTarget === "") {
@@ -157,16 +162,29 @@ const MediaUploadDialog = ({ file, blobURL, doUploadFile }: MediaUploadDialogPro
 			</>}
 
 			{(reencTarget === "image/jpeg" || reencTarget === "image/webp") && <>
-				<div className="meta-key">Quality</div>
+				<label htmlFor="slider-reenc-quality" className="meta-key">Quality</label>
 				<div className="meta-value meta-value-long">
 					<input
 						type="range"
 						min={1}
 						max={reencTarget === "image/webp" ? 101 : 100}
+						id="slider-reenc-quality"
 						value={jpegQuality}
 						onChange={evt => setJPEGQuality(parseInt(evt.target.value))}
 					/>
 					<span>{jpegQuality === 101 ? "Lossless" : `${jpegQuality}%`}</span>
+				</div>
+			</>}
+
+			{isEncrypted && <>
+				<label htmlFor="checkbox-no-encrypt" className="meta-key">Don't encrypt</label>
+				<div className="meta-value meta-value-long">
+					<input
+						type="checkbox"
+						checked={noEncrypt}
+						id="checkbox-no-encrypt"
+						onChange={evt => setNoEncrypt(evt.target.checked)}
+					/>
 				</div>
 			</>}
 		</div>
