@@ -6,10 +6,11 @@
 
 A Matrix client written in Go using [mautrix](https://github.com/mautrix/go).
 
-This branch contains gomuks web. For legacy gomuks terminal, see the
-[master branch](https://github.com/gomuks/gomuks/tree/master). The new
-version will get a terminal frontend in the future. See also:
-<https://github.com/gomuks/gomuks/issues/476>.
+This branch contains new gomuks, which consists of the backend, and web and
+terminal frontends. The new terminal frontend is still experimental and doesn't
+have many features, but basic messaging should work. For legacy gomuks terminal,
+see the [master branch](https://github.com/gomuks/gomuks/tree/master).
+See also: <https://github.com/gomuks/gomuks/issues/476>.
 
 ## Documentation
 For installation and usage instructions, see [docs.mau.fi](https://docs.mau.fi/gomuks/).
