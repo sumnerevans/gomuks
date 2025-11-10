@@ -694,7 +694,7 @@ func (gmx *Gomuks) GetURLPreview(w http.ResponseWriter, r *http.Request) {
 		mautrix.MInvalidParam.WithMessage("URL must be provided to preview").Write(w)
 		return
 	}
-	linkPreview, err := gmx.Client.Client.GetURLPreview(r.Context(), url)
+	linkPreview, err := gmx.Client.Client.GetURLPreview(mautrix.WithMaxRetries(r.Context(), 0), url)
 	if err != nil {
 		log.Err(err).Msg("Failed to get URL preview")
 		writeMaybeRespError(err, w)
