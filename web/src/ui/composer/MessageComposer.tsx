@@ -140,7 +140,9 @@ const draftStore = {
 			return null
 		}
 		try {
-			return JSON.parse(data)
+			const parsed = JSON.parse(data)
+			parsed.loadingPreviews = []
+			return parsed
 		} catch {
 			return null
 		}
@@ -708,6 +710,9 @@ const MessageComposer = () => {
 		}
 	}, [roomCtx, room, state, editing])
 	useEffect(() => {
+		if (state.uninited) {
+			return
+		}
 		if (!room.preferences.send_bundled_url_previews) {
 			setState({ previews: [], loadingPreviews: [], possiblePreviews: []})
 			return
@@ -721,7 +726,7 @@ const MessageComposer = () => {
 			loadingPreviews: s.loadingPreviews.filter(u => urls.includes(u)),
 			possiblePreviews: urls,
 		}))
-	}, [room.preferences, state.text])
+	}, [room.preferences, state.uninited, state.text])
 	const clearMedia = useCallback(() => setState({ media: null, location: null }), [])
 	const onChangeLocation = useCallback((location: ComposerLocationValue) => setState({ location }), [])
 	const closeReply = useCallback((evt: React.MouseEvent) => {
