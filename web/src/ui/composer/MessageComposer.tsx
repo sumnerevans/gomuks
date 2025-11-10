@@ -96,6 +96,7 @@ export interface ComposerState {
 	loadingPreviews: string[]
 	possiblePreviews: string[]
 	replyTo: EventID | null
+	mentionRoom: boolean
 	silentReply: boolean
 	explicitReplyInThread: boolean
 	startNewThread: boolean
@@ -113,6 +114,7 @@ const emptyComposer: ComposerState = {
 	loadingPreviews: [],
 	possiblePreviews: [],
 	replyTo: null,
+	mentionRoom: true,
 	silentReply: false,
 	explicitReplyInThread: false,
 	startNewThread: false,
@@ -262,7 +264,7 @@ const MessageComposer = () => {
 		setAutocomplete(null)
 		const mentions: Mentions = {
 			user_ids: [],
-			room: false,
+			room: state.text.includes("@room") && state.mentionRoom,
 		}
 		let relates_to: RelatesTo | undefined = undefined
 		if (roomCtx.threadRoot) {
@@ -951,7 +953,15 @@ const MessageComposer = () => {
 				room={room} client={client}
 				location={state.location} onChange={onChangeLocation} clearLocation={clearMedia}
 			/>}
-			{state.previews.length || state.loadingPreviews || possiblePreviewsNotLoadingOrPreviewed
+			{state.text.includes("@room") && <label className="mention-confirmations">
+				<input
+					type="checkbox"
+					checked={state.mentionRoom}
+					onChange={evt => setState({ mentionRoom: evt.currentTarget.checked })}
+				/>
+				Mention @room
+			</label>}
+			{state.previews.length || state.loadingPreviews.length || possiblePreviewsNotLoadingOrPreviewed
 				? <div className="url-previews">
 					{state.previews.map((preview, i) => <URLPreview
 						key={i}
