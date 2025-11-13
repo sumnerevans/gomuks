@@ -100,8 +100,8 @@ go.mau.fi/goheif v0.0.0-20250809103256-ca48e8691d2f h1:Aaoinc/Rpjt61RGQxHhF+lLck
 go.mau.fi/goheif v0.0.0-20250809103256-ca48e8691d2f/go.mod h1:pvI0eODG9JOWnCYxy3dkgrL3/bJttxsUFgu+NvCBH4M=
 go.mau.fi/mauview v0.2.2-0.20241209125653-292e0a6914c5 h1:apKftqeRRyj/Vpd5s81fNhS8UErwgfs07KG3NSHB/4Q=
 go.mau.fi/mauview v0.2.2-0.20241209125653-292e0a6914c5/go.mod h1:G0Qkfwt84f+5tagHsaRdiTuUFeTlIZu61MN/JL9D8Qo=
-go.mau.fi/util v0.9.3-0.20251025192449-8a7afa7a7710 h1:ip73gyYxICKFNRmI2dv6wklnCzxc2UCYjOwBBE6cK4Q=
-go.mau.fi/util v0.9.3-0.20251025192449-8a7afa7a7710/go.mod h1:055elBBCJSdhRsmub7ci9hXZPgGr1U6dYg44cSgRgoU=
+go.mau.fi/util v0.9.3-0.20251113115128-765da680fbae h1:Np49LoHPR27+h93o/2Ung9j/M1LiCNY/d0mjNObm09Q=
+go.mau.fi/util v0.9.3-0.20251113115128-765da680fbae/go.mod h1:055elBBCJSdhRsmub7ci9hXZPgGr1U6dYg44cSgRgoU=
 go.mau.fi/webp v0.2.0 h1:QVMenHw7JDb4vall5sV75JNBQj9Hw4u8AKbi1QetHvg=
 go.mau.fi/webp v0.2.0/go.mod h1:VSg9MyODn12Mb5pyG0NIyNFhujrmoFSsZBs8syOZD1Q=
 go.mau.fi/zeroconfig v0.2.0 h1:e/OGEERqVRRKlgaro7E6bh8xXiKFSXB3eNNIud7FUjU=

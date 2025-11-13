@@ -4,11 +4,11 @@ go 1.24.0
 
 toolchain go1.25.4
 
-require github.com/wailsapp/wails/v3 v3.0.0-alpha.38
+require github.com/wailsapp/wails/v3 v3.0.0-alpha.40
 
 require (
 	go.mau.fi/gomuks v0.4.0
-	go.mau.fi/util v0.9.3-0.20251025192449-8a7afa7a7710
+	go.mau.fi/util v0.9.3-0.20251113115128-765da680fbae
 )
 
 require (
