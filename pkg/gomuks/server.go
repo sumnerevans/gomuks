@@ -86,15 +86,13 @@ func (gmx *Gomuks) StartServer() {
 		gmx.AuthMiddleware,
 	))
 	if frontend, err := fs.Sub(gmx.FrontendFS, "dist"); err != nil {
-		gmx.Log.Warn().Msg("Frontend not found")
+		gmx.Log.Warn().Err(err).Msg("Frontend not found")
+	} else if indexFile, err := frontend.Open("index.html"); err != nil {
+		gmx.Log.Warn().Err(err).Msg("Failed to open frontend index.html")
 	} else {
 		router.Handle("/", gmx.FrontendCacheMiddleware(http.FileServerFS(frontend)))
 		if version.Gomuks.Commit != "unknown" && !version.Gomuks.BuildTime.IsZero() {
 			gmx.frontendETag = fmt.Sprintf(`"%s-%s"`, version.Gomuks.Commit, version.Gomuks.BuildTime.Format(time.RFC3339))
-		}
-		indexFile, err := frontend.Open("index.html")
-		if err != nil {
-			gmx.Log.Fatal().Err(err).Msg("Failed to open index.html")
 		}
 		data, err := io.ReadAll(indexFile)
 		_ = indexFile.Close()
