@@ -13,6 +13,10 @@
 //
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+//eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type UnknownEventContent = Record<string, any>
+
 export type RoomID = string
 export type EventID = string
 export type UserID = string
@@ -366,15 +370,8 @@ export interface ElementRecentEmoji {
 
 export type JoinRule = "public" | "knock" | "restricted" | "knock_restricted" | "invite" | "private"
 
-export interface RoomSummary {
+export interface PublicRoomInfo {
 	room_id: RoomID
-	membership?: Membership
-
-	room_version?: RoomVersion
-	"im.nheko.summary.room_version"?: RoomVersion
-	"im.nheko.summary.version"?: RoomVersion
-	encryption?: "m.megolm.v1.aes-sha2"
-	"im.nheko.summary.encryption"?: "m.megolm.v1.aes-sha2"
 
 	avatar_url?: ContentURI
 	canonical_alias?: RoomAlias
@@ -385,7 +382,32 @@ export interface RoomSummary {
 	room_type: RoomType
 	topic?: string
 	world_readable: boolean
+	room_version?: RoomVersion
+	encryption?: "m.megolm.v1.aes-sha2"
 	allowed_room_ids?: RoomID[]
+}
+
+export interface StrippedStateEvent {
+	type: EventType
+	sender: UserID
+	state_key: string
+	content: UnknownEventContent
+}
+
+export interface SpaceHierarchyChild extends PublicRoomInfo {
+	children_state: StrippedStateEvent[]
+}
+
+export interface RoomSummary extends PublicRoomInfo {
+	membership?: Membership
+	"im.nheko.summary.room_version"?: RoomVersion
+	"im.nheko.summary.version"?: RoomVersion
+	"im.nheko.summary.encryption"?: "m.megolm.v1.aes-sha2"
+}
+
+export interface RespSpaceHierarchy {
+	rooms: SpaceHierarchyChild[]
+	next_batch?: string
 }
 
 export interface RespRoomJoin {

@@ -44,6 +44,7 @@ import type {
 	RespMediaConfig,
 	RespOpenIDToken,
 	RespRoomJoin,
+	RespSpaceHierarchy,
 	RespTurnServer,
 	RoomAlias,
 	RoomID,
@@ -312,6 +313,13 @@ export default abstract class RPCClient {
 
 	getRoomSummary(room_id_or_alias: RoomID | RoomAlias, via?: string[]): Promise<RoomSummary> {
 		return this.request("get_room_summary", { room_id_or_alias, via })
+	}
+
+	getSpaceHierarchy(
+		room_id: RoomID,
+		params: { from?: string, limit?: number, max_depth?: number | null, suggested_only?: boolean } = {},
+	): Promise<RespSpaceHierarchy> {
+		return this.request("get_space_hierarchy", { room_id, ...params })
 	}
 
 	joinRoom(room_id_or_alias: RoomID | RoomAlias, via?: string[], reason?: string): Promise<RespRoomJoin> {

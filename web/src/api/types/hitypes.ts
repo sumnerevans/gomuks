@@ -26,7 +26,9 @@ import {
 	RelationType,
 	RoomAlias,
 	RoomID,
+	StrippedStateEvent,
 	TombstoneEventContent,
+	UnknownEventContent,
 	UserID,
 } from "./mxtypes.ts"
 
@@ -82,16 +84,6 @@ export interface DBSpaceEdge {
 
 	parent_event_rowid?: EventRowID
 	canonical?: true
-}
-
-//eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type UnknownEventContent = Record<string, any>
-
-export interface StrippedStateEvent {
-	type: EventType
-	sender: UserID
-	state_key: string
-	content: UnknownEventContent
 }
 
 export interface DBInvitedRoom {
