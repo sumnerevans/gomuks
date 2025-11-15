@@ -13,7 +13,7 @@
 //
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
-import { UserID } from "@/api/types"
+import { RoomAlias, RoomID, UserID } from "@/api/types"
 
 export const escapeHTML = (input: string) => input
 	.replaceAll("&", "&amp;")
@@ -33,3 +33,13 @@ export const escapeMarkdownAndURI = (input: string) => {
 
 export const makeMentionMarkdown = (displayname: string, userID: UserID) =>
 	`[${escapeMarkdown(displayname).replace("\n", " ")}](https://matrix.to/#/${escapeMarkdownAndURI(userID)}) `
+
+export const makeRoomMentionMarkdown = (roomName: string, roomIDOrAlias: RoomID | RoomAlias, via?: string[]) => {
+	let query = ""
+	if (via?.length && roomIDOrAlias.startsWith("!")) {
+		query = "?" + new URLSearchParams(via.map(item => ["via", item])).toString()
+	}
+	const url = `https://matrix.to/#/${escapeMarkdownAndURI(roomIDOrAlias)}${query}`
+	roomName = escapeMarkdown(roomName).replace("\n", " ")
+	return `[${roomName}](${url})`
+}

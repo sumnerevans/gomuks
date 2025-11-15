@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 import { JSX, RefObject, use, useEffect, useLayoutEffect, useRef } from "react"
-import { getAvatarThumbnailURL, getMediaURL } from "@/api/media.ts"
+import { getAvatarThumbnailURL, getMediaURL, getRoomAvatarThumbnailURL } from "@/api/media.ts"
 import {
 	AutocompleteMemberEntry,
 	RoomStateStore,
@@ -32,13 +32,13 @@ import {
 	unpackExtensibleText,
 } from "@/api/types"
 import { Emoji, emojiToMarkdown, useSortedAndFilteredEmojis } from "@/util/emoji"
-import { makeMentionMarkdown } from "@/util/markdown.ts"
+import { makeMentionMarkdown, makeRoomMentionMarkdown } from "@/util/markdown.ts"
 import useEvent from "@/util/useEvent.ts"
 import ClientContext from "../ClientContext.ts"
 import { RoomContext } from "../roomview/roomcontext.ts"
 import type { ComposerState } from "./MessageComposer.tsx"
 import { charToAutocompleteType, isLegacyCommand } from "./getAutocompleter.ts"
-import { useFilteredCommands, useFilteredMembers } from "./userautocomplete.ts"
+import { useFilteredCommands, useFilteredMembers, useFilteredRooms } from "./userautocomplete.ts"
 import "./Autocompleter.css"
 
 export interface AutocompleteQuery {
@@ -212,10 +212,30 @@ export const UserAutocompleter = ({ params, room, ...rest }: AutocompleterProps)
 	return useAutocompleter({ params, room, ...rest, items, ...userFuncs })
 }
 
-export const RoomAutocompleter = ({ params }: AutocompleterProps) => {
-	return <div className="autocompletions">
-		Autocomplete {params.type} {params.query}
-	</div>
+const roomFuncs = {
+	getText: (room: RoomStateStore, state: ComposerState) => state.command
+		? room.meta.current.canonical_alias || room.roomID
+		: makeRoomMentionMarkdown(
+			room.meta.current.canonical_alias || room.meta.current.name || room.roomID,
+			room.meta.current.canonical_alias || room.roomID,
+			room.getViaServers(),
+		),
+	getKey: (room: RoomStateStore) => room.roomID,
+	render: (room: RoomStateStore) => <>
+		<img
+			className={`small avatar ${room.meta.current.creation_content?.type === "m.space" ? "space" : ""}`}
+			loading="lazy"
+			src={getRoomAvatarThumbnailURL(room.meta.current)}
+			alt=""
+		/>
+		{room.meta.current.name ?? <code>room.roomID</code>}
+	</>,
+}
+
+export const RoomAutocompleter = ({ params, ...rest }: AutocompleterProps) => {
+	const client = use(ClientContext)!
+	const items = useFilteredRooms(client.store, (params.frozenQuery ?? params.query).slice(1))
+	return useAutocompleter({ params, ...rest, items, ...roomFuncs })
 }
 
 const BotSourceIcon = ({ source }: { source: UserID }) => {

@@ -176,16 +176,20 @@ export class StateStore {
 		return fn ? this.roomList.current.filter(fn) : this.roomList.current
 	}
 
-	#shouldHideRoom(entry: SyncRoom): boolean {
+	#showTypeInRoomList(entry: SyncRoom): boolean {
 		const cc = entry.meta.creation_content
 		switch (cc?.type ?? "") {
 		default:
 			// The room is not a normal room
-			return true
+			return false
 		case "":
 		case "support.feline.policy.lists.msc.v1":
 		case "org.matrix.msc3417.call":
+			return true
 		}
+	}
+
+	#isTombstoned(entry: SyncRoom): boolean {
 		const replacementRoom = entry.meta.tombstone?.replacement_room
 		if (
 			replacementRoom
@@ -215,7 +219,12 @@ export class StateStore {
 		if (!room) {
 			room = this.rooms.get(entry.meta.room_id)
 		}
-		if (this.#shouldHideRoom(entry)) {
+		const isTombstoned = this.#isTombstoned(entry)
+		const showInRoomList = this.#showTypeInRoomList(entry)
+		if (room) {
+			room.tombstoned = isTombstoned
+		}
+		if (isTombstoned || !showInRoomList) {
 			if (room) {
 				room.hidden = true
 			}

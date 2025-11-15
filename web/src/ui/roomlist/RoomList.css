@@ -236,4 +236,9 @@ img.avatar {
 		width: 5rem;
 		height: 5rem;
 	}
+
+	&.space {
+		border-radius: 0;
+		clip-path: url(#squircle);
+	}
 }

@@ -125,6 +125,7 @@ const fakeGomuksMember: MemDBEvent = {
 export class RoomStateStore {
 	readonly roomID: RoomID
 	readonly meta: NonNullCachedEventDispatcher<DBRoom>
+	searchString: string
 	timeline: TimelineRowTuple[] = []
 	timelineCache: (MemDBEvent | null)[] = []
 	editTargets: EventRowID[] = []
@@ -163,6 +164,7 @@ export class RoomStateStore {
 	readUpToRow = -1
 	hasMoreHistory = true
 	hidden = false
+	tombstoned = false
 	groupSessionAutoShared = false
 	#threadListenerRoot: EventID | null = null
 	#threadListener: ((append?: MemDBEvent[], overwrite?: MemDBEvent) => void) | null = null
@@ -172,6 +174,7 @@ export class RoomStateStore {
 	constructor(meta: DBRoom, private parent: StateStore) {
 		this.roomID = meta.room_id
 		this.meta = new NonNullCachedEventDispatcher(meta)
+		this.searchString = this.#makeSearchString(meta)
 		this.localPreferenceCache = getLocalStoragePreferences(`prefs-${this.roomID}`, this.preferenceSub.notify)
 		this.preferences = getPreferenceProxy(parent, this)
 	}
@@ -512,10 +515,19 @@ export class RoomStateStore {
 		this.stateSubs.notify(this.stateSubKey(evtType, key))
 	}
 
+	#makeSearchString(meta: DBRoom): string {
+		return toSearchableString(
+			(meta.name ?? "")
+			+ (meta.canonical_alias ?? "")
+			+ (meta.dm_user_id ?? ""),
+		)
+	}
+
 	applySync(sync: SyncRoom) {
 		if (visibleMetaIsEqual(this.meta.current, sync.meta)) {
 			this.meta.current = sync.meta
 		} else {
+			this.searchString = this.#makeSearchString(sync.meta)
 			this.meta.emit(sync.meta)
 		}
 		for (const ad of Object.values(sync.account_data ?? {})) {
