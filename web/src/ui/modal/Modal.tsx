@@ -23,6 +23,10 @@ interface ModalWrapperProps {
 	historyStateKey: string
 }
 
+// Hacky hack to stop using history.back() on chrome, because the popstate event fires in the wrong order
+// TODO stop using browser history for modals?
+const hackyIsFirefox = navigator.userAgent.includes("Gecko/")
+
 const ModalWrapper = ({ children, ContextType, historyStateKey }: ModalWrapperProps) => {
 	const [state, setState] = useReducer((prevState: ModalState | null, newState: ModalState | null) => {
 		prevState?.onClose?.()
@@ -34,14 +38,14 @@ const ModalWrapper = ({ children, ContextType, historyStateKey }: ModalWrapperPr
 		}
 		evt?.stopPropagation()
 		setState(null)
-		if (history.state?.[historyStateKey]) {
+		if (history.state?.[historyStateKey] && hackyIsFirefox) {
 			history.back()
 		}
 	}, [historyStateKey, state])
 	const onKeyWrapper = (evt: React.KeyboardEvent<HTMLDivElement>) => {
 		if (evt.key === "Escape" && !state?.noDismiss) {
 			setState(null)
-			if (history.state?.[historyStateKey]) {
+			if (history.state?.[historyStateKey] && hackyIsFirefox) {
 				history.back()
 			}
 		}
