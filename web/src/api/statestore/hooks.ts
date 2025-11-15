@@ -18,6 +18,7 @@ import Client from "@/api/client.ts"
 import type { CustomEmojiPack } from "@/util/emoji"
 import type {
 	BeeperPerMessageProfile,
+	DBSpaceEdge,
 	EventID,
 	EventType,
 	MemDBEvent,
@@ -30,6 +31,7 @@ import type {
 import { Preferences, preferences } from "../types/preferences"
 import type { StateStore } from "./main.ts"
 import type { AutocompleteMemberEntry, RoomStateStore } from "./room.ts"
+import type { SpaceEdgeStore } from "./space.ts"
 
 export function useRoomTimeline(room: RoomStateStore): (MemDBEvent | null)[] {
 	return useSyncExternalStore(
@@ -151,6 +153,13 @@ export function useRoomAccountData(room: RoomStateStore | null, type?: EventType
 	return useSyncExternalStore(
 		room && type !== undefined ? room.accountDataSubs.getSubscriber(type) : noopSubscribe,
 		() => type !== undefined ? room?.accountData.get(type) ?? null : null,
+	)
+}
+
+export function useSpaceEdges(edgeStore: SpaceEdgeStore | undefined): DBSpaceEdge[] | null {
+	return useSyncExternalStore(
+		edgeStore ? edgeStore.sub.subscribe : noopSubscribe,
+		() => edgeStore ? edgeStore.children : null,
 	)
 }
 

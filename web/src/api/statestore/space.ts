@@ -16,6 +16,7 @@
 import { RoomListEntry, StateStore } from "@/api/statestore/main.ts"
 import { DBSpaceEdge, RoomID } from "@/api/types"
 import { NonNullCachedEventDispatcher } from "@/util/eventdispatcher.ts"
+import Subscribable from "@/util/subscribable.ts"
 
 export interface RoomListFilter {
 	id: string
@@ -102,6 +103,7 @@ export class SpaceEdgeStore extends Space {
 	#flattenedRooms: Set<RoomID> = new Set()
 	#childSpaces: Set<SpaceEdgeStore> = new Set()
 	readonly #parentSpaces: Set<SpaceEdgeStore> = new Set()
+	sub = new Subscribable()
 
 	constructor(public id: RoomID, private parent: StateStore) {
 		super()
@@ -187,6 +189,7 @@ export class SpaceEdgeStore extends Space {
 		if (this.#parentSpaces.size > 0) {
 			this.#notifyParentsOfChange(recalculateFlattened, addedRooms, new WeakSet())
 		}
+		this.sub.notify()
 	}
 }
 

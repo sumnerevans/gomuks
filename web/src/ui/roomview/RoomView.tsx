@@ -23,6 +23,7 @@ import ErrorBoundary from "../util/ErrorBoundary.tsx"
 import { jumpToEvent } from "../util/jumpToEvent.tsx"
 import ElementCall from "../widget/ElementCall.tsx"
 import RoomViewHeader from "./RoomViewHeader.tsx"
+import SpaceView from "./SpaceView.tsx"
 import { RoomContext, RoomContextData } from "./roomcontext.ts"
 import "./RoomView.css"
 
@@ -35,7 +36,7 @@ interface RoomViewProps {
 function getViewForRoomType(roomType: string | undefined): JSX.Element | null {
 	switch (roomType) {
 	case "m.space":
-		return null // TODO <SpaceView />
+		return <SpaceView />
 	case "support.feline.policy.lists.msc.v1":
 		return null // TODO <PolicyListEditor />
 	case "org.matrix.msc3417.call":
