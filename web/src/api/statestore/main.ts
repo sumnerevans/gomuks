@@ -221,17 +221,13 @@ export class StateStore {
 		}
 		const isTombstoned = this.#isTombstoned(entry)
 		const showInRoomList = this.#showTypeInRoomList(entry)
+		const hidden = isTombstoned || !showInRoomList
 		if (room) {
 			room.tombstoned = isTombstoned
+			room.hidden = hidden
 		}
-		if (isTombstoned || !showInRoomList) {
-			if (room) {
-				room.hidden = true
-			}
+		if (hidden) {
 			return null
-		}
-		if (room?.hidden) {
-			room.hidden = false
 		}
 		const preview_event = room?.eventsByRowID.get(entry.meta.preview_event_rowid)
 		const preview_sender = preview_event && room?.getStateEvent("m.room.member", preview_event.sender)
@@ -324,11 +320,13 @@ export class StateStore {
 			if (!resyncRoomList) {
 				// When we join a valid replacement room, hide the tombstoned room.
 				const predecessorID = data.meta.creation_content?.predecessor?.room_id
-				if (
-					isNewRoom
-					&& typeof predecessorID === "string"
-					&& this.rooms.get(predecessorID)?.meta.current.tombstone?.replacement_room === roomID) {
-					changedRoomListEntries.set(predecessorID, null)
+				if (isNewRoom && typeof predecessorID === "string") {
+					const predecessorRoom = this.rooms.get(predecessorID)
+					if (predecessorRoom?.meta.current.tombstone?.replacement_room === roomID) {
+						changedRoomListEntries.set(predecessorID, null)
+						predecessorRoom.tombstoned = true
+						predecessorRoom.hidden = true
+					}
 				}
 			}
 
