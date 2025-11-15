@@ -13,17 +13,19 @@
 //
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
-import { use, useEffect, useState } from "react"
+import { use, useCallback, useEffect, useState } from "react"
 import { getRoomAvatarThumbnailURL } from "@/api/media.ts"
-import { useSpaceEdges } from "@/api/statestore"
+import { RoomStateStore, useRoomState, useSpaceEdges } from "@/api/statestore"
 import { DBSpaceEdge, MemDBEvent, RoomID, SpaceHierarchyChild } from "@/api/types"
 import { useEventAsState } from "@/util/eventdispatcher.ts"
 import { getEventLevel } from "@/util/powerlevel.ts"
 import { ensureStringArray } from "@/util/validation.ts"
 import ClientContext from "../ClientContext.ts"
 import MainScreenContext from "../MainScreenContext.ts"
+import { useFilteredRooms } from "../composer/userautocomplete.ts"
 import { getPowerLevels } from "../menu/util.ts"
 import { useRoomContext } from "./roomcontext.ts"
+import AddIcon from "@/icons/add.svg?react"
 import DeleteIcon from "@/icons/delete.svg?react"
 import RecommendIcon from "@/icons/recommend.svg?react"
 import VerifiedIcon from "@/icons/verified.svg?react"
@@ -32,19 +34,26 @@ import "./SpaceView.css"
 interface SpaceChildProps {
 	spaceID: RoomID
 	roomID: RoomID
-	edge: DBSpaceEdge
+	edge?: DBSpaceEdge
 	childEvt?: MemDBEvent
 	summary?: SpaceHierarchyChild
 	canModify: boolean
+	store?: RoomStateStore
+	onAdd?: () => void
 }
 
-const SpaceChild = ({ spaceID, roomID, edge, summary, childEvt, canModify }: SpaceChildProps) => {
+const SpaceChild = ({
+	spaceID, roomID, edge, summary, childEvt, canModify, store, onAdd,
+}: SpaceChildProps) => {
 	const mainScreen = use(MainScreenContext)
 	const client = use(ClientContext)!
-	const store = client.store.rooms.get(roomID)
+	store = store ?? client.store.rooms.get(roomID)
 	const room = useEventAsState(store?.meta)
 	const name = room?.name ?? summary?.name
 	const onClickDelete = () => {
+		if (!edge) {
+			return
+		}
 		let confirmMessage: string
 		if (edge.child_event_rowid) {
 			if (edge.parent_event_rowid) {
@@ -80,6 +89,15 @@ const SpaceChild = ({ spaceID, roomID, edge, summary, childEvt, canModify }: Spa
 			)
 		}
 	}
+	const onClickAdd = () => {
+		client.rpc.setState(spaceID, "m.space.child", roomID, { via: store!.getViaServers() }).then(
+			resp => console.info("Added m.space.child", spaceID, "->", roomID, resp),
+			err => {
+				console.error("Failed to add m.space.child", spaceID, "->", roomID, err)
+				window.alert(`Failed to add m.space.child event: ${err}`)
+			},
+		).finally(onAdd)
+	}
 	const joinRoom = () => {
 		mainScreen.setActiveRoom(roomID, {
 			previewMeta: {
@@ -88,20 +106,58 @@ const SpaceChild = ({ spaceID, roomID, edge, summary, childEvt, canModify }: Spa
 			},
 		})
 	}
+	const isSpace = (room?.creation_content?.type ?? summary?.room_type) === "m.space"
 	return <>
-		<div className={`space-child ${room ? "known-room" : "unknown-room"}`} onClick={joinRoom}>
-			<img src={getRoomAvatarThumbnailURL(room ?? summary ?? { room_id: roomID })} alt="" className="avatar" />
+		<div
+			className={`space-child ${room ? "known-room" : "unknown-room"} ${edge ? "existing-edge" : ""}`}
+			onClick={edge ? joinRoom : undefined}
+		>
+			<img
+				src={getRoomAvatarThumbnailURL(room ?? summary ?? { room_id: roomID })}
+				loading="lazy"
+				alt=""
+				className={`avatar ${isSpace ? "space" : ""}`}
+			/>
 			<div className="room-id-and-name">
 				{name !== undefined ? <span className="room-name">{name}</span> : null}
 				<span className="room-id">{roomID}</span>
 			</div>
 		</div>
-		<div className="buttons">
+		{edge ? <div className="buttons">
 			{edge.canonical && <button disabled title="This is the canonical parent space"><VerifiedIcon /></button>}
 			{edge.suggested && <button disabled title="Suggested room in space"><RecommendIcon /></button>}
 			{canModify && <button onClick={onClickDelete}><DeleteIcon /></button>}
-		</div>
+		</div> : <div className="buttons">
+			<button onClick={onClickAdd}><AddIcon /></button>
+		</div>}
 	</>
+}
+
+const SpaceAdder = () => {
+	const roomCtx = useRoomContext()
+	const client = use(ClientContext)!
+	const [query, setQuery] = useState("")
+	const clearQuery = useCallback(() => setQuery(""), [])
+	const filteredRooms = useFilteredRooms(client.store, query)
+	return <div className="space-adder">
+		<input
+			type="text"
+			value={query}
+			onChange={e => setQuery(e.target.value)}
+			placeholder="Search rooms to add..."
+		/>
+		<div className="space-children">
+			{filteredRooms.map(room => {
+				const existingChild = roomCtx.store.getStateEvent("m.space.child", room.roomID)
+				if (existingChild && Array.isArray(existingChild.content.via)) {
+					return null
+				}
+				return <SpaceChild
+					spaceID={roomCtx.store.roomID} roomID={room.roomID} canModify={true} store={room} onAdd={clearQuery}
+				/>
+			})}
+		</div>
+	</div>
 }
 
 const emptyMap = new Map<RoomID, SpaceHierarchyChild>()
@@ -112,6 +168,7 @@ const SpaceView = () => {
 	const client = use(ClientContext)!
 	const edgeStore = client.store.spaceEdges.get(roomCtx.store.roomID)
 	const children = useSpaceEdges(edgeStore)
+	useRoomState(roomCtx.store, "m.room.power_levels", "")
 	useEffect(() => {
 		let cancelled = false
 		client.rpc.getSpaceHierarchy(roomCtx.store.roomID, {
@@ -138,15 +195,18 @@ const SpaceView = () => {
 	const canModifySpace = getEventLevel(pls, "m.space.child", true) <= ownPL
 	// TODO display hidden space rooms (only parent rowid set)
 	return <div className="space-view">
-		{children.map(edge => edge.child_event_rowid /*|| edge.parent_event_rowid*/ ? <SpaceChild
-			spaceID={roomCtx.store.roomID}
-			roomID={edge.child_id}
-			childEvt={edge.child_event_rowid ? roomCtx.store.eventsByRowID.get(edge.child_event_rowid) : undefined}
-			edge={edge}
-			summary={hierarchy.get(edge.child_id)}
-			canModify={canModifySpace}
-			key={edge.child_id}
-		/> : null)}
+		{canModifySpace && <SpaceAdder />}
+		<div className="space-children">
+			{children.map(edge => edge.child_event_rowid /*|| edge.parent_event_rowid*/ ? <SpaceChild
+				spaceID={roomCtx.store.roomID}
+				roomID={edge.child_id}
+				childEvt={edge.child_event_rowid ? roomCtx.store.eventsByRowID.get(edge.child_event_rowid) : undefined}
+				edge={edge}
+				summary={hierarchy.get(edge.child_id)}
+				canModify={canModifySpace}
+				key={edge.child_id}
+			/> : null)}
+		</div>
 	</div>
 }
 
