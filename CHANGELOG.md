@@ -1,3 +1,16 @@
+# v25.11
+
+The first release of new gomuks is here! gomuks now consists of a backend plus
+different frontends, like web and terminal. For context, see
+<https://github.com/gomuks/gomuks/issues/476>.
+
+The terminal frontend is currently a separate binary, but will be combined with
+the backend in a future release. It's also not at feature parity with legacy
+gomuks yet, but it works.
+
+See the installation instructions for more details:
+<https://docs.mau.fi/gomuks/installation.html>
+
 # v0.3.1 (2024-07-16)
 
 * Bumped minimum Go version to 1.21.
