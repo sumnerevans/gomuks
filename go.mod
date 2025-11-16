@@ -7,7 +7,6 @@ toolchain go1.25.4
 require (
 	codeberg.org/tslocum/cbind v0.1.6
 	github.com/SherClockHolmes/webpush-go v1.4.0
-	github.com/alecthomas/chroma v0.10.0
 	github.com/alecthomas/chroma/v2 v2.20.0
 	github.com/buckket/go-blurhash v1.1.0
 	github.com/chzyer/readline v1.5.1
