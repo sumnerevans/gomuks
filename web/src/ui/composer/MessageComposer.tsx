@@ -62,6 +62,7 @@ import type { AutocompleteQuery } from "./Autocompleter.tsx"
 import CommandInput from "./CommandInput.tsx"
 import { ComposerLocation, ComposerLocationValue, ComposerMedia } from "./ComposerMedia.tsx"
 import MediaUploadDialog from "./MediaUploadDialog.tsx"
+import VoiceRecorder from "./VoiceRecorder.tsx"
 import {
 	canAutocompleteCommand,
 	charToAutocompleteType,
@@ -76,6 +77,7 @@ import CloseIcon from "@/icons/close.svg?react"
 import EmojiIcon from "@/icons/emoji-categories/smileys-emotion.svg?react"
 import GIFIcon from "@/icons/gif.svg?react"
 import LocationIcon from "@/icons/location.svg?react"
+import MicIcon from "@/icons/mic.svg?react"
 import MoreIcon from "@/icons/more.svg?react"
 import SendIcon from "@/icons/send.svg?react"
 import StickerIcon from "@/icons/sticker.svg?react"
@@ -582,7 +584,7 @@ const MessageComposer = () => {
 		xhr.setRequestHeader("Content-Type", file.type)
 		xhr.send(file)
 	}, [client.rpc, isEncrypted])
-	const openFileUploadModal = (file: File | null | undefined) => {
+	const openFileUploadModal = (file: File | null | undefined, isVoice?: true) => {
 		if (!file) {
 			return
 		}
@@ -594,11 +596,16 @@ const MessageComposer = () => {
 				innerBoxClass: "media-upload-modal-wrapper",
 				onClose: () => URL.revokeObjectURL(objectURL),
 				content: <MediaUploadDialog
-					file={file} blobURL={objectURL} doUploadFile={doUploadFile} isEncrypted={isEncrypted}
+					file={file}
+					blobURL={objectURL}
+					doUploadFile={doUploadFile}
+					isEncrypted={isEncrypted}
+					isVoice={isVoice}
 				/>,
 			})
 		} else {
-			doUploadFile(file, file.name)
+			window.closeModal()
+			doUploadFile(file, file.name, { voice_message: isVoice })
 		}
 	}
 	const onPaste = (evt: React.ClipboardEvent<HTMLTextAreaElement>) => {
@@ -811,6 +818,16 @@ const MessageComposer = () => {
 				onClose: () => !isMobileDevice && textInput.current?.focus(),
 			})
 		}
+		const openVoiceRecorder = () => {
+			openModal({
+				dimmed: true,
+				boxed: true,
+				boxClass: "voice-recorder-box",
+				innerBoxClass: "voice-recorder",
+				content: <VoiceRecorder onFinish={openFileUploadModal} />,
+				onClose: () => !isMobileDevice && textInput.current?.focus(),
+			})
+		}
 		const openLocationPicker = () => {
 			setState({ location: { lat: 0, long: 0, prec: 1 }, media: null })
 		}
@@ -835,6 +852,11 @@ const MessageComposer = () => {
 				disabled={!!locationDisabledTitle}
 				title={locationDisabledTitle ?? "Add location"}
 			><LocationIcon/>{includeText && "Location"}</button>
+			<button
+				onClick={openVoiceRecorder}
+				disabled={!!mediaDisabledTitle}
+				title={mediaDisabledTitle ?? "Record voice message"}
+			><MicIcon/>{includeText && "Voice"}</button>
 			<button
 				onClick={() => fileInput.current!.click()}
 				disabled={!!mediaDisabledTitle}

@@ -310,6 +310,7 @@ export interface MediaEncodingOptions {
 	resize_height?: number
 	resize_percent?: number
 	_no_encrypt?: boolean
+	voice_message?: boolean
 }
 
 export type MembershipAction = "invite" | "kick" | "ban" | "unban"

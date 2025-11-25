@@ -24,6 +24,7 @@ export interface MediaUploadDialogProps {
 	blobURL: string
 	doUploadFile: (file: Blob, filename: string, encodingOpts?: MediaEncodingOptions) => void
 	isEncrypted: boolean
+	isVoice?: boolean
 }
 
 function formatSize(bytes: number): string {
@@ -47,7 +48,7 @@ interface dimensions {
 	height: number
 }
 
-const MediaUploadDialog = ({ file, blobURL, doUploadFile, isEncrypted }: MediaUploadDialogProps) => {
+const MediaUploadDialog = ({ file, blobURL, doUploadFile, isEncrypted, isVoice }: MediaUploadDialogProps) => {
 	const videoRef = useRef<HTMLVideoElement>(null)
 	const [name, setName] = useState(file.name)
 	const [reencTarget, setReencTarget] = useState(nonEncodableSources.includes(file.type) ? "image/jpeg" : "")
@@ -101,6 +102,7 @@ const MediaUploadDialog = ({ file, blobURL, doUploadFile, isEncrypted }: MediaUp
 			resize_height: resizeSlider !== 100 ? resizedHeight : undefined,
 			resize_percent: resizeSlider,
 			_no_encrypt: noEncrypt,
+			voice_message: isVoice,
 		})
 		closeModal()
 	}

@@ -826,6 +826,13 @@ func (gmx *Gomuks) cacheAndUploadMedia(
 		Info:     info,
 		FileName: fileName,
 	}
+	if query.Get("voice_message") == "true" {
+		content.MSC1767Audio = &event.MSC1767Audio{
+			Duration: info.Duration,
+			Waveform: []int{}, // TODO generate waveform
+		}
+		content.MSC3245Voice = &event.MSC3245Voice{}
+	}
 	content.File, content.URL, err = gmx.UploadFile(
 		ctx, checksum, cacheFile, encrypt, int64(info.Size), info.MimeType, fileName, progressCallback,
 	)

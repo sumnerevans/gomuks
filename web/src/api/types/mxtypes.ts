@@ -273,6 +273,13 @@ export interface BaseMessageEventContent {
 	"com.beeper.linkpreviews"?: URLPreview[]
 	"com.beeper.per_message_profile"?: BeeperPerMessageProfile
 	"org.matrix.msc4332.command"?: BotCommandInput
+	"org.matrix.msc1767.audio"?: MSC1767Audio
+	"org.matrix.msc3245.voice"?: Record<string, never>
+}
+
+export interface MSC1767Audio {
+	duration: number
+	waveform: number[]
 }
 
 export interface TextMessageEventContent extends BaseMessageEventContent {
