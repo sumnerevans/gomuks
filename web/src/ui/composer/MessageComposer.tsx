@@ -605,7 +605,8 @@ const MessageComposer = () => {
 			})
 		} else {
 			window.closeModal()
-			doUploadFile(file, file.name, { voice_message: isVoice })
+			const encTo = isVoice && file.type !== "audio/ogg; codecs=opus" ? "audio/ogg; codecs=opus" : undefined
+			doUploadFile(file, file.name, { voice_message: isVoice, encode_to: encTo })
 		}
 	}
 	const onPaste = (evt: React.ClipboardEvent<HTMLTextAreaElement>) => {

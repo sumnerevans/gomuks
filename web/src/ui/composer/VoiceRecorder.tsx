@@ -25,7 +25,15 @@ interface VoiceRecorderProps {
 	onFinish: (file: File, isVoice?: true) => void
 }
 
-const voiceMime = "audio/ogg; codecs=opus"
+function chooseMime() {
+	for (const mime of ["audio/ogg; codecs=opus", "audio/webm; codecs=opus", "audio/mp4"]) {
+		if (MediaRecorder.isTypeSupported(mime)) {
+			console.log("Will use", mime, "for recording voice message")
+			return mime
+		}
+	}
+	return undefined
+}
 
 const VoiceRecorder = ({ onFinish }: VoiceRecorderProps) => {
 	const [recording, setRecording] = useState<boolean>(false)
@@ -50,7 +58,7 @@ const VoiceRecorder = ({ onFinish }: VoiceRecorderProps) => {
 		if (recorder.current) {
 			return
 		}
-		const rec = new MediaRecorder(stream, { mimeType: voiceMime })
+		const rec = new MediaRecorder(stream, { mimeType: chooseMime() })
 		const b: BlobPart[] = []
 		let recStart = 0
 		let durationAtStart = 0
@@ -85,7 +93,7 @@ const VoiceRecorder = ({ onFinish }: VoiceRecorderProps) => {
 		if (!recorder.current) {
 			return
 		}
-		const file = new File(blobs.current, "Voice message.ogg", { type: voiceMime })
+		const file = new File(blobs.current, "Voice message.ogg", { type: recorder.current.mimeType })
 		onFinish(file, true)
 	}
 	const finishRecord = () => recorder.current?.stop()

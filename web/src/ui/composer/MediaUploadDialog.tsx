@@ -42,6 +42,8 @@ const imageReencTargets = ["image/webp", "image/jpeg", "image/png", "image/gif"]
 const nonEncodableSources = ["image/bmp", "image/tiff", "image/heif", "image/heic"]
 const imageReencSources = [...imageReencTargets, ...nonEncodableSources]
 const videoReencTargets = ["video/webm", "video/mp4", "image/webp+anim"]
+const voiceReencTargets = ["audio/ogg; codecs=opus"]
+const audioReencTargets = [...voiceReencTargets, "audio/mpeg", "audio/mp4"]
 
 interface dimensions {
 	width: number
@@ -51,7 +53,12 @@ interface dimensions {
 const MediaUploadDialog = ({ file, blobURL, doUploadFile, isEncrypted, isVoice }: MediaUploadDialogProps) => {
 	const videoRef = useRef<HTMLVideoElement>(null)
 	const [name, setName] = useState(file.name)
-	const [reencTarget, setReencTarget] = useState(nonEncodableSources.includes(file.type) ? "image/jpeg" : "")
+	const initialReencTarget = nonEncodableSources.includes(file.type)
+		? "image/jpeg"
+		: isVoice && file.type !== voiceReencTargets[0]
+			? voiceReencTargets[0]
+			: ""
+	const [reencTarget, setReencTarget] = useState(initialReencTarget)
 	const [jpegQuality, setJPEGQuality] = useState(80)
 	const [resizeSlider, setResizeSlider] = useState(100)
 	const [origDimensions, setOrigDimensions] = useState<dimensions | null>(null)
@@ -89,6 +96,7 @@ const MediaUploadDialog = ({ file, blobURL, doUploadFile, isEncrypted, isVoice }
 		</video>
 		reencTargets = videoReencTargets
 	} else if (file.type.startsWith("audio/")) {
+		reencTargets = isVoice ? voiceReencTargets : audioReencTargets
 		previewContent = <audio controls>
 			<source src={blobURL} type={file.type} />
 		</audio>
