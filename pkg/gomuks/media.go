@@ -48,6 +48,7 @@ import (
 	"github.com/rs/zerolog/hlog"
 	"go.mau.fi/util/exhttp"
 	"go.mau.fi/util/ffmpeg"
+	"go.mau.fi/util/ffmpeg/waveform"
 	"go.mau.fi/util/jsontime"
 	"go.mau.fi/util/ptr"
 	"go.mau.fi/util/random"
@@ -856,9 +857,17 @@ func (gmx *Gomuks) cacheAndUploadMedia(
 		FileName: fileName,
 	}
 	if query.Get("voice_message") == "true" {
+		samples := 80
+		if info.Duration != 0 {
+			samples = min(max(info.Duration/125, 30), 120)
+		}
+		wf, err := waveform.Generate(ctx, cachePath, samples, 256)
+		if err != nil {
+			log.Warn().Err(err).Msg("Failed to generate waveform")
+		}
 		content.MSC1767Audio = &event.MSC1767Audio{
 			Duration: info.Duration,
-			Waveform: []int{}, // TODO generate waveform
+			Waveform: wf,
 		}
 		content.MSC3245Voice = &event.MSC3245Voice{}
 	}
