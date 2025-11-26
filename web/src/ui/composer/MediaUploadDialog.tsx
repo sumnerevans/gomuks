@@ -42,7 +42,8 @@ const imageReencTargets = ["image/webp", "image/jpeg", "image/png", "image/gif"]
 const nonEncodableSources = ["image/bmp", "image/tiff", "image/heif", "image/heic"]
 const imageReencSources = [...imageReencTargets, ...nonEncodableSources]
 const videoReencTargets = ["video/webm", "video/mp4", "image/webp+anim"]
-const voiceReencTargets = ["audio/ogg; codecs=opus"]
+const voiceMimeType = "audio/ogg; codecs=opus"
+const voiceReencTargets = [voiceMimeType]
 const audioReencTargets = [...voiceReencTargets, "audio/mpeg", "audio/mp4"]
 
 interface dimensions {
@@ -53,10 +54,11 @@ interface dimensions {
 const MediaUploadDialog = ({ file, blobURL, doUploadFile, isEncrypted, isVoice }: MediaUploadDialogProps) => {
 	const videoRef = useRef<HTMLVideoElement>(null)
 	const [name, setName] = useState(file.name)
+	const needsVoiceReenc = isVoice && file.type !== voiceMimeType
 	const initialReencTarget = nonEncodableSources.includes(file.type)
 		? "image/jpeg"
-		: isVoice && file.type !== voiceReencTargets[0]
-			? voiceReencTargets[0]
+		: needsVoiceReenc
+			? voiceMimeType
 			: ""
 	const [reencTarget, setReencTarget] = useState(initialReencTarget)
 	const [jpegQuality, setJPEGQuality] = useState(80)
@@ -147,7 +149,7 @@ const MediaUploadDialog = ({ file, blobURL, doUploadFile, isEncrypted, isVoice }
 						setReencTarget(evt.target.value)
 						setResizeSlider(100)
 					}}>
-						<option value="">No re-encoding</option>
+						{!needsVoiceReenc && <option value="">No re-encoding</option>}
 						{reencTargets.map(target => <option key={target} value={target}>{target}</option>)}
 					</select>
 				</div>
