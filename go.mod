@@ -28,7 +28,7 @@ require (
 	github.com/zyedidia/clipboard v1.0.4
 	go.mau.fi/goheif v0.0.0-20250809103256-ca48e8691d2f
 	go.mau.fi/mauview v0.3.0
-	go.mau.fi/util v0.9.4-0.20251128113707-115b8b18bd18
+	go.mau.fi/util v0.9.4-0.20251128122301-b1a27415634e
 	go.mau.fi/webp v0.2.0
 	go.mau.fi/zeroconfig v0.2.0
 	golang.org/x/crypto v0.45.0

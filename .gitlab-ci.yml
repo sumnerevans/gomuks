@@ -63,7 +63,7 @@ deploy wasmuks:
   tags:
   - webdeploy
   script:
-  - apk add --no-cache rsync
+  - apk add --no-cache rsync git
   - mkdir -p web/dist/_gomuks/codeblock
   - go run ./cmd/chromagen web/dist/_gomuks/codeblock/
   - |
@@ -88,6 +88,9 @@ deploy wasmuks:
   - export GOPATH="$CI_PROJECT_DIR/.cache"
   - export GOCACHE="$CI_PROJECT_DIR/.cache/build"
   - export MAU_STATIC_BUILD=true
+  # go tool is dumb and doesn't realize it needs to always compile for the host OS/arch
+  # The maubuild tool will use TARGET_GOOS/GOARCH env vars for the actual build
+  - export GOOS=$(go env GOHOSTOS) GOARCH=$(go env GOHOSTARCH)
   script:
   - BINARY_NAME=gomuks go tool maubuild
   - BINARY_NAME=gomuks-terminal go tool maubuild
