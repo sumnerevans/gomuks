@@ -15,7 +15,6 @@ cache:
 
 variables:
   GOTOOLCHAIN: local
-  MAU_VERSION_PACKAGE: go.mau.fi/gomuks/version
 
 wasm:
   image: ${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/golang:1.25-alpine
@@ -87,13 +86,11 @@ deploy wasmuks:
   - mkdir -p .cache
   - export GOPATH="$CI_PROJECT_DIR/.cache"
   - export GOCACHE="$CI_PROJECT_DIR/.cache/build"
-  - export MAU_STATIC_BUILD=true
-  # go tool is dumb and doesn't realize it needs to always compile for the host OS/arch
-  # The maubuild tool will use TARGET_GOOS/GOARCH env vars for the actual build
-  - export GOOS=$(go env GOHOSTOS) GOARCH=$(go env GOHOSTARCH)
+  - export MAUTRIX_VERSION=$(cat go.mod | grep 'maunium.net/go/mautrix ' | awk '{ print $2 }')
+  - export GO_LDFLAGS="-s -w -linkmode external -extldflags -static -X go.mau.fi/gomuks/version.Tag=$CI_COMMIT_TAG -X go.mau.fi/gomuks/version.Commit=$CI_COMMIT_SHA -X 'go.mau.fi/gomuks/version.BuildTime=`date -Iseconds`' -X 'maunium.net/go/mautrix.GoModVersion=$MAUTRIX_VERSION'"
   script:
-  - BINARY_NAME=gomuks go tool maubuild
-  - BINARY_NAME=gomuks-terminal go tool maubuild
+  - go build -ldflags "$GO_LDFLAGS" ./cmd/gomuks
+  - go build -ldflags "$GO_LDFLAGS" ./cmd/gomuks-terminal
   artifacts:
     paths:
     - gomuks
@@ -159,9 +156,13 @@ macos/arm64:
   - arm64
   before_script:
   - export PATH=/opt/homebrew/bin:$PATH
+  - export MAUTRIX_VERSION=$(cat go.mod | grep 'maunium.net/go/mautrix ' | awk '{ print $2 }')
+  - export GO_LDFLAGS="-X go.mau.fi/gomuks/version.Tag=$CI_COMMIT_TAG -X go.mau.fi/gomuks/version.Commit=$CI_COMMIT_SHA -X 'go.mau.fi/gomuks/version.BuildTime=`date -Iseconds`' -X 'maunium.net/go/mautrix.GoModVersion=$MAUTRIX_VERSION'"
+  - export LIBRARY_PATH=$(brew --prefix)/lib
+  - export CPATH=$(brew --prefix)/include
   script:
-  - BINARY_NAME=gomuks go tool maubuild
-  - BINARY_NAME=gomuks-terminal go tool maubuild
+  - go build -ldflags "$GO_LDFLAGS" ./cmd/gomuks
+  - go build -ldflags "$GO_LDFLAGS" ./cmd/gomuks-terminal
   - install_name_tool -change $(brew --prefix)/opt/libolm/lib/libolm.3.dylib @rpath/libolm.3.dylib gomuks
   - install_name_tool -add_rpath @executable_path gomuks
   - install_name_tool -add_rpath /opt/homebrew/opt/libolm/lib gomuks
