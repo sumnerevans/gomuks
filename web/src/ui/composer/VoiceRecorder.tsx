@@ -13,7 +13,7 @@
 //
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
-import { use, useRef, useState } from "react"
+import { use, useEffect, useRef, useState } from "react"
 import { ModalCloseContext } from "../modal"
 import DeleteIcon from "@/icons/delete.svg?react"
 import PauseIcon from "@/icons/pause.svg?react"
@@ -106,6 +106,11 @@ const VoiceRecorder = ({ onFinish }: VoiceRecorderProps) => {
 		rec?.stop()
 		closeModal()
 	}
+	useEffect(() => () => {
+		const rec = recorder.current
+		recorder.current = null
+		rec?.stop()
+	}, [])
 	return <>
 		<div className="progress">
 			<div className="text">
