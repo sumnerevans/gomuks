@@ -7,7 +7,7 @@ toolchain go1.25.4
 tool go.mau.fi/util/cmd/maubuild
 
 require (
-	codeberg.org/tslocum/cbind v0.1.7
+	codeberg.org/tslocum/cbind v0.1.6
 	github.com/SherClockHolmes/webpush-go v1.4.0
 	github.com/alecthomas/chroma/v2 v2.20.0
 	github.com/buckket/go-blurhash v1.1.0
@@ -15,7 +15,7 @@ require (
 	github.com/coder/websocket v1.8.14
 	github.com/disintegration/imaging v1.6.2
 	github.com/gabriel-vasile/mimetype v1.4.11
-	github.com/gdamore/tcell/v2 v2.12.2
+	github.com/gdamore/tcell/v2 v2.9.0
 	github.com/lithammer/fuzzysearch v1.1.8
 	github.com/lucasb-eyer/go-colorful v1.3.0
 	github.com/mattn/go-runewidth v0.0.19
