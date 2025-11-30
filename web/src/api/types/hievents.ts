@@ -111,9 +111,11 @@ export interface SyncCompleteEvent extends BaseRPCCommand<SyncCompleteData> {
 
 
 export type ClientState = {
+	is_initialized: boolean
 	is_logged_in: false
 	is_verified: false
 } | {
+	is_initialized: boolean
 	is_logged_in: true
 	is_verified: boolean
 	user_id: UserID

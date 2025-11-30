@@ -76,9 +76,12 @@ function App() {
 
 	if (connState?.error && !afterConnectError) {
 		return <div className="pre-main">{errorOverlay}</div>
-	} else if ((!connState?.connected && !afterConnectError) || !clientState) {
+	} else if ((!connState?.connected && !afterConnectError) || !clientState || !clientState.is_initialized) {
 		const msg = connState?.connected ?
-			"Waiting for client state..." : "Connecting to backend..."
+			clientState
+				? "Waiting for backend to finish initializing"
+				: "Waiting for client state..."
+			: "Connecting to backend..."
 		return <div className="pre-main waiting-to-connect">
 			<ScaleLoader width="2rem" height="2rem" color="var(--primary-color)"/>
 			{msg}
