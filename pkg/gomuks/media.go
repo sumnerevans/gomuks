@@ -70,6 +70,9 @@ var ErrBadGateway = mautrix.RespError{
 }
 
 func (gmx *Gomuks) downloadMediaFromCache(ctx context.Context, w http.ResponseWriter, r *http.Request, entry *database.Media, force, useThumbnail bool) bool {
+	if ctx.Err() != nil {
+		return true
+	}
 	if !entry.UseCache() {
 		if force {
 			mautrix.MNotFound.WithMessage("Media not found in cache").Write(w)
@@ -370,6 +373,9 @@ func (gmx *Gomuks) DownloadMedia(w http.ResponseWriter, r *http.Request) {
 	}()
 
 	addErrorToCacheEntry := func(err error) {
+		if ctx.Err() != nil {
+			return
+		}
 		if cacheEntry == nil {
 			cacheEntry = &database.Media{
 				MXC: mxc,
@@ -412,7 +418,9 @@ func (gmx *Gomuks) DownloadMedia(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			log.Err(err).Msg("Failed to save errored cache entry")
 		}
-		cacheEntry.Error.Write(w)
+		if w != nil {
+			cacheEntry.Error.Write(w)
+		}
 	}
 
 	resp, err := gmx.Client.Client.Download(mautrix.WithMaxRetries(ctx, 0), mxc)
@@ -462,10 +470,16 @@ func (gmx *Gomuks) DownloadMedia(w http.ResponseWriter, r *http.Request) {
 		wrappedReader = io.TeeReader(wrappedReader, &noErrorWriter{w})
 		w = nil
 	}
+	if ctx.Err() != nil {
+		return
+	}
 	cacheEntry.Size, err = io.Copy(tempFile, wrappedReader)
 	if err != nil {
 		log.Err(err).Msg("Failed to copy media to temporary file")
 		addErrorToCacheEntry(err)
+		return
+	}
+	if ctx.Err() != nil {
 		return
 	}
 	err = reader.Close()
