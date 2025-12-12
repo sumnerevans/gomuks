@@ -60,6 +60,11 @@ export const globalDeviceSpecific = [
 	PreferenceContext.Config,
 ] as const
 
+export const roomSpecific = [
+	PreferenceContext.RoomAccount,
+	PreferenceContext.RoomDevice,
+] as const
+
 export type PreferenceValueType =
 	| boolean
 	| number
@@ -76,6 +81,7 @@ interface PreferenceFields<T extends PreferenceValueType = PreferenceValueType> 
 	defaultValue: T
 	description: string
 	allowedValues?: readonly T[]
+	valueLabels?: readonly string[]
 	hidden?: boolean
 }
 
@@ -85,6 +91,7 @@ export class Preference<T extends PreferenceValueType = PreferenceValueType> {
 	public readonly defaultValue: T
 	public readonly description?: string
 	public readonly allowedValues?: readonly T[]
+	public readonly valueLabels?: readonly string[]
 	public readonly hidden: boolean
 
 	constructor(fields: PreferenceFields<T>) {
@@ -93,6 +100,7 @@ export class Preference<T extends PreferenceValueType = PreferenceValueType> {
 		this.defaultValue = fields.defaultValue
 		this.description = fields.description ?? ""
 		this.allowedValues = fields.allowedValues
+		this.valueLabels = fields.valueLabels
 		this.hidden = fields.hidden ?? false
 	}
 }

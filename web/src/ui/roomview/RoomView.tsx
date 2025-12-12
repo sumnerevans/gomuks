@@ -14,7 +14,8 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 import { JSX, useEffect, useState } from "react"
-import { RoomStateStore } from "@/api/statestore"
+import { RoomStateStore, usePreference } from "@/api/statestore"
+import { RoomType } from "@/api/types"
 import MessageComposer from "../composer/MessageComposer.tsx"
 import TypingNotifications from "../composer/TypingNotifications.tsx"
 import RightPanel, { RightPanelProps } from "../rightpanel/RightPanel.tsx"
@@ -33,7 +34,7 @@ interface RoomViewProps {
 	rightPanelResizeHandle: JSX.Element
 }
 
-function getViewForRoomType(roomType: string | undefined): JSX.Element | null {
+function getViewForRoomType(roomType: RoomType | undefined): JSX.Element | null {
 	switch (roomType) {
 	case "m.space":
 		return <SpaceView />
@@ -47,8 +48,9 @@ function getViewForRoomType(roomType: string | undefined): JSX.Element | null {
 }
 
 const RoomView = ({ room, rightPanelResizeHandle, rightPanel }: RoomViewProps) => {
-	const [forceDefaultTimeline, setForceDefaultTimeline] = useState(false)
-	const [roomContextData] = useState(() => new RoomContextData(room, setForceDefaultTimeline))
+	const [forceViewType, setForceViewType] = useState<RoomType | null>(null)
+	const settingsViewType = usePreference(null, room, "room_view_type")
+	const [roomContextData] = useState(() => new RoomContextData(room, setForceViewType))
 	useEffect(() => {
 		if (room.hackyPendingJumpToEventID) {
 			jumpToEvent(roomContextData, room.hackyPendingJumpToEventID)
@@ -73,14 +75,12 @@ const RoomView = ({ room, rightPanelResizeHandle, rightPanel }: RoomViewProps) =
 			evt.stopPropagation()
 		}
 	}
-	let view = <>
+	const viewType = forceViewType ?? settingsViewType ?? room.meta.current.creation_content?.type
+	const view = getViewForRoomType(viewType) ?? <>
 		<TimelineView/>
 		<MessageComposer/>
 		<TypingNotifications/>
 	</>
-	if (!forceDefaultTimeline) {
-		view = getViewForRoomType(room.meta.current.creation_content?.type) ?? view
-	}
 	return <RoomContext value={roomContextData}>
 		<div className="room-view" onClick={onClick}>
 			<ErrorBoundary thing="room header" wrapperClassName="room-header-error">

@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 import { RefObject, createContext, createRef, use } from "react"
 import { RoomStateStore } from "@/api/statestore"
-import { EventID, EventRowID, MemDBEvent } from "@/api/types"
+import { EventID, EventRowID, MemDBEvent, RoomType } from "@/api/types"
 import { NonNullCachedEventDispatcher } from "@/util/eventdispatcher.ts"
 import { makeMentionMarkdown } from "@/util/markdown.ts"
 
@@ -33,16 +33,16 @@ export class RoomContextData {
 	public focusedEventRowID: EventRowID | null = null
 	public readonly isEditing = new NonNullCachedEventDispatcher<boolean>(false)
 	public scrolledToBottom = true
-	public setForceDefaultTimeline: (force: boolean) => void = noop("setForceDefaultTimeline")
+	public setForceViewType: (viewType: RoomType | null) => void = noop("setForceViewType")
 
 	constructor(
 		public readonly store: RoomStateStore,
-		setForceDefaultTimeline?: (force: boolean) => void,
+		setForceViewType?: (viewType: RoomType | null) => void,
 		public readonly threadRoot?: EventID,
 		public readonly threadParentRoom?: RoomContextData,
 	) {
-		if (setForceDefaultTimeline) {
-			this.setForceDefaultTimeline = setForceDefaultTimeline
+		if (setForceViewType) {
+			this.setForceViewType = setForceViewType
 		}
 	}
 

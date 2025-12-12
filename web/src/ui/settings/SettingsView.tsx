@@ -18,7 +18,7 @@ import { ScaleLoader } from "react-spinners"
 import Client from "@/api/client.ts"
 import { getRoomAvatarThumbnailURL, getRoomAvatarURL } from "@/api/media.ts"
 import { RoomStateStore, usePreferences } from "@/api/statestore"
-import { KeyRestoreProgress, RoomID } from "@/api/types"
+import { KeyRestoreProgress, RoomID, RoomType } from "@/api/types"
 import {
 	Preference,
 	PreferenceContext,
@@ -75,8 +75,8 @@ const SelectPreferenceCell = ({ context, name, pref, setPref, value, inheritedVa
 	}
 	return <div className="preference select-preference">
 		<select value={value ?? inheritedValue} onChange={evt => setPref(context, name, evt.target.value)}>
-			{pref.allowedValues.map(value =>
-				<option key={value} value={value}>{value}</option>)}
+			{pref.allowedValues.map((value, i) =>
+				<option key={i} value={value}>{pref.valueLabels ? pref.valueLabels[i] : value}</option>)}
 		</select>
 		{makeRemover(context, setPref, name, value)}
 	</div>
@@ -537,12 +537,15 @@ const SettingsView = ({ room }: SettingsViewProps) => {
 				<div className="room-buttons">
 					<button className="leave-room" onClick={onClickLeave}>Leave room</button>
 					<button className="devtools" onClick={openDevtools}>Explore room state</button>
-					<button
-						className="timeline"
-						onClick={() => window.activeRoomContext?.setForceDefaultTimeline(true)}
-					>
-						Force timeline view
-					</button>
+					<select onChange={evt => {
+						window.activeRoomContext?.setForceViewType(evt.target.value as RoomType)
+						closeModal()
+					}} defaultValue="__null__">
+						{preferences.room_view_type.allowedValues!.map((val, i) =>
+							<option key={i} value={val ?? "__null__"} disabled={i === 0}>
+								{i === 0 ? "Override view" : preferences.room_view_type.valueLabels![i]}
+							</option>)}
+					</select>
 					{previousRoomID &&
 						<button className="previous-room" onClick={openPredecessorRoom}>
 							Open Predecessor Room

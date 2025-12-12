@@ -169,19 +169,19 @@ export function usePreferences(ss: StateStore, room: RoomStateStore | null) {
 }
 
 export function usePreference<T extends keyof Preferences>(
-	ss: StateStore, room: RoomStateStore | null, key: T,
+	ss: StateStore | null, room: RoomStateStore | null, key: T,
 ): typeof preferences[T]["defaultValue"] {
 	const [val, setVal] = useState(
-		(room ? room.preferences[key] : ss.preferences[key]) ?? preferences[key].defaultValue,
+		(room ? room.preferences[key] : ss?.preferences[key]) ?? preferences[key].defaultValue,
 	)
 	useEffect(() => {
 		const checkChanges = () => {
-			setVal((room ? room.preferences[key] : ss.preferences[key]) ?? preferences[key].defaultValue)
+			setVal((room ? room.preferences[key] : ss?.preferences[key]) ?? preferences[key].defaultValue)
 		}
-		const unsubMain = ss.preferenceSub.subscribe(checkChanges)
+		const unsubMain = ss?.preferenceSub.subscribe(checkChanges)
 		const unsubRoom = room?.preferenceSub.subscribe(checkChanges)
 		return () => {
-			unsubMain()
+			unsubMain?.()
 			unsubRoom?.()
 		}
 	}, [ss, room, key])

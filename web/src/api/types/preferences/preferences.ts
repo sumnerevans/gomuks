@@ -13,8 +13,8 @@
 //
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
-import type { ContentURI } from "../../types"
-import { Preference, anyContext, anyGlobalContext, globalDeviceSpecific } from "./types.ts"
+import type { ContentURI, RoomType } from "../../types"
+import { Preference, anyContext, anyGlobalContext, globalDeviceSpecific, roomSpecific } from "./types.ts"
 
 export const codeBlockStyles = [
 	"auto", "abap", "algol_nu", "algol", "arduino", "autumn", "average", "base16-snazzy", "borland", "bw",
@@ -224,6 +224,14 @@ export const preferences = {
 		description: "The URL to use for the favicon.",
 		allowedContexts: anyContext,
 		defaultValue: "gomuks.png",
+	}),
+	room_view_type: new Preference<RoomType | null>({
+		displayName: "Room type override",
+		description: "Use a specific view for this room instead of the default based on its type.",
+		allowedValues: [null, "", "m.space", "org.matrix.msc3417.call"] as const,
+		valueLabels: ["None", "Timeline", "Space view", "Element Call"] as const,
+		allowedContexts: roomSpecific,
+		defaultValue: null,
 	}),
 	low_bandwidth: new Preference<boolean>({
 		displayName: "Low bandwidth mode",
