@@ -257,8 +257,19 @@ export class RoomStateStore {
 	getAllBotCommands(): WrappedBotCommand[] {
 		if (this.#allCommandsCache === null) {
 			const roomCommands = this.state.get("org.matrix.msc4332.commands")?.entries()
-				.flatMap(([stateKey, rowID]) =>
-					mapCommandContent(stateKey, this.eventsByRowID.get(rowID)?.content))
+				.flatMap(([stateKey, rowID]) => {
+					if (this.fullMembersLoaded) {
+						const ownerMember = this.getStateEvent("m.room.member", stateKey)?.content
+						if (ownerMember?.membership !== "join") {
+							return []
+						}
+					}
+					const evt = this.eventsByRowID.get(rowID)
+					if (!evt || evt.redacted_by) {
+						return []
+					}
+					return mapCommandContent(stateKey, evt.content)
+				})
 				.toArray() ?? []
 			this.#allCommandsCache = roomCommands.concat(mapCommandContent(fakeGomuksSender, StandardCommands))
 		}
@@ -506,6 +517,7 @@ export class RoomStateStore {
 			this.parent.invalidateEmojiPacksCache()
 		} else if (evtType === "m.room.member") {
 			this.#membersCache = null
+			this.#allCommandsCache = null
 			this.requestedMembers.delete(key as UserID)
 		} else if (evtType === "m.room.power_levels") {
 			this.#membersCache = null
