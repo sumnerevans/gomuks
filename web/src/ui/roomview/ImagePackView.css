@@ -48,11 +48,18 @@ div.image-pack-editor, div.image-pack-item-editor {
 		outline: none;
 	}
 
+	div.usage-options {
+		display: flex;
+		flex-wrap: wrap;
+		gap: .25rem;
+	}
+
 	> div.input-fields {
 		display: grid;
 		grid-template-columns: auto 1fr;
 		align-items: center;
 		gap: .25rem .5rem;
+		flex-shrink: 0;
 	}
 }
 
@@ -110,6 +117,12 @@ div.image-pack-item-editor-wrapper {
 	--modal-max-width: 40rem;
 	width: 100%;
 	padding: 0 !important;
+
+	@media screen and (max-width: 30rem) {
+		max-width: 100% !important;
+		max-height: 100% !important;
+		border-radius: 0 !important;
+	}
 }
 
 div.image-pack-item-editor {
@@ -121,6 +134,7 @@ div.image-pack-item-editor {
 
 	> img {
 		max-height: 20rem;
+		max-width: 100%;
 		margin: auto;
 	}
 
