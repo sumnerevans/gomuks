@@ -229,7 +229,6 @@ const ImagePackItemEditor = ({ item, save, defaultUsages }: ImagePackItemEditorP
 		setUploading(true)
 		const unsetUploading = () => setUploading(false)
 		const uploadComplete = (media: MediaMessageEventContent) => {
-			console.log("Upload complete?", media)
 			setURL(media.url ?? "")
 			setInfo(media.info)
 		}
