@@ -84,6 +84,7 @@ const knownUsages = ["emoticon", "sticker"]
 
 const ImagePackEditor = ({ id, pack }: ImagePackEditorProps) => {
 	const [packName, setPackName] = useState(ensureString(pack.pack.display_name))
+	const [packAvatar, setPackAvatar] = useState(ensureString(pack.pack.avatar_url))
 	const [usages, setUsages] = useState<Set<string> | null>(() => new Set(ensureStringArray(pack.pack.usage)))
 	const [images, setImages] = useState<ImagePackEntryWithID[]>(() =>
 		Object.entries(pack.images)
@@ -146,7 +147,7 @@ const ImagePackEditor = ({ id, pack }: ImagePackEditorProps) => {
 			pack: {
 				...pack.pack,
 				display_name: packName,
-				avatar_url: pack.pack.avatar_url,
+				avatar_url: packAvatar,
 				usage: usages ? Array.from(usages) as ImagePackUsage[] : [],
 			},
 			images: Object.fromEntries(images.map((img, i) =>
@@ -157,7 +158,7 @@ const ImagePackEditor = ({ id, pack }: ImagePackEditorProps) => {
 	}
 	return <div className="image-pack-editor">
 		<div className="input-fields">
-			<label htmlFor="image-pack-editor-name">Pack Name:</label>
+			<label htmlFor="image-pack-editor-name">Pack name:</label>
 			<input
 				id="image-pack-editor-name"
 				className="name"
@@ -165,6 +166,15 @@ const ImagePackEditor = ({ id, pack }: ImagePackEditorProps) => {
 				value={packName}
 				onChange={e => setPackName(e.target.value)}
 				placeholder="Pack name"
+			/>
+			<label htmlFor="image-pack-editor-avatar">Pack avatar:</label>
+			<input
+				id="image-pack-editor-avatar"
+				className="avatar"
+				type="text"
+				value={packAvatar}
+				onChange={e => setPackAvatar(e.target.value)}
+				placeholder="Pack avatar (defaults to first image)"
 			/>
 			{renderUsages(usages, setUsages)}
 		</div>
