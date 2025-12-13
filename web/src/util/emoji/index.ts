@@ -140,6 +140,7 @@ export interface CustomEmojiPack {
 	emojis: Emoji[]
 	stickers: Emoji[]
 	emojiMap: Map<string, Emoji>
+	source: ImagePack
 }
 
 export function parseCustomEmojiPack(
@@ -196,6 +197,7 @@ export function parseCustomEmojiPack(
 			emojis,
 			stickers,
 			emojiMap,
+			source: pack,
 		}
 	} catch (err) {
 		console.warn("Failed to parse custom emoji pack", pack, err)

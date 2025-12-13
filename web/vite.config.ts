@@ -15,6 +15,8 @@ export default defineConfig({
 				manualChunks: id => {
 					if (id.includes("wailsio")) {
 						return "wails"
+					} else if (id.includes("@dnd-kit")) {
+						return "dndkit"
 					} else if (id.includes("node_modules") && !splitDeps.some(dep => id.includes(dep))) {
 						return "vendor"
 					} else if (id.endsWith("/emoji/data.json")) {

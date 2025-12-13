@@ -212,6 +212,13 @@ export function useCustomEmojis(
 	}, [personalPack, watchedRoomPacks, specialRoomPacks, usage])
 }
 
+export function useRoomImagePacks(room: RoomStateStore): Record<string, CustomEmojiPack> {
+	return useSyncExternalStore<Record<string, CustomEmojiPack>>(
+		room.stateSubs.getSubscriber("im.ponies.room_emotes"),
+		() => room.getAllEmojiPacks(),
+	)
+}
+
 export function useBotCommands(room: RoomStateStore): WrappedBotCommand[] {
 	return useSyncExternalStore(
 		room.stateSubs.getSubscriber("org.matrix.msc4332.commands"),

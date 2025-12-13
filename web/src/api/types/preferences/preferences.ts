@@ -228,8 +228,8 @@ export const preferences = {
 	room_view_type: new Preference<RoomType | null>({
 		displayName: "Room type override",
 		description: "Use a specific view for this room instead of the default based on its type.",
-		allowedValues: [null, "", "m.space", "org.matrix.msc3417.call"] as const,
-		valueLabels: ["None", "Timeline", "Space view", "Element Call"] as const,
+		allowedValues: [null, "", "m.space", "org.matrix.msc3417.call", "fi.mau.msc2545.image_pack"] as const,
+		valueLabels: ["None", "Timeline", "Space view", "Element Call", "Image pack editor"] as const,
 		allowedContexts: roomSpecific,
 		defaultValue: null,
 	}),

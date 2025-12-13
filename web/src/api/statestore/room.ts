@@ -223,8 +223,8 @@ export class RoomStateStore {
 
 	getEmojiPack(key: string): CustomEmojiPack | null {
 		if (!this.#emojiPacksCache.has(key)) {
-			const pack = this.getStateEvent("im.ponies.room_emotes", key)?.content
-			if (!pack || !pack.images) {
+			const packEvt = this.getStateEvent("im.ponies.room_emotes", key)
+			if (!packEvt || packEvt?.redacted_by || !packEvt?.content?.images) {
 				this.#emojiPacksCache.set(key, null)
 				return null
 			}
@@ -235,7 +235,7 @@ export class RoomStateStore {
 				type: "im.ponies.room_emotes",
 				state_key: key,
 			})
-			this.#emojiPacksCache.set(key, parseCustomEmojiPack(pack as ImagePack, packID, fallbackName))
+			this.#emojiPacksCache.set(key, parseCustomEmojiPack(packEvt.content as ImagePack, packID, fallbackName))
 		}
 		return this.#emojiPacksCache.get(key) ?? null
 	}

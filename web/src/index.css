@@ -13,6 +13,7 @@
 	--link-text-color: #0467dd;
 	--visited-link-text-color: var(--link-text-color);
 	--small-font-size: .875rem;
+	--modal-max-width: 80rem;
 
 	--code-background-color: rgba(0, 0, 0, 0.15);
 	--media-placeholder-default-background: rgba(0, 0, 0, .1);
@@ -52,6 +53,7 @@
 	--modal-box-shadow-color: rgba(0, 0, 0, 0.1);
 
 	--emoji-selected-border-color: #cec;
+	--image-pack-editor-selected-color: #cec;
 
 	--unread-counter-text-color: var(--inverted-text-color);
 	--unread-counter-message-bg: rgba(0, 0, 0, 0.35);
@@ -145,6 +147,7 @@
 		--modal-box-shadow-color: rgba(255, 255, 255, 0.04);
 
 		--emoji-selected-border-color: #131;
+		--image-pack-editor-selected-color: #131;
 
 		--unread-counter-message-bg: rgba(255, 255, 255, 0.5);
 		--unread-counter-notification-bg: rgba(150, 255, 0, 0.7);

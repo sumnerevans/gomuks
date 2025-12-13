@@ -30,7 +30,8 @@ export type RoomVersion =
 export type RoomType = "" |
 	"m.space" |
 	"support.feline.policy.lists.msc.v1" |
-	"org.matrix.msc3417.call"
+	"org.matrix.msc3417.call" |
+	"fi.mau.msc2545.image_pack"
 export type RelationType = "m.annotation" | "m.reference" | "m.replace" | "m.thread"
 export type Direction = "b" | "f"
 

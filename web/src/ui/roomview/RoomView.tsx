@@ -13,7 +13,8 @@
 //
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
-import { JSX, useEffect, useState } from "react"
+import { JSX, Suspense, lazy, useEffect, useState } from "react"
+import { GridLoader } from "react-spinners"
 import { RoomStateStore, usePreference } from "@/api/statestore"
 import { RoomType } from "@/api/types"
 import MessageComposer from "../composer/MessageComposer.tsx"
@@ -34,6 +35,8 @@ interface RoomViewProps {
 	rightPanelResizeHandle: JSX.Element
 }
 
+const ImagePackView = lazy(() => import("./ImagePackView.tsx"))
+
 function getViewForRoomType(roomType: RoomType | undefined): JSX.Element | null {
 	switch (roomType) {
 	case "m.space":
@@ -42,6 +45,12 @@ function getViewForRoomType(roomType: RoomType | undefined): JSX.Element | null 
 		return null // TODO <PolicyListEditor />
 	case "org.matrix.msc3417.call":
 		return <ElementCall />
+	case "fi.mau.msc2545.image_pack":
+		return <Suspense fallback={<div style={{ display: "flex", justifyContent: "center", marginTop: "2rem" }}>
+			<GridLoader color="var(--primary-color)" size={20} />
+		</div>}>
+			<ImagePackView />
+		</Suspense>
 	default:
 		return null
 	}
