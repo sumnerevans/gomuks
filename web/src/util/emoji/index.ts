@@ -15,6 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 import { useMemo, useRef } from "react"
 import { ContentURI, EventID, ImagePack, MediaInfo, ReactionEventContent } from "@/api/types"
+import { ensureNumber } from "@/util/validation.ts"
 import data from "./data.json"
 
 export interface EmojiMetadata {
@@ -23,6 +24,7 @@ export interface EmojiMetadata {
 	n: string // Primary shortcode
 	s: string[] // Shortcodes without underscores
 	i?: MediaInfo // Media info for stickers only
+	o?: number // Order for custom emojis/stickers
 }
 
 export interface EmojiText {
@@ -152,6 +154,7 @@ export function parseCustomEmojiPack(
 		const emojis: Emoji[] = []
 		const defaultIsEmoji = !pack.pack.usage || pack.pack.usage.includes("emoticon")
 		const defaultIsSticker = !pack.pack.usage || pack.pack.usage.includes("sticker")
+		let hasOrders = false
 		for (const [shortcode, image] of Object.entries(pack.images)) {
 			if (!image.url) {
 				continue
@@ -167,7 +170,9 @@ export function parseCustomEmojiPack(
 					s: [shortcode.toLowerCase().replaceAll("_", "").replaceAll(" ", "")],
 					t: image.body || shortcode,
 					i: image.info,
+					o: ensureNumber(image["fi.mau.msc4389.order"]),
 				}
+				hasOrders = hasOrders || !!converted.o
 				emojiMap.set(image.url, converted)
 				const isSticker = image.usage ? image.usage.includes("sticker") : defaultIsSticker
 				const isEmoji = image.usage ? image.usage.includes("emoticon") : defaultIsEmoji
@@ -178,6 +183,10 @@ export function parseCustomEmojiPack(
 					stickers.push(converted)
 				}
 			}
+		}
+		if (hasOrders) {
+			emojis.sort((a, b) => a.o! - b.o!)
+			stickers.sort((a, b) => a.o! - b.o!)
 		}
 		const icon = pack.pack.avatar_url || (emojis[0] ?? stickers[0])?.u
 		return {

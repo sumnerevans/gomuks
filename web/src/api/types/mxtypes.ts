@@ -359,6 +359,7 @@ export interface ImagePackEntry {
 	body?: string
 	info?: MediaInfo
 	usage?: ImagePackUsage[]
+	"fi.mau.msc4389.order"?: number
 }
 
 export interface ImagePack {
