@@ -402,12 +402,12 @@ func (gmx *Gomuks) DownloadMedia(w http.ResponseWriter, r *http.Request) {
 				cacheEntry.Error.Matrix = ptr.Ptr(mautrix.MUnknown.WithMessage("Server returned non-JSON error with status %d", httpErr.Response.StatusCode))
 				cacheEntry.Error.StatusCode = httpErr.Response.StatusCode
 			}
-		} else if errors.Is(err, attachment.HashMismatch) ||
-			errors.Is(err, attachment.UnsupportedVersion) ||
-			errors.Is(err, attachment.UnsupportedAlgorithm) ||
-			errors.Is(err, attachment.InvalidKey) ||
-			errors.Is(err, attachment.InvalidInitVector) ||
-			errors.Is(err, attachment.InvalidHash) {
+		} else if errors.Is(err, attachment.ErrHashMismatch) ||
+			errors.Is(err, attachment.ErrUnsupportedVersion) ||
+			errors.Is(err, attachment.ErrUnsupportedAlgorithm) ||
+			errors.Is(err, attachment.ErrInvalidKey) ||
+			errors.Is(err, attachment.ErrInvalidInitVector) ||
+			errors.Is(err, attachment.ErrInvalidHash) {
 			cacheEntry.Error.Matrix = ptr.Ptr(mautrix.MUnknown.WithMessage(err.Error()))
 			cacheEntry.Error.StatusCode = http.StatusInternalServerError
 		} else {

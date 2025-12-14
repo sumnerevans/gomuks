@@ -1,3 +1,21 @@
+# v25.12 (unreleased)
+
+### Backend
+* Added commands to remove and add aliases (thanks to [@nexy7574] in [#672]).
+* Fixed `/myroomnick`/`avatar` commands failing after joining a room with
+  restricted join rules.
+* Fixed race condition where a recovery key input screen would show up if the
+  backend hadn't finished initializing when the frontend was loaded.
+* Fixed `/roomname` command not accepting an argument.
+
+[@nexy7574]: https://github.com/nexy7574
+[#672]: https://github.com/gomuks/gomuks/pull/672
+
+### Web
+* Added voice message recorder.
+* Added image pack editor.
+* Added support for downloading media on the Android wrapper.
+
 # v25.11
 
 The first release of new gomuks is here! gomuks now consists of a backend plus
