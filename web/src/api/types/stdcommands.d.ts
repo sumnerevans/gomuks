@@ -13,7 +13,7 @@ export type CommandName =
 	| "myroomavatar"
 	| "globalnick {name}"
 	| "globalavatar"
-	| "roomname"
+	| "roomname {name}"
 	| "roomavatar"
 	| "redact {event_id} {reason}"
 	| "raw {event_type} {json}"
