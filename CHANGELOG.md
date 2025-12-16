@@ -1,4 +1,4 @@
-# v25.12 (unreleased)
+# v25.12
 
 ### Backend
 * Added commands to remove and add aliases (thanks to [@nexy7574] in [#672]).

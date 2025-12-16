@@ -8,7 +8,7 @@ require github.com/wailsapp/wails/v3 v3.0.0-alpha.40
 
 require (
 	go.mau.fi/gomuks v0.2511.0
-	go.mau.fi/util v0.9.4-0.20251214123745-64997f646f1d
+	go.mau.fi/util v0.9.4
 )
 
 require (
@@ -18,12 +18,12 @@ require (
 	github.com/ProtonMail/go-crypto v1.1.6 // indirect
 	github.com/SherClockHolmes/webpush-go v1.4.0 // indirect
 	github.com/adrg/xdg v0.5.3 // indirect
-	github.com/alecthomas/chroma/v2 v2.20.0 // indirect
+	github.com/alecthomas/chroma/v2 v2.21.0 // indirect
 	github.com/bep/debounce v1.2.1 // indirect
 	github.com/buckket/go-blurhash v1.1.0 // indirect
 	github.com/cloudflare/circl v1.6.0 // indirect
 	github.com/coder/websocket v1.8.14 // indirect
-	github.com/coreos/go-systemd/v22 v22.5.0 // indirect
+	github.com/coreos/go-systemd/v22 v22.6.0 // indirect
 	github.com/cyphar/filepath-securejoin v0.4.1 // indirect
 	github.com/disintegration/imaging v1.6.2 // indirect
 	github.com/dlclark/regexp2 v1.11.5 // indirect
@@ -35,7 +35,7 @@ require (
 	github.com/go-git/go-git/v5 v5.13.2 // indirect
 	github.com/go-ole/go-ole v1.3.0 // indirect
 	github.com/godbus/dbus/v5 v5.1.0 // indirect
-	github.com/golang-jwt/jwt/v5 v5.2.1 // indirect
+	github.com/golang-jwt/jwt/v5 v5.2.2 // indirect
 	github.com/golang/groupcache v0.0.0-20241129210726-2c02b8208cf8 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/jbenet/go-context v0.0.0-20150711004518-d14ea06fba99 // indirect
@@ -79,7 +79,7 @@ require (
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1 // indirect
 	gopkg.in/warnings.v0 v0.1.2 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
-	maunium.net/go/mautrix v0.26.1-0.20251214123757-4be256229706 // indirect
+	maunium.net/go/mautrix v0.26.1 // indirect
 	mvdan.cc/xurls/v2 v2.6.0 // indirect
 )
 
