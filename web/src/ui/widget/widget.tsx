@@ -62,11 +62,6 @@ class WidgetListenerImpl implements WidgetListener {
 			sender: evt.sender,
 			type: evt.type,
 			content: evt.content,
-			// Why does this use the IRoomEvent interface??
-			event_id: "",
-			room_id: "",
-			origin_server_ts: 0,
-			unsigned: {},
 		}, evt.encrypted).catch(err => console.error("Failed to feed to-device event", evt, err))
 	}
 }

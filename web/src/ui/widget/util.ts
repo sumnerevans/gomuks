@@ -34,7 +34,7 @@ export function memDBEventToIRoomEvent(evt: MemDBEvent): IRoomEvent {
 		state_key: evt.state_key,
 		origin_server_ts: evt.timestamp,
 		content: evt.content,
-		unsigned: evt.unsigned,
+		unsigned: evt.unsigned as Record<string, unknown>,
 	}
 }
 

@@ -9,7 +9,7 @@ export default defineConfig({
 	base: "./",
 	build: {
 		target: ["esnext", "firefox140", "chrome140", "safari18"],
-		chunkSizeWarningLimit: 3500,
+		chunkSizeWarningLimit: 4000,
 		rollupOptions: {
 			output: {
 				manualChunks: id => {

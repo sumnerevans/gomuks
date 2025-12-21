@@ -58,7 +58,7 @@ export default class WSClient extends RPCClient {
 	#stopped = false
 	#reconnectTimeout: ReturnType<typeof setTimeout> | null = null
 	#connectFailures: number = 0
-	#decompWriter: WritableStreamDefaultWriter<Uint8Array> | null = null
+	#decompWriter: WritableStreamDefaultWriter<BufferSource> | null = null
 
 	constructor(readonly addr: string, readonly compress: boolean = false) {
 		super()

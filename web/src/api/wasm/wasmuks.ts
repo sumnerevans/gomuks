@@ -17,7 +17,11 @@ import initGomuksWasm from "./_gomuks.wasm?init"
 import "./go_wasm_exec.js"
 import initSqlite from "./sqlite_bridge.ts"
 
-interface MediaResponse { buffer: Uint8Array, contentType: string, contentDisposition: string }
+interface MediaResponse {
+	buffer: Uint8Array<ArrayBuffer>
+	contentType: string
+	contentDisposition: string
+}
 
 declare global {
 	interface Window {

@@ -101,7 +101,7 @@ export enum UnreadType {
 }
 
 export interface LocalContent {
-	sanitized_html?: TrustedHTML
+	sanitized_html?: string
 	edit_source?: string
 	html_version?: number
 	was_plaintext?: boolean
