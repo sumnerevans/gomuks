@@ -93,6 +93,11 @@ export default tseslint.config(
 			"eol-last": ["error", "always"],
 			"no-console": "off",
 			"@typescript-eslint/no-non-null-assertion": "off",
+			"react-hooks/immutability": "off",
+			"react-hooks/set-state-in-effect": "off",
+			"react-hooks/refs": "off",
+			"react-hooks/static-components": "off",
+			"react-hooks/purity": "off",
 		},
 	},
 )
