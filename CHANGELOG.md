@@ -1,6 +1,7 @@
 # v25.12
 
 ### Backend
+* Updated Docker image to Alpine 3.23.
 * Added commands to remove and add aliases (thanks to [@nexy7574] in [#672]).
 * Fixed `/myroomnick`/`avatar` commands failing after joining a room with
   restricted join rules.
