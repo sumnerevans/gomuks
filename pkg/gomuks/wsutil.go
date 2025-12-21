@@ -96,6 +96,7 @@ func writeCmdWithExtra[T any](
 	if err != nil {
 		return writer.n, fmt.Errorf("failed to encode command to websocket: %w", err)
 	}
+	// TODO make batching optional
 	if extra != nil && msgType == websocket.MessageBinary {
 		const preferredMaxFrameSize = 256 * 1024
 		for extraCmd := range extra {
