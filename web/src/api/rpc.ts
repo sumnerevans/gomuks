@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 import { CachedEventDispatcher, EventDispatcher } from "../util/eventdispatcher.ts"
 import { CancellablePromise } from "../util/promise.ts"
-import type {
+import {
 	ClientWellKnown,
 	DBPushRegistration,
 	Direction,
@@ -52,6 +52,7 @@ import type {
 	RoomSummary,
 	TimelineRowID,
 	URLPreview,
+	UnreadType,
 	UserID,
 	UserProfile,
 } from "./types"
@@ -287,6 +288,15 @@ export default abstract class RPCClient {
 
 	getRelatedEvents(room_id: RoomID, event_id: EventID, relation_type?: RelationType): Promise<RawDBEvent[]> {
 		return this.request("get_related_events", { room_id, event_id, relation_type })
+	}
+
+	getMentions(
+		max_timestamp: number,
+		type: UnreadType = UnreadType.Highlight,
+		limit: number = 50,
+		room_id: RoomID | undefined = undefined,
+	): Promise<RawDBEvent[]> {
+		return this.request("get_mentions", { max_timestamp, type, limit, room_id })
 	}
 
 	getEventContext(room_id: RoomID, event_id: EventID, limit: number = 20): Promise<EventContextResponse> {
