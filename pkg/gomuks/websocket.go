@@ -145,10 +145,7 @@ func (gmx *Gomuks) HandleWebsocket(w http.ResponseWriter, r *http.Request) {
 	const RecvTimeout = 60 * time.Second
 	lastImageAuthTokenSent := time.Now()
 	sendImageAuthToken := func() {
-		err := writeCmd(ctx, conn, fp, &BufferedEvent{
-			Command: jsoncmd.EventImageAuthToken,
-			Data:    gmx.generateImageToken(1 * time.Hour),
-		})
+		err := writeCmd(ctx, conn, fp, jsoncmd.SpecImageAuthToken.Format(gmx.generateImageToken(1*time.Hour)))
 		if err != nil {
 			log.Err(err).Msg("Failed to write image auth token message")
 			return
@@ -174,10 +171,7 @@ func (gmx *Gomuks) HandleWebsocket(w http.ResponseWriter, r *http.Request) {
 				Msg("Sent resume data to client")
 		}
 		if resumeData != nil {
-			err := writeCmd(ctx, conn, fp, &hicli.JSONCommand{
-				Command:   jsoncmd.EventInitComplete,
-				RequestID: 0,
-			})
+			err := writeCmd(ctx, conn, fp, jsoncmd.SpecInitComplete.Format(jsoncmd.Empty{}))
 			if err != nil {
 				log.Err(err).Msg("Failed to send init done event to client")
 				return
@@ -254,30 +248,21 @@ func (gmx *Gomuks) HandleWebsocket(w http.ResponseWriter, r *http.Request) {
 			log.Trace().Int64("req_id", cmd.RequestID).Msg("Sent response to command")
 		}
 	}
-	initErr := writeCmd(ctx, conn, fp, &jsoncmd.Container[*jsoncmd.RunData]{
-		Command: jsoncmd.EventRunID,
-		Data: &jsoncmd.RunData{
-			RunID:    strconv.FormatInt(runID, 10),
-			ETag:     gmx.frontendETag,
-			VAPIDKey: gmx.Config.Push.VAPIDPublicKey,
-		},
-	})
+	initErr := writeCmd(ctx, conn, fp, jsoncmd.SpecRunID.Format(&jsoncmd.RunData{
+		RunID:    strconv.FormatInt(runID, 10),
+		ETag:     gmx.frontendETag,
+		VAPIDKey: gmx.Config.Push.VAPIDPublicKey,
+	}))
 	if initErr != nil {
 		log.Err(initErr).Msg("Failed to write init client state message")
 		return
 	}
-	initErr = writeCmd(ctx, conn, fp, &jsoncmd.Container[*jsoncmd.ClientState]{
-		Command: jsoncmd.EventClientState,
-		Data:    gmx.Client.State(),
-	})
+	initErr = writeCmd(ctx, conn, fp, jsoncmd.SpecClientState.Format(gmx.Client.State()))
 	if initErr != nil {
 		log.Err(initErr).Msg("Failed to write init client state message")
 		return
 	}
-	initErr = writeCmd(ctx, conn, fp, &jsoncmd.Container[*jsoncmd.SyncStatus]{
-		Command: jsoncmd.EventSyncStatus,
-		Data:    gmx.Client.SyncStatus.Load(),
-	})
+	initErr = writeCmd(ctx, conn, fp, jsoncmd.SpecSyncStatus.Format(gmx.Client.SyncStatus.Load()))
 	if initErr != nil {
 		log.Err(initErr).Msg("Failed to write init sync status message")
 		return
@@ -332,11 +317,7 @@ func (gmx *Gomuks) sendInitialData(ctx context.Context, fp *flateProxy, conn *we
 	var totalSize int
 	for payload := range gmx.Client.GetInitialSync(ctx, 100) {
 		roomCount += len(payload.Rooms)
-		n, err := writeCmdWithExtra(ctx, conn, fp, &jsoncmd.Container[*jsoncmd.SyncComplete]{
-			Command:   jsoncmd.EventSyncComplete,
-			RequestID: 0,
-			Data:      payload,
-		}, nil)
+		n, err := writeCmdWithExtra(ctx, conn, fp, jsoncmd.SpecSyncComplete.Format(payload), nil)
 		if err != nil {
 			log.Err(err).Msg("Failed to send initial rooms to client")
 			return
@@ -346,10 +327,7 @@ func (gmx *Gomuks) sendInitialData(ctx context.Context, fp *flateProxy, conn *we
 	if ctx.Err() != nil {
 		return
 	}
-	err := writeCmd(ctx, conn, fp, &hicli.JSONCommand{
-		Command:   jsoncmd.EventInitComplete,
-		RequestID: 0,
-	})
+	err := writeCmd(ctx, conn, fp, jsoncmd.SpecInitComplete.Format(jsoncmd.Empty{}))
 	if err != nil {
 		log.Err(err).Msg("Failed to send initial rooms done event to client")
 		return

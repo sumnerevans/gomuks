@@ -56,14 +56,8 @@ func (c *CommandHandler) HandleCommand(cmd *hicli.JSONCommand) *hicli.JSONComman
 
 func (c *CommandHandler) Init() {
 	c.Gomuks.Log.Info().Msg("Sending initial state to client")
-	c.App.Event.Emit("hicli_event", &jsoncmd.Container[*jsoncmd.ClientState]{
-		Command: jsoncmd.EventClientState,
-		Data:    c.Gomuks.Client.State(),
-	})
-	c.App.Event.Emit("hicli_event", &jsoncmd.Container[*jsoncmd.SyncStatus]{
-		Command: jsoncmd.EventSyncStatus,
-		Data:    c.Gomuks.Client.SyncStatus.Load(),
-	})
+	c.App.Event.Emit("hicli_event", jsoncmd.SpecClientState.Format(c.Gomuks.Client.State()))
+	c.App.Event.Emit("hicli_event", jsoncmd.SpecSyncStatus.Format(c.Gomuks.Client.SyncStatus.Load()))
 	if c.Gomuks.Client.IsLoggedIn() {
 		go func() {
 			log := c.Gomuks.Log
@@ -71,19 +65,12 @@ func (c *CommandHandler) Init() {
 			var roomCount int
 			for payload := range c.Gomuks.Client.GetInitialSync(ctx, 100) {
 				roomCount += len(payload.Rooms)
-				c.App.Event.Emit("hicli_event", &jsoncmd.Container[*jsoncmd.SyncComplete]{
-					Command:   jsoncmd.EventSyncComplete,
-					RequestID: 0,
-					Data:      payload,
-				})
+				c.App.Event.Emit("hicli_event", jsoncmd.SpecSyncComplete.Format(payload))
 			}
 			if ctx.Err() != nil {
 				return
 			}
-			c.App.Event.Emit("hicli_event", &jsoncmd.Container[any]{
-				Command:   jsoncmd.EventInitComplete,
-				RequestID: 0,
-			})
+			c.App.Event.Emit("hicli_event", jsoncmd.SpecInitComplete.Format(jsoncmd.Empty{}))
 			log.Info().Int("room_count", roomCount).Msg("Sent initial rooms to client")
 		}()
 	}

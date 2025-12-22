@@ -42,12 +42,12 @@ import (
 )
 
 type PushNotification struct {
-	Dismiss         []PushDismiss       `json:"dismiss,omitempty"`
-	OrigMessages    []*PushNewMessage   `json:"-"`
-	RawMessages     []json.RawMessage   `json:"messages,omitempty"`
-	ImageAuth       string              `json:"image_auth,omitempty"`
-	ImageAuthExpiry *jsontime.UnixMilli `json:"image_auth_expiry,omitempty"`
-	HasImportant    bool                `json:"-"`
+	Dismiss         []PushDismiss          `json:"dismiss,omitempty"`
+	OrigMessages    []*PushNewMessage      `json:"-"`
+	RawMessages     []json.RawMessage      `json:"messages,omitempty"`
+	ImageAuth       jsoncmd.ImageAuthToken `json:"image_auth,omitempty"`
+	ImageAuthExpiry *jsontime.UnixMilli    `json:"image_auth_expiry,omitempty"`
+	HasImportant    bool                   `json:"-"`
 }
 
 type PushDismiss struct {

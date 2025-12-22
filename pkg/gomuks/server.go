@@ -43,6 +43,7 @@ import (
 	"maunium.net/go/mautrix"
 
 	"go.mau.fi/gomuks/pkg/hicli"
+	"go.mau.fi/gomuks/pkg/hicli/jsoncmd"
 	"go.mau.fi/gomuks/version"
 )
 
@@ -206,12 +207,12 @@ func (gmx *Gomuks) generateToken() (string, time.Time) {
 	}), expiry
 }
 
-func (gmx *Gomuks) generateImageToken(expiry time.Duration) string {
-	return gmx.signToken(tokenData{
+func (gmx *Gomuks) generateImageToken(expiry time.Duration) jsoncmd.ImageAuthToken {
+	return jsoncmd.ImageAuthToken(gmx.signToken(tokenData{
 		Username:  gmx.Config.Web.Username,
 		Expiry:    jsontime.U(time.Now().Add(expiry)),
 		ImageOnly: true,
-	})
+	}))
 }
 
 func (gmx *Gomuks) signToken(td any) string {
