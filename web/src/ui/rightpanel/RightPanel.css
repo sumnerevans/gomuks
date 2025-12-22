@@ -59,6 +59,7 @@ div.right-panel-content.notifications {
 
 	> div.controls {
 		padding: .5rem;
+		flex-shrink: 0;
 	}
 
 	> div.notification-panel-content {
