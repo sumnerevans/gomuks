@@ -14,6 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-export default function reverseMap<T, O>(arg: T[], fn: (a: T) => O) {
-	return arg.map((_, i, arr) => fn(arr[arr.length - i - 1]))
+export default function reverseMap<T, O>(arg: T[], fn: (a: T, index: number) => O) {
+	return arg.map((_, i, arr) => fn(arr[arr.length - i - 1], arr.length - i - 1))
 }

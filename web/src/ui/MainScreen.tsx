@@ -229,7 +229,7 @@ class ContextFields implements MainScreenContextFields {
 				}
 			}
 		}
-		if (type === "pinned-messages" || type === "members" || type === "widgets") {
+		if (type === "pinned-messages" || type === "members" || type === "notifications" || type === "widgets") {
 			doSetRightPanel({ type })
 		} else if (type === "user") {
 			doSetRightPanel({ type, userID: targetUser! })

@@ -42,7 +42,8 @@ import PendingIcon from "@/icons/pending.svg?react"
 import SentIcon from "@/icons/sent.svg?react"
 import "./TimelineEvent.css"
 
-export type TimelineEventViewType = "timeline" | "thread" | "context" | "pinned" | "edit-history" | "confirm"
+export type TimelineEventViewType =
+	"timeline" | "thread" | "context" | "pinned" | "edit-history" | "confirm" | "notifications"
 
 export interface TimelineEventProps {
 	evt: MemDBEvent
@@ -161,8 +162,10 @@ const TimelineEvent = ({
 		roomCtx.setFocusedEventRowID(roomCtx.focusedEventRowID === evt.rowid ? null : evt.rowid)
 	}
 	const onClickTimestamp = () => {
-		if (viewType === "pinned") {
+		if (viewType === "pinned" || (viewType === "notifications" && evt.room_id === roomCtx.store.roomID)) {
 			jumpToEventInView(roomCtx, evt.event_id, document.querySelector("div.room-view"))
+		} else if (viewType === "notifications") {
+			mainScreen.setActiveRoom(evt.room_id, { openEventID: evt.event_id })
 		}
 	}
 	const openEditHistory = () => {
@@ -206,7 +209,8 @@ const TimelineEvent = ({
 	if (evt.sender === client.userID) {
 		wrapperClassNames.push("own-event")
 	}
-	const forceContextMenuOnMobile = viewType === "edit-history" || viewType === "context" || viewType === "pinned"
+	const forceContextMenuOnMobile =
+		viewType === "edit-history" || viewType === "context" || viewType === "pinned" || viewType === "notifications"
 	if ((isMobileDevice && !forceContextMenuOnMobile) || disableMenu) {
 		wrapperClassNames.push("no-hover")
 	}

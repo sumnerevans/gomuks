@@ -22,6 +22,7 @@ import ErrorBoundary from "../util/ErrorBoundary.tsx"
 import ElementCall from "../widget/ElementCall.tsx"
 import LazyWidget from "../widget/LazyWidget.tsx"
 import MemberList from "./MemberList.tsx"
+import Notifications from "./Notifications.tsx"
 import PinnedMessages from "./PinnedMessages.tsx"
 import UserInfo from "./UserInfo.tsx"
 import WidgetList from "./WidgetList.tsx"
@@ -29,10 +30,11 @@ import BackIcon from "@/icons/back.svg?react"
 import CloseIcon from "@/icons/close.svg?react"
 import "./RightPanel.css"
 
-export type RightPanelType = "pinned-messages" | "members" | "widgets" | "widget" | "user" | "thread" | "element-call"
+export type RightPanelType =
+	"pinned-messages" | "notifications" | "members" | "widgets" | "widget" | "user" | "thread" | "element-call"
 
 interface RightPanelSimpleProps {
-	type: "pinned-messages" | "members" | "widgets" | "element-call"
+	type: "pinned-messages" | "notifications" | "members" | "widgets" | "element-call"
 }
 
 interface RightPanelWidgetProps {
@@ -60,6 +62,8 @@ function getTitle(props: RightPanelProps): string {
 	switch (props.type) {
 	case "pinned-messages":
 		return "Pinned Messages"
+	case "notifications":
+		return "Notification Center"
 	case "members":
 		return "Room Members"
 	case "widgets":
@@ -79,6 +83,8 @@ function renderRightPanelContent(props: RightPanelProps, mainScreen: MainScreenC
 	switch (props.type) {
 	case "pinned-messages":
 		return <PinnedMessages />
+	case "notifications":
+		return <Notifications />
 	case "members":
 		return <MemberList />
 	case "widgets":

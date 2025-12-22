@@ -52,6 +52,39 @@ div.right-panel-content.pinned-messages {
 	}
 }
 
+div.right-panel-content.notifications {
+	display: flex;
+	flex-direction: column;
+	overflow: hidden;
+
+	> div.controls {
+		padding: .5rem;
+	}
+
+	> div.notification-panel-content {
+		padding: .5rem;
+		display: flex;
+		flex-direction: column;
+		overflow: auto;
+		height: 100%;
+
+		&.empty {
+			align-items: center;
+			justify-content: center;
+		}
+
+		&.highlights-only {
+			--timeline-highlight-bg-color: var(--background-color);
+			--timeline-highlight-hover-bg-color: var(--timeline-hover-bg-color);
+		}
+
+		> button.load-more {
+			height: 3rem;
+			flex-shrink: 0;
+		}
+	}
+}
+
 div.right-panel-content.widgets {
 	display: flex;
 	flex-direction: column;

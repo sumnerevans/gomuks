@@ -17,7 +17,7 @@ import type { MouseEvent } from "react"
 import { CachedEventDispatcher, NonNullCachedEventDispatcher } from "../util/eventdispatcher.ts"
 import RPCClient, { SendMessageParams } from "./rpc.ts"
 import { RoomStateStore, StateStore, WidgetListener, fakeGomuksSender } from "./statestore"
-import type {
+import {
 	ClientState,
 	ElementRecentEmoji,
 	EventID,
@@ -30,6 +30,7 @@ import type {
 	RoomID,
 	RoomStateGUID,
 	SyncStatus,
+	UnreadType,
 	UserID,
 } from "./types"
 
@@ -328,6 +329,21 @@ export default class Client {
 		}
 		const events = await this.rpc.getRelatedEvents(room.roomID, eventID, relationType)
 		return events.map(evt => room.getOrApplyEvent(evt))
+	}
+
+	async getMentions({ maxTS, type, roomID, limit }: {
+		maxTS?: number, type?: UnreadType, roomID?: RoomID, limit?: number
+	} = {}) {
+		const resp = await this.rpc.getMentions(maxTS ?? Date.now(), type, limit, roomID)
+		const output = []
+		for (const evt of resp) {
+			const room = this.store.rooms.get(evt.room_id)
+			if (!room) {
+				continue
+			}
+			output.push(room.getOrApplyEvent(evt))
+		}
+		return output
 	}
 
 	async pinMessage(room: RoomStateStore, evtID: EventID, wantPinned: boolean) {
