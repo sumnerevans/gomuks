@@ -472,6 +472,32 @@ const MessageComposer = () => {
 		} else if (editing && fullKey === "Escape") {
 			evt.stopPropagation()
 			roomCtx.setEditing(null)
+		} else if (!editing && fullKey === "Ctrl+ArrowUp") {
+			let replyToIdx = replyToEvt ? room.timeline.findIndex(item => item.event_rowid === replyToEvt.rowid) : -1
+			if (replyToIdx === -1) {
+				replyToIdx = room.timeline.length - 1
+			} else if (replyToIdx > 0) {
+				replyToIdx -= 1
+			} else {
+				return
+			}
+			const newReplyEvt = room.eventsByRowID.get(room.timeline[replyToIdx].event_rowid)
+			if (newReplyEvt) {
+				roomCtx.setReplyTo(newReplyEvt.event_id)
+				evt.preventDefault()
+			}
+		} else if (!editing && fullKey === "Ctrl+ArrowDown" && replyToEvt !== null) {
+			const replyToIdx = room.timeline.findIndex(item => item.event_rowid === replyToEvt.rowid)
+			if (replyToIdx >= room.timeline.length - 1) {
+				roomCtx.setReplyTo(null)
+				evt.preventDefault()
+			} else if (replyToIdx >= 0) {
+				const newReplyEvt = room.eventsByRowID.get(room.timeline[replyToIdx + 1].event_rowid)
+				if (newReplyEvt) {
+					roomCtx.setReplyTo(newReplyEvt.event_id)
+					evt.preventDefault()
+				}
+			}
 		}
 	}
 	const onChange = (evt: React.ChangeEvent<HTMLTextAreaElement>) => {
