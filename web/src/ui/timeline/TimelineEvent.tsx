@@ -58,6 +58,15 @@ const fullTimeFormatter = new Intl.DateTimeFormat("en-GB", { dateStyle: "full", 
 const dateFormatter = new Intl.DateTimeFormat("en-GB", { dateStyle: "full" })
 const formatShortTime = (time: Date) =>
 	`${time.getHours().toString().padStart(2, "0")}:${time.getMinutes().toString().padStart(2, "0")}`
+const formatFullTime = (time: Date) => fullTimeFormatter.format(time)
+const formatDate = (time: Date) => dateFormatter.format(time)
+const newSafeDate = (val: number) => {
+	const date = new Date(val)
+	if (isNaN(+date)) {
+		return new Date(0)
+	}
+	return date
+}
 
 interface EventReactionsProps {
 	reactions: Record<string, number>
@@ -176,8 +185,8 @@ const TimelineEvent = ({
 	const memberEvtContent = maybeRedactMemberEvent(memberEvt)
 	const renderMemberEvtContent = applyPerMessageSender(memberEvtContent, perMessageSender)
 
-	const eventTS = new Date(evt.timestamp)
-	const editEventTS = evt.last_edit ? new Date(evt.last_edit.timestamp) : null
+	const eventTS = newSafeDate(evt.timestamp)
+	const editEventTS = evt.last_edit ? newSafeDate(evt.last_edit.timestamp) : null
 	const wrapperClassNames = ["timeline-event"]
 	const isRedacted = displayAsRedacted(evt, memberEvt, roomCtx.store)
 	if (isRedacted) {
@@ -218,7 +227,7 @@ const TimelineEvent = ({
 	}
 	let dateSeparator = null
 	const showInitialDateSeparator = viewType === "timeline" || viewType === "thread" || viewType === "context"
-	const prevEvtDate = prevEvt ? new Date(prevEvt.timestamp) : null
+	const prevEvtDate = prevEvt ? newSafeDate(prevEvt.timestamp) : null
 	if (
 		(showInitialDateSeparator && !prevEvt)
 		|| (prevEvtDate && (
@@ -229,7 +238,7 @@ const TimelineEvent = ({
 	) {
 		dateSeparator = <div className="date-separator">
 			<hr role="none"/>
-			{dateFormatter.format(eventTS)}
+			{formatDate(eventTS)}
 			<hr role="none"/>
 		</div>
 	}
@@ -292,7 +301,7 @@ const TimelineEvent = ({
 		smallAvatar = false
 	}
 
-	const fullTime = fullTimeFormatter.format(eventTS)
+	const fullTime = formatFullTime(eventTS)
 	const shortTime = formatShortTime(eventTS)
 	const mainEvent = <div
 		data-event-id={evt.event_id}
@@ -365,7 +374,7 @@ const TimelineEvent = ({
 			</ContentErrorBoundary>
 			{(viewType !== "edit-history" && editEventTS) ? <div
 				className="event-edited"
-				title={`Edited at ${fullTimeFormatter.format(editEventTS)}`}
+				title={`Edited at ${formatFullTime(editEventTS)}`}
 				onClick={openEditHistory}
 			>
 				(edited at {formatShortTime(editEventTS)})
