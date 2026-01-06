@@ -201,6 +201,12 @@ export const preferences = {
 		allowedContexts: anyContext,
 		defaultValue: false,
 	}),
+	ctrl_arrow_reply: new Preference<boolean>({
+		displayName: "Use Ctrl+Arrow to reply",
+		description: "Should Ctrl+Arrow Up/Down change the message you're replying to?",
+		allowedContexts: anyContext,
+		defaultValue: true,
+	}),
 	custom_notification_sound: new Preference<ContentURI>({
 		displayName: "Custom notification sound",
 		description: "The mxc:// URI to a custom notification sound.",
