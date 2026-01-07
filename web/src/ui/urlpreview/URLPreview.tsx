@@ -13,7 +13,8 @@
 //
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
-import React, { use } from "react"
+import React, { use, useState } from "react"
+import { Blurhash } from "react-blurhash"
 import { ScaleLoader } from "react-spinners"
 import { getEncryptedMediaURL, getMediaURL } from "@/api/media"
 import { RoomStateStore, usePreference } from "@/api/statestore"
@@ -34,8 +35,10 @@ const URLPreview = ({ url, preview, startLoadingPreview, clearPreview, room }: {
 }) => {
 	const client = use(ClientContext)!
 	const renderPreviews = usePreference(client.store, room ?? null, "render_url_previews")
-	// TODO support blurhashes and clicking to view image previews here?
-	const showPreviewImages = usePreference(client.store, room ?? null, "show_media_previews") || Boolean(url)
+	const [forceShowImage, setForceShowImage] = useState(false)
+	const showPreviewImages = usePreference(client.store, room ?? null, "show_media_previews")
+		// If the url parameter is set, it means we're in the composer and should always render the media
+		|| Boolean(url) || forceShowImage
 	if (!renderPreviews) {
 		return null
 	}
@@ -77,14 +80,24 @@ const URLPreview = ({ url, preview, startLoadingPreview, clearPreview, room }: {
 
 	const previewingURL = preview["og:url"] ?? preview.matched_url ?? url
 	const title = preview["og:title"] ?? preview["og:url"] ?? previewingURL
-	const mediaContainer = <div className="media-container" style={style.container}>
-		<img
+	const mediaContainer = <div
+		className="media-container"
+		style={style.container}
+		onClick={() => setForceShowImage(true)}
+	>
+		{showPreviewImages ? <img
 			loading="lazy"
 			style={style.media}
 			src={mediaURL}
 			onClick={use(LightboxContext)!}
 			alt=""
-		/>
+		/> : preview["beeper:image:blurhash"] ? <Blurhash
+			hash={preview["beeper:image:blurhash"]}
+			width={style.container.width}
+			height={style.container.height}
+			resolutionX={48}
+			resolutionY={48}
+		/> : null}
 	</div>
 	return <div
 		className={inline ? "url-preview inline" : "url-preview"}
@@ -97,7 +110,7 @@ const URLPreview = ({ url, preview, startLoadingPreview, clearPreview, room }: {
 			<button onClick={clearPreview}><DeleteIcon/></button>
 		</div>}
 		<div className="description">{preview["og:description"]}</div>
-		{mediaURL && showPreviewImages && (inline
+		{mediaURL && (inline
 			? <div className="inline-media-wrapper">{mediaContainer}</div>
 			: mediaContainer)}
 	</div>

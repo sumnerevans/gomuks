@@ -188,6 +188,7 @@ export interface ContentWarning {
 export interface URLPreview {
 	matched_url: string
 	"beeper:image:encryption"?: EncryptedFile
+	"beeper:image:blurhash"?: string
 	"matrix:image:size": number
 	"og:image"?: ContentURI
 	"og:url": string
