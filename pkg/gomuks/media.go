@@ -796,9 +796,9 @@ func (gmx *Gomuks) GetURLPreview(w http.ResponseWriter, r *http.Request) {
 		}
 
 		if content != nil {
+			preview.ImageBlurhash = gmx.temporaryMXCToBlurhash[preview.ImageURL]
 			preview.ImageURL = content.URL
 			preview.ImageEncryption = content.File
-			preview.ImageBlurhash = gmx.temporaryMXCToBlurhash[preview.ImageURL]
 		}
 	}
 
