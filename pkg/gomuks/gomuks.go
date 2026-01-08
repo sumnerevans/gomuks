@@ -73,6 +73,7 @@ type Gomuks struct {
 	// previews to permanent MXC URIs suitable for sending in an inline preview
 	temporaryMXCToPermanent         map[id.ContentURIString]id.ContentURIString
 	temporaryMXCToEncryptedFileInfo map[id.ContentURIString]*event.EncryptedFileInfo
+	temporaryMXCToBlurhash          map[id.ContentURIString]string
 }
 
 func NewGomuks() *Gomuks {
@@ -81,6 +82,7 @@ func NewGomuks() *Gomuks {
 
 		temporaryMXCToPermanent:         map[id.ContentURIString]id.ContentURIString{},
 		temporaryMXCToEncryptedFileInfo: map[id.ContentURIString]*event.EncryptedFileInfo{},
+		temporaryMXCToBlurhash:          map[id.ContentURIString]string{},
 	}
 	gmx.GetDBConfig = func() dbutil.PoolConfig {
 		return dbutil.PoolConfig{
