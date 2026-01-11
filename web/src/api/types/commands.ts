@@ -283,14 +283,22 @@ function stringToIdentifierArgument(type: BotParameterPrimitiveType, val?: strin
 	}
 }
 
-const truePrefixes = ["t", "T", "y", "Y", "1"]
-const falsePrefixes = ["f", "F", "n", "N", "0"]
-
 function parseBoolean(val?: string): boolean | null {
-	const firstChar = val?.charAt(0) ?? ""
-	if (truePrefixes.includes(firstChar)) {
+	if (!val) {
+		return null
+	}
+	switch (val.toLowerCase()) {
+	case "t":
+	case "true":
+	case "y":
+	case "yes":
+	case "1":
 		return true
-	} else if (falsePrefixes.includes(firstChar)) {
+	case "f":
+	case "false":
+	case "n":
+	case "no":
+	case "0":
 		return false
 	}
 	return null
