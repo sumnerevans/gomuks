@@ -260,6 +260,7 @@ export interface BotCommand {
 	aliases?: string[]
 	parameters?: BotParameter[]
 	description?: ExtensibleTextContainer
+	"fi.mau.tail_parameter"?: string
 }
 
 export type BotCommandList = BotCommand[]

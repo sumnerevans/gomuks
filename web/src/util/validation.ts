@@ -168,6 +168,10 @@ export function isString(val: unknown): val is string {
 	return typeof val === "string"
 }
 
+export function onlyIfString(val: unknown): string | undefined {
+	return isString(val) ? val : undefined
+}
+
 export function ensureStringArray(val: unknown): string[] {
 	return ensureTypedArray(val, isString)
 }

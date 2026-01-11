@@ -24,6 +24,7 @@ import {
 	isUserID,
 	lessNoisyEncodeURIComponent,
 	matrixToToMatrixURI,
+	onlyIfString,
 	parseMatrixURI,
 } from "@/util/validation.ts"
 import {
@@ -121,6 +122,7 @@ export function sanitizeCommand(stateKey: UserID, content?: UnknownEventContent)
 		aliases: ensureStringArray(content["aliases"]),
 		parameters,
 		description: content.description,
+		"fi.mau.tail_parameter": onlyIfString(content["fi.mau.tail_parameter"]),
 	}
 }
 
@@ -147,7 +149,7 @@ const ARRAY_CLOSER = ">"
 
 export function parseQuoted(val: string): [string | null, string, boolean] {
 	if (!val) {
-		return [null, "", false]
+		return ["", "", false]
 	}
 	if (!val.startsWith(`"`)) {
 		const spaceIdx = val.indexOf(" ")
@@ -451,7 +453,7 @@ export function stringToCommandArgs(
 	}
 	input = input.slice(prefix.length)
 	const args: Record<string, BotArgumentValue> = {}
-	const processParam = (param: BotParameter, isLast: boolean, isNamed: boolean) => {
+	const processParam = (param: BotParameter, isLast: boolean, isTail: boolean, isNamed: boolean) => {
 		let nextVal: string | null
 		let wasQuoted: boolean
 		const origInput = input
@@ -489,8 +491,8 @@ export function stringToCommandArgs(
 			args[param.key] = collector.length ? collector : param["fi.mau.default_value"] ?? getDefaultArgument(param)
 		} else {
 			[nextVal, input, wasQuoted] = parseQuoted(input)
-			if (isLast && !wasQuoted && input) {
-				// If the last argument is not quoted and not variadic, just treat the rest of the string
+			if ((isLast || isTail) && !wasQuoted && input) {
+				// If the last argument is not quoted, just treat the rest of the string
 				// as the argument without escapes (arguments with escapes should be quoted).
 				nextVal += " " + input
 				input = ""
@@ -534,16 +536,17 @@ export function stringToCommandArgs(
 				}
 				const overrideParam = spec.parameters[overrideIdx]
 				skipParams[overrideIdx] = true
-				processParam(overrideParam, false, true)
+				processParam(overrideParam, false, false, true)
 			} else {
 				break
 			}
 		}
-		if (skipParams[i]) {
+		const isTail = param.key === spec["fi.mau.tail_parameter"]
+		if (skipParams[i] || (param.optional && !isTail)) {
 			i++
 			continue
 		}
-		processParam(param, ++i === spec.parameters.length, false)
+		processParam(param, ++i === spec.parameters.length, isTail, false)
 	}
 	return args
 }
