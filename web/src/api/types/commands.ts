@@ -162,7 +162,7 @@ export function parseQuoted(val: string): [string | null, string, boolean] {
 	const out = []
 	while (true) {
 		const quoteIdx = val.indexOf(`"`)
-		const escapeIdx = val.slice(0, quoteIdx).indexOf(`\\`)
+		const escapeIdx = val.slice(0, quoteIdx === -1 ? val.length : quoteIdx).indexOf(`\\`)
 		if (escapeIdx >= 0) {
 			out.push(val.slice(0, escapeIdx))
 			out.push(val.charAt(escapeIdx+1))
