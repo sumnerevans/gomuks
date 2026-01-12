@@ -135,43 +135,58 @@ const RoomPreview = ({ roomID, via, alias, invite }: RoomPreviewProps) => {
 			{loading && <ScaleLoader color="var(--primary-color)"/>}
 			{memberCount && <div className="member-count"><GroupIcon/> {memberCount} members</div>}
 			<div className="room-topic">{topic}</div>
-			{invite && <details className="room-invite-meta">
-				<summary>Invite metadata</summary>
+			<details className="room-invite-meta">
+				<summary>{invite ? "Invite" : "Link"} metadata</summary>
 				<table>
 					<tbody>
-						<tr>
-							<td>Invited by</td>
-							<td>{invite.invited_by}</td>
-						</tr>
 						<tr>
 							<td>Room ID</td>
 							<td>{roomID}</td>
 						</tr>
-						<tr>
-							<td>Room alias</td>
-							<td>{invite.canonical_alias ?? summary?.canonical_alias}</td>
-						</tr>
-						<tr>
-							<td>Is direct</td>
-							<td>{invite.is_direct.toString()}</td>
-						</tr>
-						<tr>
-							<td>Encryption</td>
-							<td>
-								{invite.encryption ?? summary?.encryption ?? summary?.["im.nheko.summary.encryption"]}
-							</td>
-						</tr>
-						<tr>
-							<td>Join rule</td>
-							<td>{invite.join_rule ?? summary?.join_rule}</td>
-						</tr>
-						<tr>
-							<td>Timestamp</td>
-							<td>{invite.date}</td>
-						</tr>
+						{alias && <tr>
+							<td>Clicked alias</td>
+							<td>{alias}</td>
+						</tr>}
+						{invite && <>
+							<tr>
+								<td>Invited by</td>
+								<td>{invite.invited_by}</td>
+							</tr>
+							<tr>
+								<td>Is direct</td>
+								<td>{invite.is_direct.toString()}</td>
+							</tr>
+							<tr>
+								<td>Timestamp</td>
+								<td>{invite.date}</td>
+							</tr>
+						</>}
+						{invite || summary ? <>
+							<tr>
+								<td>Canonical alias</td>
+								<td>{invite?.canonical_alias ?? summary?.canonical_alias}</td>
+							</tr>
+							<tr>
+								<td>Encryption</td>
+								<td>
+									{invite?.encryption ?? summary?.encryption
+										?? summary?.["im.nheko.summary.encryption"]}
+								</td>
+							</tr>
+							<tr>
+								<td>Join rule</td>
+								<td>{invite?.join_rule ?? summary?.join_rule}</td>
+							</tr>
+						</> : null}
+						{summary && <>
+							<tr>
+								<td>Member count</td>
+								<td>{summary.num_joined_members}</td>
+							</tr>
+						</>}
 					</tbody>
 				</table>
-			</details>}
+			</details>
 			{invite?.invited_by && <MutualRooms client={client} userID={invite.invited_by}/>}
 			{allowKnock && <input
 				className="knock-reason"
