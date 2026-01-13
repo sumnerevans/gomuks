@@ -180,7 +180,7 @@ export const preferences = {
 		description: "The service to use to search for GIFs",
 		allowedValues: gifProviders,
 		allowedContexts: anyContext,
-		defaultValue: "tenor",
+		defaultValue: "giphy",
 	}),
 	// TODO implement
 	// reupload_gifs: new Preference<boolean>({
