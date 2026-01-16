@@ -1,14 +1,14 @@
 module go.mau.fi/gomuks/desktop
 
-go 1.24.0
+go 1.25.0
 
-toolchain go1.25.4
+toolchain go1.25.6
 
-require github.com/wailsapp/wails/v3 v3.0.0-alpha.40
+require github.com/wailsapp/wails/v3 v3.0.0-alpha.60
 
 require (
-	go.mau.fi/gomuks v0.2511.0
-	go.mau.fi/util v0.9.4
+	go.mau.fi/gomuks v0.2601.0
+	go.mau.fi/util v0.9.5
 )
 
 require (
@@ -18,7 +18,7 @@ require (
 	github.com/ProtonMail/go-crypto v1.1.6 // indirect
 	github.com/SherClockHolmes/webpush-go v1.4.0 // indirect
 	github.com/adrg/xdg v0.5.3 // indirect
-	github.com/alecthomas/chroma/v2 v2.21.0 // indirect
+	github.com/alecthomas/chroma/v2 v2.22.0 // indirect
 	github.com/bep/debounce v1.2.1 // indirect
 	github.com/buckket/go-blurhash v1.1.0 // indirect
 	github.com/cloudflare/circl v1.6.0 // indirect
@@ -47,11 +47,10 @@ require (
 	github.com/lucasb-eyer/go-colorful v1.3.0 // indirect
 	github.com/mattn/go-colorable v0.1.14 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
-	github.com/mattn/go-sqlite3 v1.14.32 // indirect
-	github.com/petermattis/goid v0.0.0-20251121121749-a11dd1a45f9a // indirect
+	github.com/mattn/go-sqlite3 v1.14.33 // indirect
+	github.com/petermattis/goid v0.0.0-20260113132338-7c7de50cc741 // indirect
 	github.com/pjbgf/sha1cd v0.3.2 // indirect
 	github.com/pkg/browser v0.0.0-20240102092130-5ac0b6a4141c // indirect
-	github.com/pkg/errors v0.9.1 // indirect
 	github.com/rivo/uniseg v0.4.7 // indirect
 	github.com/rs/xid v1.6.0 // indirect
 	github.com/rs/zerolog v1.34.0 // indirect
@@ -63,23 +62,21 @@ require (
 	github.com/tidwall/pretty v1.2.1 // indirect
 	github.com/tidwall/sjson v1.2.5 // indirect
 	github.com/wailsapp/go-webview2 v1.0.22 // indirect
-	github.com/wailsapp/mimetype v1.4.1 // indirect
 	github.com/xanzy/ssh-agent v0.3.3 // indirect
-	github.com/yuin/goldmark v1.7.13 // indirect
-	go.mau.fi/goheif v0.0.0-20250809103256-ca48e8691d2f // indirect
+	github.com/yuin/goldmark v1.7.16 // indirect
+	go.mau.fi/goheif v0.0.0-20251226222328-02af05634b82 // indirect
 	go.mau.fi/webp v0.2.0 // indirect
 	go.mau.fi/zeroconfig v0.2.0 // indirect
-	golang.org/x/crypto v0.46.0 // indirect
-	golang.org/x/exp v0.0.0-20251209150349-8475f28825e9 // indirect
-	golang.org/x/image v0.34.0 // indirect
-	golang.org/x/net v0.48.0 // indirect
-	golang.org/x/sys v0.39.0 // indirect
-	golang.org/x/text v0.32.0 // indirect
-	gopkg.in/ini.v1 v1.67.0 // indirect
+	golang.org/x/crypto v0.47.0 // indirect
+	golang.org/x/exp v0.0.0-20260112195511-716be5621a96 // indirect
+	golang.org/x/image v0.35.0 // indirect
+	golang.org/x/net v0.49.0 // indirect
+	golang.org/x/sys v0.40.0 // indirect
+	golang.org/x/text v0.33.0 // indirect
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1 // indirect
 	gopkg.in/warnings.v0 v0.1.2 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
-	maunium.net/go/mautrix v0.26.2-0.20260111225712-650f9c3139b5 // indirect
+	maunium.net/go/mautrix v0.26.2 // indirect
 	mvdan.cc/xurls/v2 v2.6.0 // indirect
 )
 

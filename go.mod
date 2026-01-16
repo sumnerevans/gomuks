@@ -2,14 +2,14 @@ module go.mau.fi/gomuks
 
 go 1.24.0
 
-toolchain go1.25.5
+toolchain go1.25.6
 
 tool go.mau.fi/util/cmd/maubuild
 
 require (
 	codeberg.org/tslocum/cbind v0.1.6
 	github.com/SherClockHolmes/webpush-go v1.4.0
-	github.com/alecthomas/chroma/v2 v2.21.0
+	github.com/alecthomas/chroma/v2 v2.22.0
 	github.com/buckket/go-blurhash v1.1.0
 	github.com/chzyer/readline v1.5.1
 	github.com/coder/websocket v1.8.14
@@ -19,27 +19,27 @@ require (
 	github.com/lithammer/fuzzysearch v1.1.8
 	github.com/lucasb-eyer/go-colorful v1.3.0
 	github.com/mattn/go-runewidth v0.0.19
-	github.com/mattn/go-sqlite3 v1.14.32
+	github.com/mattn/go-sqlite3 v1.14.33
 	github.com/rivo/uniseg v0.4.7
 	github.com/rs/zerolog v1.34.0
 	github.com/tidwall/gjson v1.18.0
 	github.com/tidwall/sjson v1.2.5
-	github.com/yuin/goldmark v1.7.13
+	github.com/yuin/goldmark v1.7.16
 	github.com/zyedidia/clipboard v1.0.4
-	go.mau.fi/goheif v0.0.0-20250809103256-ca48e8691d2f
+	go.mau.fi/goheif v0.0.0-20251226222328-02af05634b82
 	go.mau.fi/mauview v0.3.0
-	go.mau.fi/util v0.9.4
+	go.mau.fi/util v0.9.5
 	go.mau.fi/webp v0.2.0
 	go.mau.fi/zeroconfig v0.2.0
-	golang.org/x/crypto v0.46.0
-	golang.org/x/image v0.34.0
-	golang.org/x/net v0.48.0
-	golang.org/x/sys v0.39.0
-	golang.org/x/text v0.32.0
+	golang.org/x/crypto v0.47.0
+	golang.org/x/image v0.35.0
+	golang.org/x/net v0.49.0
+	golang.org/x/sys v0.40.0
+	golang.org/x/text v0.33.0
 	gopkg.in/toast.v1 v1.0.0-20180812000517-0a84660828b2
 	gopkg.in/yaml.v3 v3.0.1
 	maunium.net/go/mauflag v1.0.0
-	maunium.net/go/mautrix v0.26.2-0.20260111225712-650f9c3139b5
+	maunium.net/go/mautrix v0.26.2
 	mvdan.cc/xurls/v2 v2.6.0
 )
 
@@ -53,12 +53,12 @@ require (
 	github.com/mattn/go-colorable v0.1.14 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/nu7hatch/gouuid v0.0.0-20131221200532-179d4d0c4d8d // indirect
-	github.com/petermattis/goid v0.0.0-20251121121749-a11dd1a45f9a // indirect
+	github.com/petermattis/goid v0.0.0-20260113132338-7c7de50cc741 // indirect
 	github.com/rs/xid v1.6.0 // indirect
 	github.com/tidwall/match v1.1.1 // indirect
 	github.com/tidwall/pretty v1.2.1 // indirect
-	golang.org/x/exp v0.0.0-20251209150349-8475f28825e9 // indirect
-	golang.org/x/mod v0.31.0 // indirect
-	golang.org/x/term v0.38.0 // indirect
+	golang.org/x/exp v0.0.0-20260112195511-716be5621a96 // indirect
+	golang.org/x/mod v0.32.0 // indirect
+	golang.org/x/term v0.39.0 // indirect
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1 // indirect
 )
