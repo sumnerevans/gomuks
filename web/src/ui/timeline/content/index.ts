@@ -110,6 +110,8 @@ export function getBodyType(
 		case "m.room.encrypted":
 			if (isRedacted) {
 				return RedactedBody
+			} else if (evt.encrypted) {
+				return HiddenEvent // someone is trolling and sending m.room.encrypted inside m.room.encrypted
 			}
 			return EncryptedBody
 		}
