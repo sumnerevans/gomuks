@@ -1,3 +1,29 @@
+# v26.01
+
+### Backend
+* Added some documentation for the RPC API.
+* Added local calculation of heroes when fetching full member list as a
+  workaround for servers that don't provide accurate lazy loading summaries.
+* Fixed DM flag being cleared if the recipient leaves.
+
+### Web
+* Added notification center in right panel.
+* Added option to reply to messags using ctrl+arrow up/down.
+* Added blurred URL preview images and click-to-view support in rooms with media
+  previews disabled.
+* Added metadata in room preview for non-invite rooms.
+* Switched command system from MSC4332 to MSC4391.
+* Switched default GIF provider to Giphy as Tenor is being shut down in June.
+* Removed power level check for sticker picker to allow subscribing to packs
+  even if the image pack room doesn't allow sending messages.
+* Fixed room list previews having incorrect sender information if it was updated
+  by a message being decrypted late.
+* Fixed timeline crash if a message timestamp was outside what JS's `Date` allows.
+
+### Terminal
+* Added basic support for MSC4391 commands.
+* Improved error message when trying to log in with an invalid backend address.
+
 # v25.12
 
 ### Backend
