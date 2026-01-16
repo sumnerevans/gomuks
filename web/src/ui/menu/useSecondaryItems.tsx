@@ -70,10 +70,7 @@ export const useSecondaryItems = (
 					description="Report this message to your homeserver administrator?"
 					placeholder="Reason for report"
 					confirmButton="Send report"
-					onConfirm={reason => {
-						client.rpc.reportEvent(evt.room_id, evt.event_id, reason)
-							.catch(err => window.alert(`Failed to report message: ${err}`))
-					}}
+					onConfirm={reason => client.rpc.reportEvent(evt.room_id, evt.event_id, reason)}
 				/>
 			</RoomContext>,
 		})
@@ -89,10 +86,7 @@ export const useSecondaryItems = (
 					description="Permanently remove the content of this event?"
 					placeholder="Reason for removal"
 					confirmButton="Remove"
-					onConfirm={reason => {
-						client.rpc.redactEvent(evt.room_id, evt.event_id, reason)
-							.catch(err => window.alert(`Failed to redact message: ${err}`))
-					}}
+					onConfirm={reason => client.rpc.redactEvent(evt.room_id, evt.event_id, reason)}
 				/>
 			</RoomContext>,
 		})

@@ -13,7 +13,8 @@
 //
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
-import React, { JSX, use } from "react"
+import React, { JSX, use, useState } from "react"
+import { ScaleLoader } from "react-spinners"
 import { MemDBEvent } from "@/api/types"
 import TimelineEvent from "../timeline/TimelineEvent.tsx"
 import { ModalCloseContext } from "./contexts.ts"
@@ -25,7 +26,7 @@ export interface ConfirmProps<T extends readonly unknown[]> {
 	description?: string | JSX.Element
 	confirmButton: string
 	children?: JSX.Element | JSX.Element[]
-	onConfirm: (...args: T) => void
+	onConfirm: (...args: T) => Promise<unknown> | void
 	confirmArgs: T
 }
 
@@ -38,11 +39,18 @@ const ConfirmModal = <T extends readonly unknown[] = readonly never[]>({
 	onConfirm,
 	confirmArgs,
 }: ConfirmProps<T>) => {
+	const [confirming, setConfirming] = useState(false)
 	const closeModal = use(ModalCloseContext)
 	const onConfirmWrapped = (evt: React.FormEvent) => {
 		evt.preventDefault()
-		closeModal()
-		onConfirm(...confirmArgs)
+		const res = onConfirm(...confirmArgs)
+		if (res) {
+			setConfirming(true)
+			res.catch(err => window.alert(`Failed to ${confirmButton.toLowerCase()}: ${err}`))
+				.finally(closeModal)
+		} else {
+			closeModal()
+		}
 	}
 	return <form className="confirm-message-modal" onSubmit={onConfirmWrapped}>
 		<h3>{title}</h3>
@@ -54,8 +62,12 @@ const ConfirmModal = <T extends readonly unknown[] = readonly never[]>({
 		</div> : null}
 		{children}
 		<div className="confirm-buttons">
-			<button type="button" onClick={closeModal}>Cancel</button>
-			<button type="submit">{confirmButton}</button>
+			{confirming ? <>
+				<ScaleLoader barCount={8} color="var(--primary-color)"/>
+			</> : <>
+				<button type="button" onClick={closeModal}>Cancel</button>
+				<button type="submit">{confirmButton}</button>
+			</>}
 		</div>
 	</form>
 }

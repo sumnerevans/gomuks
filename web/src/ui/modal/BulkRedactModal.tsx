@@ -27,7 +27,7 @@ export interface BulkRedactProps {
 	isBanModal: boolean
 	evtCount: number
 	nonStateEvtCount: number
-	onConfirm: (doRedact: boolean, preserveState: boolean, reason: string) => void
+	onConfirm: (doRedact: boolean, preserveState: boolean, reason: string) => Promise<unknown>
 }
 
 const BulkRedactModal = ({
