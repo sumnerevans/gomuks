@@ -19,22 +19,25 @@ import ClientContext from "../ClientContext"
 import { RoomContext } from "../roomview/roomcontext"
 import LazyWidget from "./LazyWidget"
 
-const elementCallParams = new URLSearchParams({
+const elementCallHashParams = "#?" + new URLSearchParams({
 	roomId: "$matrix_room_id",
 	theme: "$org.matrix.msc2873.client_theme",
 	userId: "$matrix_user_id",
 	deviceId: "$org.matrix.msc3819.matrix_device_id",
-	widgetId: "$matrix_widget_id",
 	perParticipantE2EE: "$perParticipantE2EE",
 	baseUrl: "$homeserverBaseURL",
 	intent: "join_existing",
 	hideHeader: "true",
 	confineToRoom: "true",
 	appPrompt: "false",
+	lang: "en",
+	fontScale: "1",
+	rageshakeSubmitUrl: "https://element.io/bugreports/submit",
+	preload: "false",
 }).toString().replaceAll("%24", "$")
 
 const embeddedElementCallURL = new URL("./element-call-embedded/index.html#", window.location.href)
-embeddedElementCallURL.search = elementCallParams
+embeddedElementCallURL.hash = elementCallHashParams
 
 function makeElementCallURL(customBaseURL: string): string {
 	if (customBaseURL) {
@@ -43,7 +46,7 @@ function makeElementCallURL(customBaseURL: string): string {
 			parsed.pathname += "/"
 		}
 		parsed.pathname += "room"
-		parsed.search = elementCallParams
+		parsed.hash = elementCallHashParams
 		return parsed.toString()
 	} else {
 		return embeddedElementCallURL.toString()
