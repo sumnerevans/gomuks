@@ -25,7 +25,6 @@ import {
 	OpenIDRequestState,
 	SimpleObservable,
 	Symbols,
-	UpdateDelayedEventAction,
 	WidgetDriver,
 } from "matrix-widget-api"
 import Client from "@/api/client.ts"
@@ -91,8 +90,16 @@ class GomuksWidgetDriver extends WidgetDriver {
 		return { delayId: delayID, roomId: roomID }
 	}
 
-	async updateDelayedEvent(delayID: string, action: UpdateDelayedEventAction): Promise<void> {
-		await this.client.rpc.updateDelayedEvent(delayID, action)
+	async cancelScheduledDelayedEvent(delayID: string): Promise<void> {
+		await this.client.rpc.updateDelayedEvent(delayID, "cancel")
+	}
+
+	async restartScheduledDelayedEvent(delayID: string): Promise<void> {
+		await this.client.rpc.updateDelayedEvent(delayID, "restart")
+	}
+
+	async sendScheduledDelayedEvent(delayID: string): Promise<void> {
+		await this.client.rpc.updateDelayedEvent(delayID, "send")
 	}
 
 	async sendToDevice(
