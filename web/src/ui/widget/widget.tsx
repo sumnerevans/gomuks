@@ -47,7 +47,7 @@ const addLegacyParams = (url: string, widgetID: string) => {
 }
 
 class WidgetListenerImpl implements WidgetListener {
-	constructor(private api: ClientWidgetApi) {}
+	constructor(private api: ClientWidgetApi, private lockedToRoom: boolean = true) {}
 
 	onTimelineEvent = (evt: MemDBEvent) => {
 		this.api.feedEvent(memDBEventToIRoomEvent(evt))
@@ -60,7 +60,9 @@ class WidgetListenerImpl implements WidgetListener {
 	}
 
 	onRoomChange = (roomID: RoomID | null) => {
-		this.api.setViewedRoomId(roomID)
+		if (!this.lockedToRoom) {
+			this.api.setViewedRoomId(roomID)
+		}
 	}
 
 	onToDeviceEvent = (evt: SyncToDevice) => {
