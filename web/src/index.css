@@ -105,7 +105,7 @@
 
 	@media screen and (max-width: 45rem) {
 		--timeline-horizontal-padding: .5rem;
-		--timeline-status-size: 2.25rem;
+		--timeline-status-size: 2.3rem;
 	}
 
 	@media (prefers-color-scheme: dark) {
