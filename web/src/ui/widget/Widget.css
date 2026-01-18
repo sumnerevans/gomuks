@@ -33,9 +33,9 @@ div.widget-popout-iframe-container {
 
 	display: grid;
 	grid-template:
-		"header close" 2rem
+		"header close" var(--popout-header-size)
 		"iframe iframe" 1fr
-		/ 1fr 2rem;
+		/ 1fr var(--popout-header-size);
 
 	> h3.widget-popout-title {
 		display: flex;

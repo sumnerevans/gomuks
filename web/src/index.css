@@ -52,6 +52,7 @@
 	--dimmed-overlay-background-color: rgba(0, 0, 0, .75);
 	--modal-box-shadow-color: rgba(0, 0, 0, 0.1);
 	--popout-widget-box-shadow-color: rgba(0, 0, 0, 0.5);
+	--popout-header-size: 2rem;
 
 	--emoji-selected-border-color: #cec;
 	--image-pack-editor-selected-color: #cec;
