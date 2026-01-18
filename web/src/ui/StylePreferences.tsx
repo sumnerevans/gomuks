@@ -92,21 +92,6 @@ const StylePreferences = ({ client, activeRoom }: StylePreferencesProps) => {
 			--clickable-cursor: pointer;
 		}
 	`, [preferences.pointer_cursor])
-	useStyle(() => !preferences.show_hidden_events && css`
-		div.timeline-list > div.hidden-event {
-			display: none;
-		}
-	`, [preferences.show_hidden_events])
-	useStyle(() => !preferences.show_redacted_events && css`
-		div.timeline-list > div.redacted-event {
-			display: none;
-		}
-	`, [preferences.show_redacted_events])
-	useStyle(() => !preferences.show_membership_events && css`
-		div.timeline-list > div.membership-event {
-			display: none;
-		}
-	`, [preferences.show_membership_events])
 	useStyle(() => !preferences.show_date_separators && css`
 		div.timeline-list > div.date-separator {
 			display: none;

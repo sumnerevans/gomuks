@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 import React, { use, useEffect, useLayoutEffect, useRef, useState } from "react"
 import { ScaleLoader } from "react-spinners"
-import { usePreference, useRoomEvent } from "@/api/statestore"
+import { usePreferences, useRoomEvent } from "@/api/statestore"
 import { EventID, EventRowID, MemDBEvent } from "@/api/types"
 import ClientContext from "../ClientContext.ts"
 import MessageComposer from "../composer/MessageComposer.tsx"
@@ -40,7 +40,7 @@ const ThreadView = ({ threadRoot }: ThreadViewProps) => {
 	const scrollFixRef = useRef<number>(null)
 	const bottomRef = useRef<HTMLDivElement>(null)
 	const viewRef = useRef<HTMLDivElement>(null)
-	const smallReplies = usePreference(client.store, room, "small_replies")
+	usePreferences(client.store, room)
 	const rootEvent = useRoomEvent(room, threadRoot)
 	client.requestEvent(room, threadRoot)
 
@@ -124,12 +124,11 @@ const ThreadView = ({ threadRoot }: ThreadViewProps) => {
 			{prependRoot ? <TimelineEvent
 				prevEvt={null}
 				evt={rootEvent}
-				smallReplies={smallReplies}
+				smallReplies={room.preferences.small_replies}
 				isFocused={focusedEventRowID === rootEvent.rowid}
 				viewType="thread"
 			/> : null}
-			{renderTimelineList("thread", timeline, {
-				smallReplies,
+			{renderTimelineList("thread", timeline, room.preferences, {
 				prevEventOverride: prependRoot ? rootEvent : undefined,
 				focusedEventRowID,
 			})}

@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 import { use, useEffect, useLayoutEffect, useRef, useState } from "react"
 import { ScaleLoader } from "react-spinners"
-import { usePreference } from "@/api/statestore"
+import { usePreferences } from "@/api/statestore"
 import { EventID, MemDBEvent } from "@/api/types"
 import ClientContext from "../ClientContext.ts"
 import { RoomContext, RoomContextData } from "../roomview/roomcontext.ts"
@@ -40,7 +40,7 @@ const EventContextModal = ({ roomCtx, eventID }: EventContextModalProps) => {
 	const didHighlight = useRef<EventID | null>(null)
 	const viewRef = useRef<HTMLDivElement>(null)
 	const scrollFixRef = useRef<number>(null)
-	const smallReplies = usePreference(client.store, room, "small_replies")
+	usePreferences(client.store, room) // We pass the preference object to renderTimelineList
 	useEffect(() => {
 		setError("loading")
 		setStartLoading(false)
@@ -120,7 +120,7 @@ const EventContextModal = ({ roomCtx, eventID }: EventContextModalProps) => {
 			</button> : "No older messages available in this room"}
 		</div>
 		<div className="timeline-list">
-			{renderTimelineList("context", timeline, { smallReplies })}
+			{renderTimelineList("context", timeline, room.preferences)}
 		</div>
 		<div className="timeline-edge">
 			{end ? <button onClick={loadEnd} disabled={endLoading}>

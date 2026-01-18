@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 import { use, useCallback, useEffect, useLayoutEffect, useRef, useState } from "react"
 import { ScaleLoader } from "react-spinners"
-import { usePreference, useRoomTimeline } from "@/api/statestore"
+import { usePreferences, useRoomTimeline } from "@/api/statestore"
 import { EventRowID } from "@/api/types"
 import useFocus from "@/util/focus.ts"
 import ClientContext from "../ClientContext.ts"
@@ -43,8 +43,7 @@ const TimelineView = () => {
 	const oldestTimelineRow = timeline[0]?.timeline_rowid
 	const oldScrollHeight = useRef(0)
 	const focused = useFocus()
-	const smallReplies = usePreference(client.store, room, "small_replies")
-	const smallThreads = usePreference(client.store, room, "small_threads")
+	usePreferences(client.store, room) // We pass the preference object to renderTimelineList
 
 	// When the user scrolls the timeline manually, remember if they were at the bottom,
 	// so that we can keep them at the bottom when new events are added.
@@ -125,7 +124,7 @@ const TimelineView = () => {
 		</div>
 		<div className="timeline-list">
 			<div className="timeline-top-ref" ref={topRef}/>
-			{renderTimelineList("timeline", timeline, { smallReplies, smallThreads, focusedEventRowID })}
+			{renderTimelineList("timeline", timeline, room.preferences, { focusedEventRowID })}
 			<div className="timeline-bottom-ref" ref={bottomRef}/>
 		</div>
 	</div>

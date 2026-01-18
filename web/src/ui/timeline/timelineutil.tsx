@@ -15,31 +15,46 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 import { JSX } from "react"
 import { MemDBEvent } from "@/api/types"
+import { Preferences } from "@/api/types/preferences"
 import TimelineEvent, { TimelineEventViewType } from "./TimelineEvent.tsx"
+import { HiddenEvent, getBodyType } from "./content"
 
 interface renderTimelineListParams {
-	smallReplies?: boolean
-	smallThreads?: boolean
 	focusedEventRowID?: number | null
 	prevEventOverride?: MemDBEvent
+}
+
+function isHiddenEvent(entry: MemDBEvent) {
+	switch (entry.type) {
+	case "m.room.server_acl":
+		return true
+	}
+	return getBodyType(entry, Boolean(entry.redacted_by && !entry.viewing_redacted)) === HiddenEvent
 }
 
 export function renderTimelineList(
 	viewType: TimelineEventViewType,
 	timeline: (MemDBEvent | null)[],
-	{ smallReplies, smallThreads, focusedEventRowID, prevEventOverride }: renderTimelineListParams,
+	prefs: Preferences,
+	{ focusedEventRowID, prevEventOverride }: renderTimelineListParams = {},
 ): (JSX.Element | null)[] {
 	let prevEvt: MemDBEvent | null = prevEventOverride ?? null
 	return timeline.map(entry => {
 		if (!entry) {
+			return null
+		} else if (entry.type === "m.room.member" && !prefs.show_membership_events) {
+			return null
+		} else if (entry.redacted_by && !prefs.show_redacted_events) {
+			return null
+		} else if (!prefs.show_hidden_events && isHiddenEvent(entry)) {
 			return null
 		}
 		const thisEvt = <TimelineEvent
 			key={entry.rowid}
 			evt={entry}
 			prevEvt={prevEvt}
-			smallReplies={smallReplies}
-			smallThreads={smallThreads}
+			smallReplies={prefs.small_replies}
+			smallThreads={prefs.small_threads}
 			isFocused={focusedEventRowID === entry.rowid}
 			viewType={viewType}
 		/>
