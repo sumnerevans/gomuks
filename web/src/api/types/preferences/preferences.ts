@@ -116,7 +116,13 @@ export const preferences = {
 	}),
 	show_membership_events: new Preference<boolean>({
 		displayName: "Show membership events",
-		description: "Whether membership and profile changes should be visible in the room timeline.",
+		description: "Whether any membership events should be visible in the room timeline.",
+		allowedContexts: anyContext,
+		defaultValue: true,
+	}),
+	show_profile_changes: new Preference<boolean>({
+		displayName: "Show profile change events",
+		description: "Whether profile changes should be visible in the room timeline.",
 		allowedContexts: anyContext,
 		defaultValue: true,
 	}),

@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 import { JSX } from "react"
-import { MemDBEvent } from "@/api/types"
+import { MemDBEvent, MemberEventContent } from "@/api/types"
 import { Preferences } from "@/api/types/preferences"
 import TimelineEvent, { TimelineEventViewType } from "./TimelineEvent.tsx"
 import { HiddenEvent, getBodyType } from "./content"
@@ -27,17 +27,38 @@ interface renderTimelineListParams {
 function isHiddenEvent(entry: MemDBEvent): boolean {
 	switch (entry.type) {
 	case "m.room.server_acl":
+		// TODO treat the "all servers are banned" ACL as visible?
 		return true
+	case "m.room.member": {
+		const prevContent = entry.unsigned.prev_content as MemberEventContent
+		return prevContent
+			&& prevContent.membership === entry.content.membership
+			&& prevContent.displayname === entry.content.displayname
+			&& prevContent.avatar_url === entry.content.avatar_url
+	}
 	}
 	return getBodyType(entry, Boolean(entry.redacted_by && !entry.viewing_redacted)) === HiddenEvent
 }
 
+const unredactableEventTypes = new Set([
+	"m.room.power_levels",
+	"m.room.create",
+	"m.room.member",
+])
+
 function shouldHide(entry: MemDBEvent, prefs: Preferences): boolean {
-	if (entry.type === "m.room.member" && !prefs.show_membership_events) {
+	if (entry.type === "m.room.member") {
+		if (!prefs.show_membership_events) {
+			return true
+		} else if (!prefs.show_profile_changes
+			&& (entry.unsigned.prev_content as MemberEventContent)?.membership === entry.content.membership) {
+			return true
+		}
+	}
+	if (entry.redacted_by && !prefs.show_redacted_events && !unredactableEventTypes.has(entry.type)) {
 		return true
-	} else if (entry.redacted_by && !prefs.show_redacted_events) {
-		return true
-	} else if ((!prefs.show_hidden_events || entry.sender === "@github:maunium.net") && isHiddenEvent(entry)) {
+	}
+	if ((!prefs.show_hidden_events || entry.sender === "@github:maunium.net") && isHiddenEvent(entry)) {
 		return true
 	}
 	return false
@@ -56,6 +77,7 @@ export function renderTimelineList(
 		small_threads: prefs.small_threads,
 		display_read_receipts: prefs.display_read_receipts,
 		show_membership_events: prefs.show_membership_events,
+		show_profile_changes: prefs.show_profile_changes,
 		show_redacted_events: prefs.show_redacted_events,
 		show_hidden_events: prefs.show_hidden_events,
 	}
