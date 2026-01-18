@@ -1,5 +1,5 @@
 // gomuks - A Matrix client written in Go.
-// Copyright (C) 2025 Tulir Asokan
+// Copyright (C) 2026 Tulir Asokan
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as published by
@@ -24,12 +24,23 @@ interface renderTimelineListParams {
 	prevEventOverride?: MemDBEvent
 }
 
-function isHiddenEvent(entry: MemDBEvent) {
+function isHiddenEvent(entry: MemDBEvent): boolean {
 	switch (entry.type) {
 	case "m.room.server_acl":
 		return true
 	}
 	return getBodyType(entry, Boolean(entry.redacted_by && !entry.viewing_redacted)) === HiddenEvent
+}
+
+function shouldHide(entry: MemDBEvent, prefs: Preferences): boolean {
+	if (entry.type === "m.room.member" && !prefs.show_membership_events) {
+		return true
+	} else if (entry.redacted_by && !prefs.show_redacted_events) {
+		return true
+	} else if ((!prefs.show_hidden_events || entry.sender === "@github:maunium.net") && isHiddenEvent(entry)) {
+		return true
+	}
+	return false
 }
 
 export function renderTimelineList(
@@ -39,26 +50,54 @@ export function renderTimelineList(
 	{ focusedEventRowID, prevEventOverride }: renderTimelineListParams = {},
 ): (JSX.Element | null)[] {
 	let prevEvt: MemDBEvent | null = prevEventOverride ?? null
+	let receiptMergeIdx: number | null = null
+	const flattenedPrefs = {
+		small_replies: prefs.small_replies,
+		small_threads: prefs.small_threads,
+		display_read_receipts: prefs.display_read_receipts,
+		show_membership_events: prefs.show_membership_events,
+		show_redacted_events: prefs.show_redacted_events,
+		show_hidden_events: prefs.show_hidden_events,
+	}
 	return timeline.map(entry => {
 		if (!entry) {
 			return null
-		} else if (entry.type === "m.room.member" && !prefs.show_membership_events) {
+		} else if (shouldHide(entry, flattenedPrefs)) {
+			if (prevEvt && viewType === "timeline" && flattenedPrefs.display_read_receipts) {
+				// Completely pointless optimization to avoid recreating the receipt_flattening array on every render
+				if (!prevEvt.receipt_flattening) {
+					prevEvt.receipt_flattening = [entry.event_id]
+					receiptMergeIdx = null
+				} else if (receiptMergeIdx === null) {
+					prevEvt.receipt_flattening.push(entry.event_id)
+				} else if (prevEvt.receipt_flattening[receiptMergeIdx] === entry.event_id) {
+					receiptMergeIdx += 1
+				} else {
+					prevEvt.receipt_flattening = prevEvt.receipt_flattening.slice(0, receiptMergeIdx)
+					prevEvt.receipt_flattening.push(entry.event_id)
+					receiptMergeIdx = null
+				}
+			}
 			return null
-		} else if (entry.redacted_by && !prefs.show_redacted_events) {
-			return null
-		} else if (!prefs.show_hidden_events && isHiddenEvent(entry)) {
-			return null
+		}
+		if (
+			prevEvt?.receipt_flattening
+			&& receiptMergeIdx !== null
+			&& prevEvt.receipt_flattening.length > receiptMergeIdx
+		) {
+			prevEvt.receipt_flattening = prevEvt.receipt_flattening.slice(0, receiptMergeIdx)
 		}
 		const thisEvt = <TimelineEvent
 			key={entry.rowid}
 			evt={entry}
 			prevEvt={prevEvt}
-			smallReplies={prefs.small_replies}
-			smallThreads={prefs.small_threads}
+			smallReplies={flattenedPrefs.small_replies}
+			smallThreads={flattenedPrefs.small_threads}
 			isFocused={focusedEventRowID === entry.rowid}
 			viewType={viewType}
 		/>
 		prevEvt = entry
+		receiptMergeIdx = 0
 		return thisEvt
 	})
 }

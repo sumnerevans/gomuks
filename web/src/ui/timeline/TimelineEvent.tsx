@@ -384,7 +384,7 @@ const TimelineEvent = ({
 		{!evt.event_id.startsWith("~")
 			&& roomCtx.store.preferences.display_read_receipts
 			&& viewType === "timeline"
-			? <ReadReceipts room={roomCtx.store} eventID={evt.event_id} /> : null}
+			? <ReadReceipts room={roomCtx.store} eventID={evt.event_id} extraEvents={evt.receipt_flattening} /> : null}
 		{evt.sender === client.userID && evt.transaction_id && viewType !== "edit-history"
 			? <EventSendStatus evt={evt}/> : null}
 	</div>

@@ -1,5 +1,5 @@
 // gomuks - A Matrix client written in Go.
-// Copyright (C) 2024 Tulir Asokan
+// Copyright (C) 2026 Tulir Asokan
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as published by
@@ -22,9 +22,15 @@ import { getDisplayname } from "@/util/validation.ts"
 import ClientContext from "../ClientContext.ts"
 import "./ReadReceipts.css"
 
-const ReadReceipts = ({ room, eventID }: { room: RoomStateStore, eventID: EventID }) => {
+interface ReadReceiptsProps {
+	room: RoomStateStore
+	eventID: EventID
+	extraEvents?: EventID[]
+}
+
+const ReadReceipts = ({ room, eventID, extraEvents }: ReadReceiptsProps) => {
 	const client = use(ClientContext)!
-	const receipts = useReadReceipts(room, eventID)
+	const receipts = useReadReceipts(room, eventID, extraEvents)
 	const memberEvts = useMultipleRoomMembers(client, room, receipts.map(receipt => receipt.user_id))
 	if (receipts.length === 0) {
 		return null

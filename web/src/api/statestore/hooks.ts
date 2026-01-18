@@ -1,5 +1,5 @@
 // gomuks - A Matrix client written in Go.
-// Copyright (C) 2024 Tulir Asokan
+// Copyright (C) 2026 Tulir Asokan
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as published by
@@ -44,11 +44,30 @@ export function useRoomTyping(room: RoomStateStore): string[] {
 	return useSyncExternalStore(room.typingSub.subscribe, () => room.typing)
 }
 
-export function useReadReceipts(room: RoomStateStore, evtID: EventID): MemReceipt[] {
-	return useSyncExternalStore(
-		room.receiptSubs.getSubscriber(evtID),
-		() => room.receiptsByEventID.get(evtID) ?? emptyArray,
-	)
+function getAllReceipts(
+	room: RoomStateStore, evtID: EventID, extraEvents?: EventID[],
+): MemReceipt[] {
+	const base = room.receiptsByEventID.get(evtID) ?? emptyArray
+	if (!extraEvents) {
+		return base
+	}
+	return base.concat(extraEvents.flatMap(id => room.receiptsByEventID.get(id) ?? emptyArray))
+}
+
+export function useReadReceipts(room: RoomStateStore, evtID: EventID, extraEvents?: EventID[]): MemReceipt[] {
+	const [receipts, setReceipts] = useState<MemReceipt[]>(() => getAllReceipts(room, evtID, extraEvents))
+	useEffect(() => {
+		const callback = () => setReceipts(getAllReceipts(room, evtID, extraEvents))
+		const unsubMain = room.receiptSubs.getSubscriber(evtID)(callback)
+		const unsubs = extraEvents?.map(id => room.eventSubs.getSubscriber(id)(callback)) ?? []
+		return () => {
+			unsubMain()
+			for (const unsub of unsubs) {
+				unsub()
+			}
+		}
+	}, [room, evtID, extraEvents])
+	return receipts
 }
 
 export function useRoomState(
