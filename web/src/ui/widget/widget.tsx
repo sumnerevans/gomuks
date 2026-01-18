@@ -178,6 +178,7 @@ const makeWidget = ({ room, info, client, noPermissionPrompt }: WidgetProps) => 
 		if (deleted) {
 			return
 		}
+		room.activeWidgets.delete(info.id)
 		existingWidgets.delete(fullWidgetID)
 		deleted = true
 		console.info("Deleting widget", fullWidgetID)
@@ -192,6 +193,7 @@ const makeWidget = ({ room, info, client, noPermissionPrompt }: WidgetProps) => 
 	}
 	const onSetup = () => {
 		console.info("Setting up widget API for", iframe, fullWidgetID)
+		room.activeWidgets.add(info.id)
 		clientAPI = new ClientWidgetApi(wrappedWidget, iframe, driver)
 		clientAPI.setViewedRoomId(room.roomID)
 		removeListener = client.addWidgetListener(new WidgetListenerImpl(clientAPI))

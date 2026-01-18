@@ -591,7 +591,7 @@ export class StateStore {
 		let deletedEvents = 0
 		let deletedState = 0
 		for (const room of this.rooms.values()) {
-			if (room.roomID === this.activeRoomID || room.lastOpened > maxLastOpened) {
+			if (room.roomID === this.activeRoomID || room.lastOpened > maxLastOpened || room.activeWidgets.size) {
 				continue
 			}
 			const [de, ds] = room.doGarbageCollection()

@@ -164,6 +164,7 @@ export class RoomStateStore {
 	paginationRequestedForRow = -1
 	readUpToRow = -1
 	hasMoreHistory = true
+	activeWidgets = new Set<string>()
 	hidden = false
 	tombstoned = false
 	groupSessionAutoShared = false
